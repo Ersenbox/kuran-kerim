@@ -1372,21 +1372,6 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 }
 .tesbi-pill.active { border-color: var(--g1); color: var(--g1); background: rgba(0,200,83,0.1); }
 .tesbi-target { font-size: 14px; color: var(--text3); font-weight: 600; margin-top: 8px; }
-
-/* ── Kütüphane ── */
-.kutuphane-item {
-  display:flex;align-items:center;gap:10px;padding:11px 14px;
-  border-radius:12px;border:1px solid var(--border);background:var(--card);
-  cursor:pointer;transition:all 0.15s;
-}
-.kutuphane-item:hover { border-color:var(--g2);background:rgba(0,200,83,0.05); }
-.kutuphane-item:active { transform:scale(0.98); }
-.kut-ar { font-family:'Scheherazade New',serif;font-size:18px;color:var(--g1);min-width:40px;text-align:center; }
-.kut-name { font-size:14px;font-weight:700;color:var(--text); }
-.kut-desc { font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px; }
-.kut-add { background:rgba(0,200,83,0.12);border:1px solid rgba(0,200,83,0.3);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--g2);cursor:pointer;white-space:nowrap; }
-.kut-add:hover { background:var(--g2);color:#fff; }
-.kut-cat { font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;padding:10px 4px 4px;border-bottom:1px solid var(--border);margin-bottom:6px; }
 .tesbi-progress {
   width: 200px;
   height: 8px;
@@ -3157,196 +3142,6 @@ function playBeep(type) {
 // Tesbihat ses entegrasyonu
 const _origIncrement = window.incrementTesbi;
 
-// ════════════════════════════
-// YEDEKLEME — İndir & Yükle
-// ════════════════════════════
-
-// ════════════════════════════════════════
-// TEPSİH KÜTÜPHANESİ
-// ════════════════════════════════════════
-
-const KUTUPHANE = [
-  { cat: "⭐ Temel Zikirler", items: [
-    {name:"SubhanAllah", ar:"سُبْحَانَ اللَّهِ", desc:"Allah'ı tesbih ederim", target:33},
-    {name:"Elhamdülillah", ar:"الْحَمْدُ لِلَّهِ", desc:"Hamd Allah'a mahsustur", target:33},
-    {name:"Allahu Ekber", ar:"اللَّهُ أَكْبَرُ", desc:"Allah en büyüktür", target:33},
-    {name:"La ilahe illallah", ar:"لَا إِلَهَ إِلَّا اللَّهُ", desc:"Allah'tan başka ilah yoktur", target:100},
-    {name:"Estagfirullah", ar:"أَسْتَغْفِرُ اللَّهَ", desc:"Allah'tan bağışlanma dilerim", target:100},
-    {name:"Salavat", ar:"اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ", desc:"Peygambere salat-u selam", target:100},
-  ]},
-  { cat: "📿 Tesbihler", items: [
-    {name:"Kelime-i Şehadet", ar:"أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ", desc:"Eşhedü en la ilahe illallah...", target:33},
-    {name:"Kelime-i Tevhid", ar:"لَا إِلَهَ إِلَّا اللَّهُ مُحَمَّدٌ رَسُولُ اللَّهِ", desc:"Lâ ilâhe illallâh Muhammedürrasûlullah", target:33},
-    {name:"Sübhânallahi velhamdülillâhi", ar:"سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", desc:"Sübhânallâhi velhamdülillâhi...", target:33},
-    {name:"Sübhânallâhi'l-azîm", ar:"سُبْحَانَ اللَّهِ الْعَظِيمِ", desc:"Büyük Allah'ı tesbih ederim", target:33},
-    {name:"Lâ havle", ar:"لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ", desc:"Lâ havle velâ kuvvete illâ billâh", target:33},
-    {name:"Hasbiyallahü", ar:"حَسْبِيَ اللَّهُ", desc:"Allah bana yeter", target:33},
-    {name:"Estağfirullah el-azîm", ar:"أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ", desc:"Büyük Allah'tan bağışlanma dilerim", target:100},
-    {name:"Bismillahi sübhanallahi", ar:"بِسْمِ اللَّهِ سُبْحَانَ اللَّهِ", desc:"Bismillahi Sübhanallahi ve Bihamdihi", target:33},
-    {name:"Salat-ı Tefriciye", ar:"اللَّهُمَّ صَلِّ صَلَاةً كَامِلَةً", desc:"Allâhumme salli salâten kâmileten...", target:1000},
-    {name:"Hatm'i İstiğfar", ar:"أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي", desc:"Estağfirullah'el azim ellezi...", target:100},
-    {name:"Ya Mukallibel Kulub", ar:"يَا مُقَلِّبَ الْقُلُوبِ", desc:"Ya mukallibel kulûb sebbit kalbî...", target:33},
-    {name:"Allahuekber", ar:"اللَّهُ أَكْبَرُ", desc:"Allahu Ekber", target:100},
-  ]},
-  { cat: "🤲 Dualar", items: [
-    {name:"Ayet-el Kürsi", ar:"اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ", desc:"Allâhü lâ ilâhe illâ hüvel hayyül kayyûm...", target:1},
-    {name:"İstihare Duası", ar:"اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ", desc:"Allâhumme innî estehîruke bi-ilmike...", target:1},
-    {name:"Ezan Duası", ar:"اللَّهُمَّ رَبَّ هَٰذِهِ الدَّعْوَةِ", desc:"Allahümme rabbe hâzihid-da'vetit-tâmmeti...", target:1},
-    {name:"Seyyidül İstiğfar", ar:"اللَّهُمَّ أَنْتَ رَبِّي", desc:"Allahümme ente Rabbî lâ ilahe illâ ente...", target:1},
-    {name:"Salât-ı Münciye", ar:"اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا", desc:"Allâahümme salli alâa seyyidinâa Muhammed...", target:1},
-    {name:"Yemek Duası", ar:"بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ", desc:"Bismillah ve alâ berekâtillah", target:1},
-    {name:"İftar Duası", ar:"اللَّهُمَّ لَكَ صُمْتُ", desc:"Allâhümme leke sümtü ve bike âmentü...", target:1},
-    {name:"Yunus A.S. Duası", ar:"لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ", desc:"Lâ ilâhe illâ ente sübhâneke innî küntü...", target:1},
-    {name:"Eyyüp A.S. Duası", ar:"رَبِّ أَنِّي مَسَّنِيَ الضُّرُّ", desc:"Rabbi ennî messeniye'd-durrü ve ente erham...", target:1},
-    {name:"Muhafaza Duası", ar:"اللَّهُمَّ يَا حَافِظُ", desc:"Allahümme ya Hafizu ya Hafız ihfazna...", target:1},
-    {name:"Bereket Duası", ar:"لَا إِلَهَ إِلَّا اللَّهُ الْمَلِكُ", desc:"Lâ ilâhe illallâhü'l Melikül Hakkul Mübin", target:33},
-  ]},
-  { cat: "✨ Salavat", items: [
-    {name:"Salavat (kısa)", ar:"صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ", desc:"Sallallahu aleyhi ve sellem", target:100},
-    {name:"Salâtü'l-Fâtih", ar:"اللَّهُمَّ صَلِّ وَسَلِّمْ وَبَارِكْ", desc:"Allahümme Salli ve Sellim ve Bârik...", target:100},
-    {name:"İsmî Azam", ar:"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", desc:"Bismillahirrahmanirrahim. Allahümme inni...", target:1},
-  ]}
-];
-
-function showKutuphane() {
-  const q_id = 'kutSearch_' + Date.now();
-  
-  const renderItems = (q) => KUTUPHANE.map(cat => {
-    const items = cat.items.filter(z =>
-      !q || z.name.toLowerCase().includes(q) || (z.desc||'').toLowerCase().includes(q)
-    );
-    if(!items.length) return '';
-    return `<div class="kut-cat">${cat.cat}</div>` +
-      items.map(z => `
-        <div class="kutuphane-item">
-          <div class="kut-ar">${z.ar ? z.ar.substring(0,6) : '📿'}</div>
-          <div style="flex:1;min-width:0">
-            <div class="kut-name">${z.name}</div>
-            <div class="kut-desc">${z.desc||''}</div>
-          </div>
-          <button class="kut-add" onclick="addFromKutuphane(${JSON.stringify(z).replace(/'/g,'&#39;').replace(/"/g,'&quot;')})">+ Ekle</button>
-        </div>`).join('');
-  }).join('');
-
-  showModal(`
-    <div style="margin-bottom:14px">
-      <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:12px">📚 Tespih Kütüphanesi</div>
-      <input id="${q_id}" oninput="document.getElementById('kutList').innerHTML=renderKutItems(this.value)" 
-        placeholder="🔍 Zikir veya dua ara..." 
-        style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border2);
-        background:var(--bg2);color:var(--text);font-size:14px;outline:none;font-family:Outfit,sans-serif;margin-bottom:10px">
-    </div>
-    <div id="kutList" style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px">
-      ${renderItems('')}
-    </div>
-    <div style="margin-top:12px;text-align:right">
-      <button class="ay-btn" onclick="closeModal()" style="padding:10px 20px;font-size:14px">Kapat</button>
-    </div>
-  `);
-  
-  // renderKutItems'i global yap (modal içi için)
-  window.renderKutItems = renderItems;
-}
-
-function addFromKutuphane(zObj) {
-  // Zaten var mı kontrol et
-  const list = loadTesbiList();
-  if(list.find(z => z.name === zObj.name)) {
-    toast('⚠️ Bu zikir zaten listede: ' + zObj.name);
-    return;
-  }
-  
-  const newZ = { ...zObj, custom: true };
-  const saved = JSON.parse(localStorage.getItem('customZikirler') || '[]');
-  saved.push(newZ);
-  localStorage.setItem('customZikirler', JSON.stringify(saved));
-  tesbiCounts.push(0);
-  localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
-  
-  renderTesbiSel();
-  toast('✅ Eklendi: ' + zObj.name);
-}
-
-function exportBackup() {
-  const backup = {
-    version: 1,
-    date: new Date().toISOString(),
-    app: 'Kuran-i Kerim',
-    customZikirler: JSON.parse(localStorage.getItem('customZikirler') || '[]'),
-    zikirOverrides: JSON.parse(localStorage.getItem('zikirOverrides') || '{}'),
-    tesbiCounts: JSON.parse(localStorage.getItem('tesbiCounts') || '[]'),
-    ezanSettings: JSON.parse(localStorage.getItem('ezanSettings') || '{}'),
-    favs: JSON.parse(localStorage.getItem('qfavs') || '[]'),
-    ezberList: JSON.parse(localStorage.getItem('qezber') || '[]'),
-    theme: localStorage.getItem('qtheme') || 'light',
-    fontSize: localStorage.getItem('qfontsize') || '100',
-    settings: JSON.parse(localStorage.getItem('qsettings') || '{}'),
-    savedLat: localStorage.getItem('savedLat') || '',
-    savedLng: localStorage.getItem('savedLng') || '',
-    savedCity: localStorage.getItem('savedCity') || ''
-  };
-  
-  const json = JSON.stringify(backup, null, 2);
-  const blob = new Blob([json], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const dateStr = new Date().toISOString().split('T')[0];
-  a.download = 'kuran-yedek-' + dateStr + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('✅ Yedek indirildi: kuran-yedek-' + dateStr + '.json');
-}
-
-function importBackup() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json,application/json';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    try {
-      const text = await file.text();
-      const backup = JSON.parse(text);
-      
-      if(!backup.app || backup.app !== 'Kuran-i Kerim') {
-        toast('❌ Geçersiz yedek dosyası');
-        return;
-      }
-      
-      if(!confirm('Mevcut verileriniz yedekle değiştirilecek. Devam edilsin mi?')) return;
-      
-      if(backup.customZikirler) localStorage.setItem('customZikirler', JSON.stringify(backup.customZikirler));
-      if(backup.zikirOverrides) localStorage.setItem('zikirOverrides', JSON.stringify(backup.zikirOverrides));
-      if(backup.tesbiCounts) localStorage.setItem('tesbiCounts', JSON.stringify(backup.tesbiCounts));
-      if(backup.ezanSettings) localStorage.setItem('ezanSettings', JSON.stringify(backup.ezanSettings));
-      if(backup.favs) localStorage.setItem('qfavs', JSON.stringify(backup.favs));
-      if(backup.ezberList) localStorage.setItem('qezber', JSON.stringify(backup.ezberList));
-      if(backup.theme) localStorage.setItem('qtheme', backup.theme);
-      if(backup.fontSize) localStorage.setItem('qfontsize', backup.fontSize);
-      if(backup.settings) localStorage.setItem('qsettings', JSON.stringify(backup.settings));
-      if(backup.savedLat) localStorage.setItem('savedLat', backup.savedLat);
-      if(backup.savedLng) localStorage.setItem('savedLng', backup.savedLng);
-      if(backup.savedCity) localStorage.setItem('savedCity', backup.savedCity);
-      
-      // Yeniden yükle
-      const savedTheme = backup.theme || 'light';
-      document.getElementById('htmlRoot').setAttribute('data-theme', savedTheme);
-      
-      tesbiCounts = backup.tesbiCounts || [];
-      renderTesbiSel();
-      updateTesbiUI();
-      updateFavCount();
-      
-      const backupDate = backup.date ? new Date(backup.date).toLocaleDateString('tr-TR') : '?';
-      toast('✅ Yedek yüklendi! (' + backupDate + ' tarihli)');
-    } catch(err) {
-      toast('❌ Yedek okunamadı: ' + err.message);
-    }
-  };
-  input.click();
-}
-
 // Ayarlar sayfası init
 function initAyarlar() {
   const s = settings;
@@ -3926,62 +3721,25 @@ const DEFAULT_TESBI = [
 function loadTesbiList() {
   const saved = localStorage.getItem('customZikirler');
   const custom = saved ? JSON.parse(saved) : [];
-  const overrides = JSON.parse(localStorage.getItem('zikirOverrides') || '{}');
-  
-  const base = DEFAULT_TESBI.map((z, i) => overrides[i] ? {...overrides[i], _defaultIdx: i} : z);
-  return [...base, ...custom.map(z => ({...z, custom:true}))];
+  return [...DEFAULT_TESBI, ...custom.map(z => ({...z, custom:true}))];
 }
 
 // Tesbi listesini render et
 function renderTesbiSel() {
   const list = loadTesbiList();
+  // TESBI_LIST'i güncelle
   window.TESBI_LIST = list;
+  // Counts array boyutunu ayarla
   while(tesbiCounts.length < list.length) tesbiCounts.push(0);
   localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
   
   const sel = document.getElementById('tesbiSel');
   if(!sel) return;
-
-  // ── LİSTE GÖRÜNÜMÜ ──
-  sel.innerHTML = `
-    <div style="margin-bottom:12px">
-      <input id="zikirSearchInput" oninput="filterZikirList()" placeholder="🔍 Zikir ara..." 
-        style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border2);
-        background:var(--card);color:var(--text);font-size:14px;outline:none;font-family:Outfit,sans-serif">
-    </div>
-    <div id="zikirListContainer" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;padding-right:2px">
-      ${list.map((z, i) => `
-        <div class="zikir-list-item ${i===curTesbi?'active':''}" id="zli-${i}" onclick="selectTesbi(${i},null);renderTesbiSel()" style="
-          display:flex;align-items:center;gap:10px;padding:10px 14px;
-          border-radius:12px;border:1px solid ${i===curTesbi?'var(--g1)':'var(--border)'};
-          background:${i===curTesbi?'rgba(0,200,83,0.08)':'var(--card)'};
-          cursor:pointer;transition:all 0.15s">
-          <div style="font-family:'Scheherazade New',serif;font-size:20px;color:var(--g1);min-width:44px;text-align:center">${z.ar?z.ar.substring(0,8):'📿'}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;font-size:14px;color:var(--text)">${z.name}</div>
-            ${z.meal?`<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${z.meal}</div>`:''}
-          </div>
-          <div style="text-align:right;min-width:38px">
-            <div style="font-size:16px;font-weight:900;color:var(--g1)">${tesbiCounts[i]||0}</div>
-            <div style="font-size:10px;color:var(--text4)">/${z.target}</div>
-          </div>
-          <div style="display:flex;gap:4px;flex-shrink:0" onclick="event.stopPropagation()">
-            <button onclick="editZikir(${i})" title="Düzenle" style="background:rgba(0,200,83,0.1);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:13px">✏️</button>
-            ${z.custom?`<button onclick="deleteZikir(${i})" title="Sil" style="background:rgba(239,83,80,0.1);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:13px">🗑</button>`:''}
-          </div>
-        </div>`).join('')}
-    </div>`;
-}
-
-function filterZikirList() {
-  const q = document.getElementById('zikirSearchInput')?.value.toLowerCase() || '';
-  const list = loadTesbiList();
-  const items = document.querySelectorAll('[id^="zli-"]');
-  items.forEach((el, i) => {
-    const z = list[i];
-    const match = !q || z.name.toLowerCase().includes(q) || (z.meal||'').toLowerCase().includes(q) || (z.ar||'').includes(q);
-    el.style.display = match ? 'flex' : 'none';
-  });
+  sel.innerHTML = list.map((z, i) => `
+    <div class="tesbi-pill ${i===curTesbi?'active':''}" onclick="selectTesbi(${i},this)">
+      ${z.name}
+      ${z.custom ? `<span onclick="event.stopPropagation();deleteZikir(${i})" style="margin-left:6px;opacity:0.7;font-size:10px;cursor:pointer">✕</span>` : ''}
+    </div>`).join('');
 }
 
 // Yeni zikir ekleme modalı
@@ -4041,70 +3799,6 @@ function saveNewZikir() {
   closeModal();
   renderTesbiSel();
   toast('✅ Zikir eklendi: ' + ad);
-}
-
-function editZikir(i) {
-  const list = loadTesbiList();
-  const z = list[i];
-  if(!z) return;
-  
-  showModal(`
-    <div style="margin-bottom:16px">
-      <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:16px">✏️ Zikir Düzenle</div>
-      <div class="zikir-form">
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Zikir Adı *</label>
-        <input class="zikir-input" id="editZikirAd" value="${z.name.replace(/"/g,'&quot;')}" maxlength="40">
-        
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Arapça Yazımı</label>
-        <input class="zikir-input zikir-input-ar" id="editZikirAr" value="${(z.ar||'').replace(/"/g,'&quot;')}">
-        
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Türkçe Meali</label>
-        <input class="zikir-input" id="editZikirMeal" value="${(z.meal||'').replace(/"/g,'&quot;')}">
-        
-        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Hedef Sayı</label>
-        <input class="zikir-input" id="editZikirHedef" type="number" value="${z.target}" min="1" max="9999">
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="ay-btn" onclick="closeModal()" style="padding:10px 20px;font-size:14px">İptal</button>
-      <button class="loc-btn" onclick="saveEditZikir(${i})" style="font-size:14px">✅ Kaydet</button>
-    </div>
-  `);
-}
-
-function saveEditZikir(i) {
-  const ad = document.getElementById('editZikirAd')?.value.trim();
-  if(!ad) { toast('❌ Zikir adı boş olamaz'); return; }
-  
-  const list = loadTesbiList();
-  const z = list[i];
-  
-  const updated = {
-    ...z,
-    name: ad,
-    ar: document.getElementById('editZikirAr')?.value.trim() || z.ar || '',
-    meal: document.getElementById('editZikirMeal')?.value.trim() || z.meal || '',
-    target: parseInt(document.getElementById('editZikirHedef')?.value) || z.target,
-    custom: true
-  };
-  
-  if(!z.custom) {
-    // Varsayılan zikir → custom kopyası oluştur, orijinali gizle
-    const overrides = JSON.parse(localStorage.getItem('zikirOverrides') || '{}');
-    overrides[i] = updated;
-    localStorage.setItem('zikirOverrides', JSON.stringify(overrides));
-  } else {
-    // Custom zikir → direkt güncelle
-    const saved = JSON.parse(localStorage.getItem('customZikirler') || '[]');
-    const customIdx = i - DEFAULT_TESBI.length;
-    if(saved[customIdx]) saved[customIdx] = updated;
-    localStorage.setItem('customZikirler', JSON.stringify(saved));
-  }
-  
-  closeModal();
-  renderTesbiSel();
-  updateTesbiUI();
-  toast('✅ Zikir güncellendi: ' + ad);
 }
 
 function deleteZikir(i) {
@@ -4682,21 +4376,6 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
     </div>
 
     <div class="settings-group">
-      <div class="settings-group-title">💾 Yedekleme</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-        <button class="settings-btn" onclick="exportBackup()" style="cursor:pointer;background:var(--g4);color:#fff;border-color:var(--g4);font-weight:700;flex:1;min-width:140px;padding:10px">
-          ⬇️ Yedek İndir
-        </button>
-        <button class="settings-btn" onclick="importBackup()" style="cursor:pointer;background:var(--bg3);color:var(--text);border:1px solid var(--border2);flex:1;min-width:140px;padding:10px">
-          ⬆️ Yedek Yükle
-        </button>
-      </div>
-      <div style="font-size:11px;color:var(--text4);line-height:1.6">
-        📦 Zikirler, sayaçlar, favoriler, ayarlar — JSON dosyası olarak indirilir, her zaman geri yükleyebilirsiniz.
-      </div>
-    </div>
-
-    <div class="settings-group">
       <div class="settings-group-title">🗑 Veri</div>
       <div class="settings-row">
         <div>
@@ -4974,13 +4653,10 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
     <!-- ZİKİR SEÇİCİ -->
     <div class="tesbi-sel" id="tesbiSel"></div>
 
-    <!-- ZİKİR BUTONLARI -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="loc-btn" onclick="showAddZikir()" style="font-size:13px;padding:8px 16px;flex:1">
+    <!-- YENİ ZİKİR EKLE BUTONU -->
+    <div style="text-align:center;margin-bottom:16px">
+      <button class="loc-btn" onclick="showAddZikir()" style="font-size:13px;padding:8px 20px">
         ➕ Yeni Zikir Ekle
-      </button>
-      <button class="loc-btn" onclick="showKutuphane()" style="font-size:13px;padding:8px 16px;flex:1;background:var(--bg3);color:var(--text);border-color:var(--border2)">
-        📚 Kütüphane
       </button>
     </div>
 
@@ -5247,5 +4923,125 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
   <div class="more-item" onclick="showPage('ayarlar');updateBNav('ayarlar');toggleMore()">⚙️ Ayarlar</div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     KOD KORUMA SİSTEMİ
+     © 2026 Bakiciersen — Tüm hakları saklıdır
+═══════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── 1. SAĞ TIK ENGELİ ──
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    _showCopyWarning();
+    return false;
+  });
+
+  // ── 2. KLAVYE KISAYOLLARI ENGELİ ──
+  document.addEventListener('keydown', function(e) {
+    const blocked = (
+      (e.ctrlKey && ['u','U','s','S','a','A','p','P'].includes(e.key)) ||  // Ctrl+U/S/A/P
+      (e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C'].includes(e.key)) || // Ctrl+Shift+I/J/C
+      e.key === 'F12'
+    );
+    if(blocked) {
+      e.preventDefault();
+      e.stopPropagation();
+      if(e.key === 'F12' || (e.ctrlKey && e.shiftKey)) _showCopyWarning();
+      return false;
+    }
+  }, true);
+
+  // ── 3. METİN SEÇİMİ ENGELİ (Arapça hariç) ──
+  document.addEventListener('selectstart', function(e) {
+    const allowed = e.target.closest('.ayah-ar, .s-ar, .esma-ar, .dua-ar, input, textarea, [data-selectable]');
+    if(!allowed) {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // ── 4. DEVTOOLS AÇILINCA UYARI ──
+  let _devToolsOpen = false;
+  const _devCheck = setInterval(function() {
+    const w = window.outerWidth - window.innerWidth > 160;
+    const h = window.outerHeight - window.innerHeight > 160;
+    if((w || h) && !_devToolsOpen) {
+      _devToolsOpen = true;
+      _showDevToolsWarning();
+    }
+    if(!w && !h) _devToolsOpen = false;
+  }, 1000);
+
+  // ── 5. KAYNAK KOD GÖRÜNTÜLEMESİ ENGELİ ──
+  // view-source: protokolünü engelle
+  if(window.location.protocol === 'view-source:') {
+    window.location.href = 'about:blank';
+  }
+
+  // ── 6. IFRAME ENGELİ ──
+  if(window.top !== window.self) {
+    try {
+      window.top.location.href = window.self.location.href;
+    } catch(e) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#c00;font-size:18px">⛔ Bu içerik iframe içinde gösterilemez.</div>';
+    }
+  }
+
+  // ── 7. DRAG ENGELİ ──
+  document.addEventListener('dragstart', function(e) {
+    e.preventDefault();
+    return false;
+  });
+
+  // ── UYARI FONKSİYONLARI ──
+  function _showCopyWarning() {
+    let w = document.getElementById('_copyWarn');
+    if(w) { clearTimeout(w._t); w.remove(); }
+    w = document.createElement('div');
+    w.id = '_copyWarn';
+    w.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:999999;' +
+      'background:linear-gradient(135deg,#c62828,#b71c1c);color:#fff;padding:12px 24px;' +
+      'border-radius:12px;font-family:Outfit,sans-serif;font-size:14px;font-weight:700;' +
+      'box-shadow:0 8px 32px rgba(0,0,0,0.4);text-align:center;max-width:320px;' +
+      'animation:_warnIn 0.3s ease';
+    w.innerHTML = '🔒 © 2026 Kuran-ı Kerim<br><span style="font-size:12px;font-weight:400;opacity:0.9">Bu içerik telif hakkıyla korunmaktadır.<br>Kopyalanması yasaktır.</span>';
+    document.body.appendChild(w);
+    w._t = setTimeout(() => w.remove(), 3000);
+  }
+
+  function _showDevToolsWarning() {
+    let w = document.getElementById('_devWarn');
+    if(w) return;
+    w = document.createElement('div');
+    w.id = '_devWarn';
+    w.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999999;' +
+      'background:#b71c1c;color:#fff;padding:10px 20px;' +
+      'font-family:Outfit,sans-serif;font-size:13px;font-weight:700;text-align:center;' +
+      'box-shadow:0 2px 16px rgba(0,0,0,0.4)';
+    w.innerHTML = '⚠️ Geliştirici araçları tespit edildi — © 2026 Bakiciersen. Tüm hakları saklıdır.' +
+      '<span onclick="this.parentElement.remove()" style="float:right;cursor:pointer;opacity:0.8;margin-left:16px">✕</span>';
+    document.body.appendChild(w);
+  }
+
+  // ── CSS: Uyarı animasyonu ──
+  const _style = document.createElement('style');
+  _style.textContent = '@keyframes _warnIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}' +
+    '* { -webkit-user-select: none; -moz-user-select: none; user-select: none; }' +
+    'input, textarea, [data-selectable], .ayah-ar, .s-ar { -webkit-user-select: text !important; user-select: text !important; }';
+  document.head.appendChild(_style);
+
+  // ── COPYRIGHT CONSOLE MESAJI ──
+  setTimeout(function() {
+    console.clear();
+    console.log('%c⛔ DUR!', 'color:#c62828;font-size:48px;font-weight:900');
+    console.log('%cBu tarayıcı özelliği kötü niyetli kişiler tarafından kullanılır.', 'color:#333;font-size:16px');
+    console.log('%c© 2026 kuran-kerim.bakiciersen.workers.dev — Tüm hakları saklıdır.', 'color:#888;font-size:13px');
+    console.log('%cYetkisiz kopyalama yasak ve hukuki işlem başlatılır.', 'color:#c00;font-size:13px;font-weight:700');
+  }, 500);
+
+})();
+</script>
 </body>
 </html>
