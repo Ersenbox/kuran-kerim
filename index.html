@@ -2,6 +2,9 @@
 <html lang="tr" data-theme="light" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#00c853">
@@ -1914,6 +1917,14 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   .reader-top { flex-direction: column; align-items: flex-start; }
 }
 </style>
+<!-- Google Analytics GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DRZD24GZ9S"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DRZD24GZ9S');
+</script>
 </head>
 <body>
 
@@ -1963,6 +1974,11 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
         <option value="es">🇪🇸 Español</option>
         <option value="bn">🇧🇩 বাংলা</option>
         <option value="ar">🇸🇦 عربي</option>
+        <option value="nl">🇳🇱 Nederlands</option>
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="fa">🇮🇷 فارسی</option>
+        <option value="ms">🇲🇾 Melayu</option>
+        <option value="sw">🇰🇪 Kiswahili</option>
       </select>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
     </div>
@@ -2377,20 +2393,29 @@ function filterSurahs(q) {
 }
 
 // ── READER ──
-const EDITIONS = {tr:'tr.diyanet',de:'de.bubenheim',en:'en.sahih',fr:'fr.hamidullah',ru:'ru.kuliev',id:'id.indonesian',ur:'ur.ahmedali',es:'es.cortes',bn:'bn.bengali',ar:'ar.muyassar'};
+const EDITIONS = {tr:'tr.diyanet',de:'de.bubenheim',en:'en.sahih',fr:'fr.hamidullah',ru:'ru.kuliev',id:'id.indonesian',ur:'ur.ahmedali',es:'es.cortes',bn:'bn.bengali',ar:'ar.muyassar',nl:'nl.keyzer',it:'it.piccardo',fa:'fa.makarem',ms:'ms.basmeih',sw:'sw.barwani'};
 
 // Her dil için tefsir edition — yoksa null (uyarı çıkar)
 const TAFSIR_EDITIONS = {
-  tr: 'tr.diyanet',      // Diyanet tefsiri ✅
-  de: 'de.bubenheim',    // Almanca tercüme (tefsir yok, tercüme kullan) ✅
-  en: 'en.ahmedali',     // İngilizce ✅
-  fr: 'fr.hamidullah',   // Fransızca ✅
-  ru: 'ru.kuliev',       // Rusça ✅
-  id: 'id.indonesian',   // Endonezce ✅
-  ur: 'ur.jalandhry',    // Urduca ✅
-  es: 'es.cortes',       // İspanyolca ✅
-  bn: 'bn.bengali',      // Bengalce ✅
-  ar: 'ar.muyassar'      // Arapça ✅
+  tr: 'tr.diyanet',
+  de: 'de.bubenheim',
+  en: 'en.ahmedali',
+  fr: 'fr.hamidullah',
+  ru: 'ru.kuliev',
+  id: 'id.indonesian',
+  ur: 'ur.jalandhry',
+  es: 'es.cortes',
+  bn: 'bn.bengali',
+  ar: 'ar.muyassar',
+  nl: 'nl.keyzer',
+  it: 'it.piccardo',
+  fa: 'fa.makarem',
+  ms: 'ms.basmeih',
+  sw: null,  // Kiswahili tefsir API'de yok
+  fa: 'fa.makarem',
+  ms: 'ms.basmeih',
+  nl: 'nl.keyzer',
+  it: 'it.piccardo'
 };
 
 // Tefsir buton etiketi — dile göre
@@ -2404,7 +2429,12 @@ const TAFSIR_LABELS = {
   ur: '📖 ترجمہ',
   es: '📖 Traducción',
   bn: '📖 অনুবাদ',
-  ar: '📖 الترجمة'
+  ar: '📖 الترجمة',
+  nl: '📖 Vertaling',
+  it: '📖 Traduzione',
+  fa: '📖 ترجمه',
+  ms: '📖 Terjemahan',
+  sw: '📖 Tafsiri'
 };
 
 async function openSurah(n) {
@@ -3037,16 +3067,7 @@ function selectTesbi(i,el){
   updateTesbiUI();
 }
 
-function updateTesbiUI(){
-  const t=TESBI_LIST[curTesbi];
-  document.getElementById('tesbiAr').textContent=t.ar;
-  document.getElementById('tesbiCount').textContent=tesbiCounts[curTesbi];
-  document.getElementById('tesbiNameEl').textContent=t.name;
-  document.getElementById('tesbiTarget').textContent=`Hedef: ${t.target}`;
-  const pct=Math.min(100,(tesbiCounts[curTesbi]%t.target)/t.target*100);
-  document.getElementById('tesbiBar').style.width=pct+'%';
-  renderTesbiStats();
-}
+
 
 function incrementTesbi(){
   tesbiCounts[curTesbi]++;
@@ -5258,6 +5279,10 @@ function loadTesbiList() {
     });
   });
 
+  // Gizlenen kütüphane zikirlerini filtrele
+  const hidden = JSON.parse(localStorage.getItem('hiddenZikirler') || '[]');
+  base = base.filter(z => !hidden.includes(z.name));
+
   // Custom zikirler (kullanıcının eklediği, kütüphanede olmayanlar)
   custom.forEach(z => {
     if(!base.find(b => b.name === z.name)) {
@@ -5265,9 +5290,14 @@ function loadTesbiList() {
     }
   });
 
-  // Override uygula (düzenlenenler)
-  const allOverrides = JSON.parse(localStorage.getItem('zikirOverrides') || '{}');
-  base = base.map((z, i) => allOverrides[i] ? {...allOverrides[i]} : z);
+  // Override uygula — isme göre (indeks değil, kayma olmasın)
+  const nameOverrides = JSON.parse(localStorage.getItem('zikirNameOverrides') || '{}');
+  const legacyOverrides = JSON.parse(localStorage.getItem('zikirOverrides') || '{}');
+  base = base.map((z, i) => {
+    if(nameOverrides[z.name]) return {...z, ...nameOverrides[z.name]};
+    if(legacyOverrides[i]) return {...legacyOverrides[i]};
+    return z;
+  });
 
   // Sıra uygula (sürükle-bırak ile değiştirilen)
   if(order && Array.isArray(order) && order.length === base.length) {
@@ -5509,27 +5539,37 @@ function editZikir(i) {
   const list = loadTesbiList();
   const z = list[i];
   if(!z) return;
-  
+  const isLib = !!z._fromLib;
+
   showModal(`
     <div style="margin-bottom:16px">
-      <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:16px">✏️ Zikir Düzenle</div>
+      <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px">✏️ Zikir Düzenle</div>
+      ${isLib ? '<div style="font-size:11px;color:var(--text4);margin-bottom:12px">📚 Kütüphane zikri — değişiklikler sadece senin listende kaydedilir</div>' : ''}
       <div class="zikir-form">
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Zikir Adı *</label>
-        <input class="zikir-input" id="editZikirAd" value="${z.name.replace(/"/g,'&quot;')}" maxlength="40">
-        
+        <input class="zikir-input" id="editZikirAd" value="${z.name.replace(/"/g,'&quot;')}" maxlength="60">
+
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Arapça Yazımı</label>
         <input class="zikir-input zikir-input-ar" id="editZikirAr" value="${(z.ar||'').replace(/"/g,'&quot;')}">
-        
+
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Türkçe Meali</label>
-        <input class="zikir-input" id="editZikirMeal" value="${(z.meal||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}">
-        
+        <input class="zikir-input" id="editZikirMeal" value="${(z.meal||'').substring(0,300)}">
+
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Hedef Sayı</label>
-        <input class="zikir-input" id="editZikirHedef" type="number" value="${z.target}" min="1" max="9999">
+        <input class="zikir-input" id="editZikirHedef" type="number" value="${z.target}" min="1" max="99999">
       </div>
     </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="ay-btn" onclick="closeModal()" style="padding:10px 20px;font-size:14px">İptal</button>
-      <button class="loc-btn" onclick="saveEditZikir(${i})" style="font-size:14px">✅ Kaydet</button>
+    <div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap">
+      <button onclick="confirmDeleteZikir(${i},'${z.name.replace(/'/g,"\\'")}')" style="
+        padding:10px 16px;border-radius:10px;border:1px solid rgba(239,83,80,0.5);
+        background:rgba(239,83,80,0.08);color:#ef5350;font-size:13px;
+        font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">
+        🗑 Sil
+      </button>
+      <div style="display:flex;gap:8px">
+        <button class="ay-btn" onclick="closeModal()" style="padding:10px 18px;font-size:14px">İptal</button>
+        <button class="loc-btn" onclick="saveEditZikir(${i})" style="font-size:14px;padding:10px 20px">✅ Kaydet</button>
+      </div>
     </div>
   `);
 }
@@ -5537,59 +5577,67 @@ function editZikir(i) {
 function saveEditZikir(i) {
   const ad = document.getElementById('editZikirAd')?.value.trim();
   if(!ad) { toast('❌ Zikir adı boş olamaz'); return; }
-  
+
   const list = loadTesbiList();
   const z = list[i];
-  
+  if(!z) return;
+
   const updated = {
     ...z,
     name: ad,
     ar: document.getElementById('editZikirAr')?.value.trim() || z.ar || '',
     meal: document.getElementById('editZikirMeal')?.value.trim() || z.meal || '',
-    target: parseInt(document.getElementById('editZikirHedef')?.value) || z.target,
-    custom: true
+    target: parseInt(document.getElementById('editZikirHedef')?.value) || z.target || 33,
   };
-  
-  if(!z.custom) {
-    // Varsayılan zikir → custom kopyası oluştur, orijinali gizle
-    const overrides = JSON.parse(localStorage.getItem('zikirOverrides') || '{}');
-    overrides[i] = updated;
-    localStorage.setItem('zikirOverrides', JSON.stringify(overrides));
-  } else {
-    // Custom zikir → direkt güncelle
-    const saved = JSON.parse(localStorage.getItem('customZikirler') || '[]');
-    const customIdx = i - DEFAULT_TESBI.length;
-    if(saved[customIdx]) saved[customIdx] = updated;
-    localStorage.setItem('customZikirler', JSON.stringify(saved));
-  }
-  
+
+  // Tüm zikirler (kütüphane + custom) override ile kaydedilir
+  // Anahtar: zikir ismi (indeks değil — indeks kayabilir)
+  const overrides = JSON.parse(localStorage.getItem('zikirNameOverrides') || '{}');
+  overrides[z.name] = updated;
+  localStorage.setItem('zikirNameOverrides', JSON.stringify(overrides));
+
   closeModal();
   renderTesbiSel();
   updateTesbiUI();
-  toast('✅ Zikir güncellendi: ' + ad);
+  toast('✅ Kaydedildi: ' + ad);
+}
+
+function confirmDeleteZikir(i, name) {
+  if(!confirm(name + ' silinsin mi?\n\nBu işlem geri alınamaz.')) return;
+  deleteZikir(i);
 }
 
 function deleteZikir(i) {
   const list = loadTesbiList();
   const z = list[i];
-  if(!z || !z.custom) { toast('Varsayılan zikirler silinemez'); return; }
-  
-  if(!confirm(z.name + ' silinsin mi?')) return;
-  
-  // customZikirler'den kaldır
-  const saved = JSON.parse(localStorage.getItem('customZikirler') || '[]');
-  const customIdx = i - DEFAULT_TESBI.length;
-  saved.splice(customIdx, 1);
-  localStorage.setItem('customZikirler', JSON.stringify(saved));
-  
+  if(!z) return;
+
+  // Kütüphane zikri ise — gizlenmiş listesine ekle
+  if(z._fromLib) {
+    const hidden = JSON.parse(localStorage.getItem('hiddenZikirler') || '[]');
+    if(!hidden.includes(z.name)) hidden.push(z.name);
+    localStorage.setItem('hiddenZikirler', JSON.stringify(hidden));
+    // İsim override'ı da temizle
+    const overrides = JSON.parse(localStorage.getItem('zikirNameOverrides') || '{}');
+    delete overrides[z.name];
+    localStorage.setItem('zikirNameOverrides', JSON.stringify(overrides));
+  } else {
+    // Custom zikir — customZikirler'den kaldır
+    const saved = JSON.parse(localStorage.getItem('customZikirler') || '[]');
+    const idx2 = saved.findIndex(c => c.name === z.name);
+    if(idx2 >= 0) saved.splice(idx2, 1);
+    localStorage.setItem('customZikirler', JSON.stringify(saved));
+  }
+
   // Count array'i düzenle
   tesbiCounts.splice(i, 1);
   localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
-  
+
   if(curTesbi >= i) curTesbi = Math.max(0, curTesbi - 1);
+  closeModal();
   renderTesbiSel();
   updateTesbiUI();
-  toast('🗑 Zikir silindi');
+  toast('🗑 Zikir silindi: ' + z.name);
 }
 
 // selectTesbi override - dinamik liste kullan
@@ -7118,12 +7166,36 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
 <!-- ═══ SERVICE WORKER + PWA INSTALL ═══ -->
 <script>
-// ── Service Worker ──
+// ── Service Worker v34 — Güncelleme Zorunlu ──
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-      .then(r => console.log('[PWA] SW registered'))
-      .catch(e => console.warn('[PWA] SW failed:', e));
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      console.log('[PWA] SW registered v34');
+
+      // Güncelleme varsa hemen uygula
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Yeni versiyon hazır — sayfayı yenile
+            newWorker.postMessage('SKIP_WAITING');
+            window.location.reload();
+          }
+        });
+      });
+
+      // Mevcut SW'yi güncellemeye zorla
+      reg.update();
+
+    } catch(e) {
+      console.warn('[PWA] SW failed:', e);
+    }
+  });
+
+  // Controller değişince sayfayı yenile
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
   });
 }
 
