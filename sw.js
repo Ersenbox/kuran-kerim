@@ -3,8 +3,8 @@
 // Cache version güncellendi → eski cache temizlenir
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'kuran-v34';
-const CACHE_VERSION = '2026-06-06-v34';
+const CACHE_NAME = 'kuran-v35';
+const CACHE_VERSION = '2026-06-06-v35';
 
 // Cache'lenecek dosyalar
 const CACHE_FILES = [
@@ -19,15 +19,21 @@ const CACHE_FILES = [
   '/icons/icon-192.png',
   '/icons/icon-384.png',
   '/icons/icon-512.png',
+  // Ezan dosyaları — offline çalışması için cache'le
+  '/public/audio/azan1.mp3',
+  '/public/audio/azan2.mp3',
+  '/public/audio/azan3.mp3',
+  '/public/audio/azan4.mp3',
+  '/public/audio/azan5.mp3',
 ];
 
 // ── INSTALL: Yeni cache kur ──
 self.addEventListener('install', event => {
-  console.log('[SW v34] Installing...');
+  console.log('[SW v35] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(CACHE_FILES).catch(err => {
-        console.warn('[SW v34] Cache addAll partial fail:', err);
+        console.warn('[SW v35] Cache addAll partial fail:', err);
       });
     })
   );
@@ -37,19 +43,19 @@ self.addEventListener('install', event => {
 
 // ── ACTIVATE: ESKİ CACHE'LERİ TEMİZLE ──
 self.addEventListener('activate', event => {
-  console.log('[SW v34] Activating — clearing old caches...');
+  console.log('[SW v35] Activating — clearing old caches...');
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys
           .filter(key => key !== CACHE_NAME)
           .map(key => {
-            console.log('[SW v34] Deleting old cache:', key);
+            console.log('[SW v35] Deleting old cache:', key);
             return caches.delete(key);
           })
       );
     }).then(() => {
-      console.log('[SW v34] Old caches cleared');
+      console.log('[SW v35] Old caches cleared');
       // Tüm açık sekmeleri hemen güncelle
       return self.clients.claim();
     })
@@ -115,6 +121,6 @@ self.addEventListener('message', event => {
     caches.keys().then(keys => {
       keys.forEach(key => caches.delete(key));
     });
-    console.log('[SW v34] All caches cleared by message');
+    console.log('[SW v35] All caches cleared by message');
   }
 });
