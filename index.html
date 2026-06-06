@@ -2234,10 +2234,6 @@ let hizliSureler = JSON.parse(localStorage.getItem('hizliSureler')||'[1,36,55,67
 
 // INIT
 window.onload = () => {
-
-  // Lang — localStorage'dan yükle, yoksa TR
-  lang = (JSON.parse(localStorage.getItem('qSettings')||'{}').lang) || 'tr';
-  
   // Tema — kaydedilen ayarı uygula, yoksa light
   const savedTheme = localStorage.getItem('qtheme') || 'light';
   document.getElementById('htmlRoot').setAttribute('data-theme', savedTheme);
@@ -2498,17 +2494,7 @@ function renderAyahs() {
         <div class="ay-tafsir show" id="tafsir${i}">Yükleniyor...</div>
       </div>
       <div class="ay-actions">
-        <div style="display:flex;gap:6px">
-        <button class="ay-btn" id="playAyahBtn${i}" onclick="event.stopPropagation();playAyah(${i})" style="flex:1">
-          🔊 Dinle
-        </button>
-        <button class="ay-btn" id="pauseAyahBtn${i}" onclick="event.stopPropagation();pauseAyah()" style="display:none;flex:1">
-          ⏸ Pause
-        </button>
-        <button class="ay-btn" onclick="event.stopPropagation();stopAyah()" style="flex:0.6;background:var(--bg3)">
-          ⏹
-        </button>
-      </div>
+        <button class="ay-btn" onclick="event.stopPropagation();playAyah(${i})">🔊</button>
         <button class="ay-btn" id="tafsirBtn${i}" onclick="event.stopPropagation();loadTafsir(${i})">${TAFSIR_LABELS[lang]||'📖 Meal'}</button>
         <button class="ay-btn" onclick="event.stopPropagation();loadOkunus(${i})">🔤 Okunuş</button>
         <button class="ay-btn" onclick="event.stopPropagation();copyAyah(${i})">📋 Kopyala</button>
@@ -2693,32 +2679,7 @@ function setupSearch(){
   const inp=document.getElementById('searchQ');let t;
   inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>doSearch(inp.value.trim()),450);});
 }
-async 
-// ── TÜRKÇE NORMALIZE ──
-function normalizeText(text) {
-  return text
-    .toLowerCase()
-    .replace(/ş/g, 's').replace(/Ş/g, 's')
-    .replace(/ı/g, 'i').replace(/I/g, 'i')
-    .replace(/ğ/g, 'g').replace(/Ğ/g, 'g')
-    .replace(/ü/g, 'u').replace(/Ü/g, 'u')
-    .replace(/ö/g, 'o').replace(/Ö/g, 'o')
-    .replace(/ç/g, 'c').replace(/Ç/g, 'c')
-    .trim();
-}
-
-
-// Cüz adları arama — buildJuz'dan önce ekle
-const JUZ_NAMES = {
-  tr: ['1. Cüz (Alef-Lâm-Mîm)', '2. Cüz', '3. Cüz', '4. Cüz', '5. Cüz',
-       '6. Cüz', '7. Cüz', '8. Cüz', '9. Cüz', '10. Cüz',
-       '11. Cüz', '12. Cüz', '13. Cüz', '14. Cüz', '15. Cüz',
-       '16. Cüz', '17. Cüz', '18. Cüz', '19. Cüz', '20. Cüz',
-       '21. Cüz', '22. Cüz', '23. Cüz', '24. Cüz', '25. Cüz',
-       '26. Cüz', '27. Cüz', '28. Cüz', '29. Cüz', '30. Cüz'],
-};
-
-function doSearch(q){
+async function doSearch(q){
   const res=document.getElementById('searchRes');
   if(q.length<2){res.innerHTML='';return;}
   res.innerHTML='<div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
@@ -5145,9 +5106,6 @@ async function playEzanVakit(vakit) {
   const audio = document.getElementById('ezanAudio');
   if(!audio) return;
 
-  // Önce durdur ve sıfırla
-  try { audio.pause(); } catch(e){}
-  audio.currentTime = 0;
   document.querySelectorAll('.ezan-btn').forEach(b => b.classList.remove('playing'));
 
   const selEl = document.getElementById('ezan-' + vakit);
@@ -5156,49 +5114,40 @@ async function playEzanVakit(vakit) {
   audio.volume = volEl ? parseFloat(volEl.value) : 0.8;
 
   const vakit_tr = {sabah:'Sabah',ogle:'Öğle',ikindi:'İkindi',aksam:'Akşam',yatsi:'Yatsı'};
+
+  // Yerel ezan dosyaları: /public/audio/azan1.mp3 → azan21.mp3
   const num = Math.max(1, Math.min(21, n));
+  const localSrc = '/public/audio/azan' + num + '.mp3';
 
-  // Kaynak listesi — önce yerel (Cloudflare'de çalışır), sonra GitHub raw
-  const sources = [
-    '/public/audio/azan' + num + '.mp3',
-    'https://raw.githubusercontent.com/Ersenbox/kuran-kerim/main/public/audio/azan' + num + '.mp3'
-  ];
+  // GitHub raw CDN (Cloudflare + file:// için fallback)
+  const githubSrc = 'https://raw.githubusercontent.com/Ersenbox/kuran-kerim/main/public/audio/azan' + num + '.mp3';
 
+  const sources = [localSrc, githubSrc];
+
+  let played = false;
   for(const src of sources) {
     try {
-      // Her denemede yeni Audio objesi — eski event'ler temizlensin
-      const tmpAudio = new Audio(src);
-      tmpAudio.volume = audio.volume;
-
-      await new Promise((res, rej) => {
-        tmpAudio.oncanplaythrough = res;
-        tmpAudio.onloadeddata = res;
-        tmpAudio.onerror = rej;
-        setTimeout(rej, 8000);
-        tmpAudio.load();
-      });
-
-      // Başarılı — asıl audio element'e yükle
       audio.src = src;
-      audio.volume = tmpAudio.volume;
+      await new Promise((res, rej) => {
+        audio.oncanplaythrough = res;
+        audio.onloadeddata = res;  // daha hızlı başlama
+        audio.onerror = rej;
+        audio.load();
+        setTimeout(rej, 8000);  // 8sn timeout - büyük dosyalar için
+      });
       await audio.play();
       toast('🔊 ' + (vakit_tr[vakit]||vakit) + ' Ezanı çalıyor...');
-      return; // Başarılı, fonksiyondan çık
+      played = true;
+      break;
     } catch(e) {
-      continue; // Sonraki kaynağı dene
+      continue;
     }
   }
 
-  // Tüm kaynaklar başarısız — doğrudan play dene (autoplay policy bypass)
-  try {
-    audio.src = sources[0];
-    audio.load();
-    await audio.play();
-    toast('🔊 ' + (vakit_tr[vakit]||vakit) + ' Ezanı çalıyor...');
-    return;
-  } catch(e) {}
-
-  toast('❌ Ezan çalınamadı — ' + (vakit_tr[vakit]||vakit));
+  if(!played) {
+    document.querySelectorAll('.ezan-btn').forEach(b => b.classList.remove('playing'));
+    toast('❌ Ezan çalınamadı — ses dosyası bulunamadı');
+  }
 }
 
 // Eski playEzan de çalışsın (geriye dönük)
@@ -5210,34 +5159,6 @@ function stopEzan() {
   document.querySelectorAll('.ezan-btn').forEach(b => b.classList.remove('playing'));
   toast('⏹ Durduruldu');
 }
-
-// ── AUDIO KONTROL ──
-function pauseAyah() {
-  const aud = document.getElementById('aud');
-  if(aud && !aud.paused) {
-    aud.pause();
-    const btn = document.getElementById('playAyahBtn'+curAyah);
-    if(btn) btn.textContent = '▶ Dinle';
-    const pauseBtn = document.getElementById('pauseAyahBtn'+curAyah);
-    if(pauseBtn) pauseBtn.style.display = 'none';
-    toast('⏸ Durduruldu');
-  }
-}
-
-function stopAyah() {
-  const aud = document.getElementById('aud');
-  if(aud) {
-    aud.pause();
-    aud.currentTime = 0;
-    const btn = document.getElementById('playAyahBtn'+curAyah);
-    if(btn) btn.textContent = '▶ Dinle';
-    const pauseBtn = document.getElementById('pauseAyahBtn'+curAyah);
-    if(pauseBtn) pauseBtn.style.display = 'none';
-    playing = false;
-    toast('⏹ Durduruldu');
-  }
-}
-
 
 // ── AYLIK İMSAKİYE ──
 let savedLat = null, savedLng = null, savedCity = '';
