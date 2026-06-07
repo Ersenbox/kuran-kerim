@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="medine">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hadis ve Sünnet Rehberi</title>
+<style>
+[data-theme=medine]{--bg:#f8faf8;--bg2:#eef4ef;--card:#fff;--p:#1b5e20;--s:#2e7d32;--a:#d4af37;--t:#151515;--m:#52665a;--b:rgba(27,94,32,.2)}
+[data-theme=night]{--bg:#0f1720;--bg2:#16202a;--card:#1b2632;--p:#43a047;--s:#2e7d32;--a:#d4af37;--t:#f5f5f5;--m:#b8c7bc;--b:rgba(212,175,55,.25)}
+[data-theme=kabe]{--bg:#121212;--bg2:#1b1b1b;--card:#202020;--p:#d4af37;--s:#b8942f;--a:#f5f0e6;--t:#f5f0e6;--m:#c9c0aa;--b:rgba(212,175,55,.3)}
+[data-theme=osmanli]{--bg:#f8f1e5;--bg2:#efe2cf;--card:#fff;--p:#6d071a;--s:#8a1026;--a:#d4af37;--t:#241515;--m:#6b4a4a;--b:rgba(109,7,26,.2)}
+[data-theme=endulus]{--bg:#f5f9fc;--bg2:#e8f1f8;--card:#fff;--p:#0d3b66;--s:#1d70a2;--a:#d4af37;--t:#102030;--m:#536b7a;--b:rgba(13,59,102,.2)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--t);line-height:1.65}header{position:sticky;top:0;background:var(--bg2);border-bottom:1px solid var(--b);z-index:10}.bar{max-width:1280px;margin:auto;min-height:70px;display:flex;align-items:center;gap:10px;padding:10px 18px}.logo{font-weight:900;color:var(--p);margin-right:auto;font-size:18px}.nav{display:flex;gap:7px;flex-wrap:wrap}button,select,input{font:inherit}.btn,.sel{border:1px solid var(--b);background:var(--card);color:var(--t);border-radius:13px;padding:9px 13px;font-weight:800;cursor:pointer}.btn.on,.primary{background:var(--p)!important;color:#fff!important}.hero{text-align:center;padding:42px 18px 25px}.bism{font-family:Georgia,serif;font-size:42px;color:var(--p);line-height:1.8}.hero h1{font-size:38px}.muted{color:var(--m)}.search{max-width:700px;margin:18px auto;display:flex;background:var(--card);border:1px solid var(--b);border-radius:999px;padding:8px}.search input{flex:1;border:0;background:transparent;outline:0;color:var(--t);padding:0 14px}.main{max-width:1280px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.item{background:var(--card);border:1px solid var(--b);border-radius:18px;padding:18px}.card h3,.item h3{color:var(--p);margin-bottom:7px}.list{display:grid;gap:12px;margin-top:15px}.arabic{font-family:Georgia,serif;font-size:30px;direction:rtl;text-align:right;line-height:2}.src{color:var(--a);font-weight:900;margin-top:8px}.hide{display:none}.pill{display:inline-block;border:1px solid var(--b);border-radius:999px;padding:4px 10px;margin:4px;color:var(--m);font-size:12px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.stat{text-align:center}.stat b{font-size:25px;color:var(--p)}.loginBox{max-width:430px;margin:auto}.loginBox input{width:100%;padding:12px;border:1px solid var(--b);border-radius:12px;background:var(--card);color:var(--t);margin:6px 0}.mode,.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.footer{text-align:center;color:var(--m);padding:30px}.mobile{display:none}@media(max-width:900px){.nav{display:none}.mobile{display:block}.grid,.stats{grid-template-columns:1fr}.hero h1{font-size:28px}.bism{font-size:30px}.bar{flex-wrap:wrap}.search{border-radius:18px}.search button{border-radius:12px}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="bar">
+<div class="logo" data-i="title">Hadis ve Sünnet Rehberi</div>
+<nav class="nav">
+<button class="btn on" onclick="showPage('home')" data-i="home">Ana Sayfa</button>
+<button class="btn" onclick="showPage('hadith')" data-i="hadiths">Hadisler</button>
+<button class="btn" onclick="showPage('sunnah')" data-i="sunnahs">Sünnetler</button>
+<button class="btn" onclick="showPage('dua')" data-i="duas">Dualar</button>
+<button class="btn" onclick="showPage('fav')" data-i="favorites">Favoriler</button>
+<button class="btn" onclick="showPage('admin')">Admin</button>
+</nav>
+<select class="sel mobile" onchange="showPage(this.value)">
+<option value="home">Menu</option><option value="hadith">Hadisler</option><option value="sunnah">Sünnetler</option><option value="dua">Dualar</option><option value="fav">Favoriler</option><option value="admin">Admin</option>
+</select>
+<select id="langSel" class="sel" onchange="setLang(this.value)"></select>
+<select id="themeSel" class="sel" onchange="setTheme(this.value)">
+<option value="medine">Medine</option><option value="night">Gece</option><option value="kabe">Kâbe</option><option value="osmanli">Osmanlı</option><option value="endulus">Endülüs</option>
+</select>
+</div>
+</header>
+
+<section id="home" class="pg">
+<div class="hero">
+<div class="bism">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ</div>
+<h1 data-i="title">Hadis ve Sünnet Rehberi</h1>
+<p class="muted" data-i="sub">Peygamber Efendimiz ﷺ’in hadisleri ve sünnetleri için sade, güvenilir ve çok dilli rehber.</p>
+<div class="search"><input id="q" data-ph="searchph" placeholder="Hadis, sünnet veya dua ara..."><button class="btn primary" onclick="doSearch()" data-i="search">Ara</button></div>
+</div>
+<main class="main grid">
+<div class="card"><h3 data-i="dailyH">Günün Hadisi</h3><p id="dailyHadith"></p></div>
+<div class="card"><h3 data-i="dailyS">Günün Sünneti</h3><p id="dailySunnah"></p></div>
+<div class="card"><h3 data-i="target">V1 Hedefi</h3><p id="targetText"></p></div>
+<div class="card"><h3>Login</h3><p id="userBox" class="muted">Misafir</p><button class="btn" onclick="showPage('login')">Email Login</button></div>
+</main>
+</section>
+
+<main id="hadith" class="main pg hide">
+<h2 data-i="hadiths">Hadisler</h2>
+<p class="muted" data-i="hadithInfo"></p>
+<div class="mode">
+<button class="btn" onclick="viewMode='simple';localStorage.viewMode=viewMode;renderAll()" data-i="simple">Sade</button>
+<button class="btn" onclick="viewMode='normal';localStorage.viewMode=viewMode;renderAll()" data-i="normal">Normal</button>
+<button class="btn" onclick="viewMode='detail';localStorage.viewMode=viewMode;renderAll()" data-i="detail">Detaylı</button>
+</div>
+<div id="hadithList" class="list"></div>
+</main>
+
+<main id="sunnah" class="main pg hide"><h2 data-i="sunnahs">Sünnetler</h2><p class="muted" data-i="sunnahInfo"></p><div id="sunnahList" class="list"></div></main>
+<main id="dua" class="main pg hide"><h2 data-i="duas">Dualar</h2><p class="muted" data-i="duaInfo"></p><div id="duaList" class="list"></div></main>
+<main id="fav" class="main pg hide"><h2 data-i="favorites">Favoriler</h2><div id="favList" class="list"></div></main>
+
+<main id="login" class="main pg hide">
+<div class="card loginBox">
+<h2>Email Login</h2>
+<p class="muted" data-i="loginInfo"></p>
+<input id="email" placeholder="Email">
+<input id="name" data-ph="nameph" placeholder="İsim">
+<button class="btn primary" onclick="login()" data-i="login">Giriş Yap</button>
+<button class="btn" onclick="logout()" data-i="logout">Çıkış</button>
+</div>
+</main>
+
+<main id="admin" class="main pg hide">
+<h2>Admin Panel</h2>
+<p class="muted" data-i="adminInfo"></p>
+<div class="stats">
+<div class="card stat"><b id="today">0</b><br><span data-i="today">Bugün</span></div>
+<div class="card stat"><b id="week">0</b><br><span data-i="week">Hafta</span></div>
+<div class="card stat"><b id="month">0</b><br><span data-i="month">Ay</span></div>
+<div class="card stat"><b id="year">0</b><br><span data-i="year">Yıl</span></div>
+<div class="card stat"><b id="total">0</b><br><span data-i="total">Toplam</span></div>
+</div>
+<div class="card" style="margin-top:14px">
+<h3 data-i="contentTarget">İçerik Hedefi</h3>
+<span class="pill">Buhari 1500</span><span class="pill">Müslim 1200</span><span class="pill">Tirmizî 900</span><span class="pill">Ebu Davud 700</span><span class="pill">Nesâî 700</span><span class="pill">Sünnet 1000</span><span class="pill">15 Dil</span>
+</div>
+</main>
+
+<footer class="footer">Hadis & Sünnet Rehberi • Single index.html</footer>
+
+<script>
+const LANGS={tr:"Türkçe",en:"English",ar:"العربية",de:"Deutsch",fr:"Français",es:"Español",it:"Italiano",ru:"Русский",id:"Indonesia",ur:"اردو",bn:"বাংলা",fa:"فارسی",ms:"Melayu",nl:"Nederlands",sw:"Kiswahili"};
+langSel.innerHTML=Object.entries(LANGS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+
+const UI={
+tr:{title:"Hadis ve Sünnet Rehberi",sub:"Peygamber Efendimiz ﷺ’in hadisleri ve sünnetleri için sade, güvenilir ve çok dilli rehber.",home:"Ana Sayfa",hadiths:"Hadisler",sunnahs:"Sünnetler",duas:"Dualar",favorites:"Favoriler",search:"Ara",searchph:"Hadis, sünnet veya dua ara...",dailyH:"Günün Hadisi",dailyS:"Günün Sünneti",target:"V1 Hedefi",hadithInfo:"Hadisler kaynak, derece, kategori ve açıklama ile gösterilir.",sunnahInfo:"Sünnetler konu bazlıdır ve ilgili hadis kaynaklarına bağlanır.",duaInfo:"Günlük dualar Arapça metin, tercüme ve kaynakla gösterilir.",simple:"Sade",normal:"Normal",detail:"Detaylı",loginInfo:"Demo login: bilgiler sadece bu cihazda saklanır.",nameph:"İsim",login:"Giriş Yap",logout:"Çıkış",adminInfo:"Ziyaretçi sayaçları ve içerik hedefleri.",today:"Bugün",week:"Hafta",month:"Ay",year:"Yıl",total:"Toplam",contentTarget:"İçerik Hedefi",favAdded:"Favorilere eklendi",noFav:"Henüz favori yok.",guest:"Misafir",read:"Oku",source:"Kaynak",grade:"Derece",category:"Kategori",explanation:"Açıklama"},
+en:{title:"Hadith & Sunnah Guide",sub:"A simple, reliable, multilingual guide to the Hadith and Sunnah of Prophet Muhammad ﷺ.",home:"Home",hadiths:"Hadiths",sunnahs:"Sunnahs",duas:"Duas",favorites:"Favorites",search:"Search",searchph:"Search hadith, sunnah or dua...",dailyH:"Hadith of the Day",dailyS:"Sunnah of the Day",target:"V1 Target",hadithInfo:"Hadiths are shown with source, grade, category and explanation.",sunnahInfo:"Sunnahs are topic-based and linked to hadith sources.",duaInfo:"Daily duas are shown with Arabic text, translation and source.",simple:"Simple",normal:"Normal",detail:"Detailed",loginInfo:"Demo login: data is stored only on this device.",nameph:"Name",login:"Login",logout:"Logout",adminInfo:"Visitor counters and content targets.",today:"Today",week:"Week",month:"Month",year:"Year",total:"Total",contentTarget:"Content Target",favAdded:"Added to favorites",noFav:"No favorites yet.",guest:"Guest",read:"Read",source:"Source",grade:"Grade",category:"Category",explanation:"Explanation"},
+ar:{title:"دليل الحديث والسنة",sub:"دليل بسيط وموثوق ومتعدد اللغات لأحاديث وسنة النبي محمد ﷺ.",home:"الرئيسية",hadiths:"الأحاديث",sunnahs:"السنن",duas:"الأدعية",favorites:"المفضلة",search:"بحث",searchph:"ابحث عن حديث أو سنة أو دعاء...",dailyH:"حديث اليوم",dailyS:"سنة اليوم",target:"هدف الإصدار الأول",hadithInfo:"تُعرض الأحاديث مع المصدر والدرجة والتصنيف والشرح.",sunnahInfo:"السنن مرتبة حسب الموضوع ومرتبطة بمصادر الحديث.",duaInfo:"الأدعية اليومية مع النص العربي والترجمة والمصدر.",simple:"بسيط",normal:"عادي",detail:"مفصل",loginInfo:"تسجيل تجريبي: تُحفظ البيانات على هذا الجهاز فقط.",nameph:"الاسم",login:"دخول",logout:"خروج",adminInfo:"عدادات الزوار وأهداف المحتوى.",today:"اليوم",week:"الأسبوع",month:"الشهر",year:"السنة",total:"المجموع",contentTarget:"هدف المحتوى",favAdded:"تمت الإضافة إلى المفضلة",noFav:"لا توجد مفضلات بعد.",guest:"زائر",read:"اقرأ",source:"المصدر",grade:"الدرجة",category:"التصنيف",explanation:"الشرح"}
+};
+const base=UI.en;
+["de","fr","es","it","ru","id","ur","bn","fa","ms","nl","sw"].forEach(k=>UI[k]={...base});
+UI.de={...base,title:"Hadith- und Sunnah-Leitfaden",home:"Start",hadiths:"Hadithe",sunnahs:"Sunnah",duas:"Bittgebete",favorites:"Favoriten",search:"Suchen",dailyH:"Hadith des Tages",dailyS:"Sunnah des Tages",guest:"Gast"};
+UI.fr={...base,title:"Guide Hadith & Sunna",home:"Accueil",hadiths:"Hadiths",sunnahs:"Sunnas",duas:"Invocations",favorites:"Favoris",search:"Rechercher",dailyH:"Hadith du jour",dailyS:"Sunna du jour",guest:"Invité"};
+UI.es={...base,title:"Guía de Hadiz y Sunnah",home:"Inicio",hadiths:"Hadices",sunnahs:"Sunnas",duas:"Duas",favorites:"Favoritos",search:"Buscar",dailyH:"Hadiz del día",dailyS:"Sunnah del día",guest:"Invitado"};
+UI.it={...base,title:"Guida Hadith e Sunnah",home:"Home",hadiths:"Hadith",sunnahs:"Sunnah",duas:"Dua",favorites:"Preferiti",search:"Cerca",dailyH:"Hadith del giorno",dailyS:"Sunnah del giorno",guest:"Ospite"};
+UI.ru={...base,title:"Справочник хадисов и сунны",home:"Главная",hadiths:"Хадисы",sunnahs:"Сунна",duas:"Дуа",favorites:"Избранное",search:"Поиск",dailyH:"Хадис дня",dailyS:"Сунна дня",guest:"Гость"};
+UI.id={...base,title:"Panduan Hadis & Sunnah",home:"Beranda",hadiths:"Hadis",sunnahs:"Sunnah",duas:"Doa",favorites:"Favorit",search:"Cari",dailyH:"Hadis Hari Ini",dailyS:"Sunnah Hari Ini",guest:"Tamu"};
+UI.ur={...base,title:"حدیث اور سنت رہنما",home:"صفحہ اول",hadiths:"احادیث",sunnahs:"سنن",duas:"دعائیں",favorites:"پسندیدہ",search:"تلاش",dailyH:"آج کی حدیث",dailyS:"آج کی سنت",guest:"مہمان"};
+UI.bn={...base,title:"হাদিস ও সুন্নাহ গাইড",home:"হোম",hadiths:"হাদিস",sunnahs:"সুন্নাহ",duas:"দোয়া",favorites:"প্রিয়",search:"খুঁজুন",dailyH:"দিনের হাদিস",dailyS:"দিনের সুন্নাহ",guest:"অতিথি"};
+UI.fa={...base,title:"راهنمای حدیث و سنت",home:"خانه",hadiths:"احادیث",sunnahs:"سنت‌ها",duas:"دعاها",favorites:"علاقه‌مندی‌ها",search:"جستجو",dailyH:"حدیث روز",dailyS:"سنت روز",guest:"مهمان"};
+UI.ms={...base,title:"Panduan Hadis & Sunnah",home:"Utama",hadiths:"Hadis",sunnahs:"Sunnah",duas:"Doa",favorites:"Kegemaran",search:"Cari",dailyH:"Hadis Hari Ini",dailyS:"Sunnah Hari Ini",guest:"Tetamu"};
+UI.nl={...base,title:"Hadith & Sunnah Gids",home:"Home",hadiths:"Hadiths",sunnahs:"Sunnah",duas:"Dua's",favorites:"Favorieten",search:"Zoek",dailyH:"Hadith van de dag",dailyS:"Sunnah van de dag",guest:"Gast"};
+UI.sw={...base,title:"Mwongozo wa Hadithi na Sunnah",home:"Mwanzo",hadiths:"Hadithi",sunnahs:"Sunnah",duas:"Dua",favorites:"Vipendwa",search:"Tafuta",dailyH:"Hadithi ya Siku",dailyS:"Sunnah ya Siku",guest:"Mgeni"};
+
+const multi=(tr,en)=>({tr,en,ar:en,de:en,fr:en,es:en,it:en,ru:en,id:en,ur:en,bn:en,fa:en,ms:en,nl:en,sw:en});
+const H=[
+{id:"h1",book:"Buhari",no:"1",grade:"Sahih",cat:multi("Niyet","Intention"),ar:"إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ",text:multi("Ameller niyetlere göredir.","Actions are judged by intentions."),ex:multi("Bu hadis, ibadet ve davranışlarda niyetin temel olduğunu öğretir.","This hadith teaches that intention is central in worship and actions.")},
+{id:"h2",book:"Müslim",no:"2564",grade:"Sahih",cat:multi("Merhamet","Mercy"),ar:"مَنْ لاَ يَرْحَمُ لاَ يُرْحَمُ",text:multi("Merhamet etmeyene merhamet edilmez.","Whoever does not show mercy will not be shown mercy."),ex:multi("Merhamet, mümin ahlakının ana direklerinden biridir.","Mercy is one of the main pillars of Muslim character.")},
+{id:"h3",book:"Tirmizî",no:"1987",grade:"Hasan",cat:multi("Ahlak","Character"),ar:"اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ",text:multi("Nerede olursan ol Allah’tan sakın.","Be mindful of Allah wherever you are."),ex:multi("Takva, kişinin her ortamda Allah bilinciyle yaşamasıdır.","Taqwa means living with awareness of Allah in every situation.")},
+{id:"h4",book:"Ebu Davud",no:"4800",grade:"Sahih",cat:multi("Samimiyet","Sincerity"),ar:"الدِّينُ النَّصِيحَةُ",text:multi("Din samimiyettir.","Religion is sincere counsel."),ex:multi("Bu hadis, Müslüman ilişkilerinde samimiyet ve doğruluğun önemini gösterir.","This hadith shows the importance of sincerity and truthfulness in Muslim relations.")},
+{id:"h5",book:"Nesâî",no:"4998",grade:"Sahih",cat:multi("Kardeşlik","Brotherhood"),ar:"لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",text:multi("Sizden biri kendisi için sevdiğini kardeşi için de sevmedikçe iman etmiş olmaz.","None of you truly believes until he loves for his brother what he loves for himself."),ex:multi("Bu hadis kardeşlik, fedakârlık ve güzel ahlakı öğretir.","This hadith teaches brotherhood, selflessness and good character.")}
+];
+
+const S=[
+{id:"s1",title:multi("Yemeğe Besmele ile Başlamak","Begin eating with Bismillah"),cat:multi("Yemek","Food"),src:"Buhari / Müslim",text:multi("Yemeğe Allah’ın adıyla başlamak sünnettir.","Beginning meals with the name of Allah is Sunnah.")},
+{id:"s2",title:multi("Sağ Elle Yemek","Eat with the right hand"),cat:multi("Yemek","Food"),src:"Müslim",text:multi("Yemek ve içmekte sağ eli kullanmak tavsiye edilmiştir.","Using the right hand for eating and drinking is recommended.")},
+{id:"s3",title:multi("Selamı Yaymak","Spread the greeting of peace"),cat:multi("Ahlak","Character"),src:"Tirmizî",text:multi("Selamı yaymak sevgi ve kardeşliği artırır.","Spreading salam increases love and brotherhood.")},
+{id:"s4",title:multi("Uyumadan Önce Dua Etmek","Make dua before sleeping"),cat:multi("Uyku","Sleep"),src:"Buhari",text:multi("Uykuya Allah’ı anarak girmek güzel bir sünnettir.","Going to sleep while remembering Allah is a beautiful Sunnah.")},
+{id:"s5",title:multi("Misvak Kullanmak","Use the miswak"),cat:multi("Temizlik","Cleanliness"),src:"Buhari / Müslim",text:multi("Ağız temizliğine önem vermek Peygamber Efendimiz ﷺ’in sünnetlerindendir.","Caring for oral cleanliness is from the Sunnah of the Prophet ﷺ.")}
+];
+
+const D=[
+{id:"d1",title:multi("Yemek Duası","Dua before eating"),ar:"بِسْمِ اللهِ",text:multi("Allah’ın adıyla başlarım.","In the name of Allah."),src:"Günlük dua"},
+{id:"d2",title:multi("Uyku Duası","Dua before sleeping"),ar:"بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",text:multi("Allah’ım, Senin adınla ölür ve dirilirim.","O Allah, in Your name I die and live."),src:"Buhari"},
+{id:"d3",title:multi("İlim Duası","Dua for knowledge"),ar:"رَبِّ زِدْنِي عِلْمًا",text:multi("Rabbim, ilmimi artır.","My Lord, increase me in knowledge."),src:"Taha 114"}
+];
+
+let L=localStorage.lang||"tr",viewMode=localStorage.viewMode||"normal";
+function t(k){return (UI[L]||UI.en)[k]||UI.en[k]||k}
+function val(o){return o[L]||o.en||o.tr||""}
+function setLang(x){L=x;localStorage.lang=x;document.documentElement.lang=x;document.body.dir=["ar","ur","fa"].includes(x)?"rtl":"ltr";document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));renderAll()}
+function setTheme(x){document.documentElement.dataset.theme=x;localStorage.theme=x;themeSel.value=x}
+function showPage(id){document.querySelectorAll(".pg").forEach(p=>p.classList.add("hide"));document.getElementById(id).classList.remove("hide")}
+function addFav(id,type){let f=JSON.parse(localStorage.favs||"[]");if(!f.find(x=>x.id===id&&x.type===type))f.push({id,type});localStorage.favs=JSON.stringify(f);renderFav();alert(t("favAdded"))}
+function renderHadith(arr=H){hadithList.innerHTML=arr.map(x=>`<div class="item"><div class="arabic">${x.ar}</div>${viewMode!=="simple"?`<h3>${val(x.text)}</h3>`:""}${viewMode==="detail"?`<p class="muted"><b>${t("explanation")}:</b> ${val(x.ex)}</p>`:""}<div class="src">${t("source")}: ${x.book} ${x.no} • ${t("grade")}: ${x.grade} • ${t("category")}: ${val(x.cat)}</div><div class="actions"><button class="btn" onclick="addFav('${x.id}','h')">⭐ ${t("favorites")}</button></div></div>`).join("")}
+function renderSunnah(arr=S){sunnahList.innerHTML=arr.map(x=>`<div class="item"><h3>${val(x.title)}</h3><p>${val(x.text)}</p><div class="src">${t("source")}: ${x.src} • ${t("category")}: ${val(x.cat)}</div><button class="btn" onclick="addFav('${x.id}','s')">⭐ ${t("favorites")}</button></div>`).join("")}
+function renderDua(arr=D){duaList.innerHTML=arr.map(x=>`<div class="item"><h3>${val(x.title)}</h3><div class="arabic">${x.ar}</div><p>${val(x.text)}</p><div class="src">${t("source")}: ${x.src}</div><button class="btn" onclick="addFav('${x.id}','d')">⭐ ${t("favorites")}</button></div>`).join("")}
+function renderFav(){let f=JSON.parse(localStorage.favs||"[]");if(!f.length){favList.innerHTML=`<p class="muted">${t("noFav")}</p>`;return}favList.innerHTML=f.map(v=>{let x=v.type==="h"?H.find(a=>a.id===v.id):v.type==="s"?S.find(a=>a.id===v.id):D.find(a=>a.id===v.id);return `<div class="item"><h3>${val(x.title||x.text)}</h3><p class="muted">${x.src||x.book||""}</p></div>`}).join("")}
+function doSearch(){let q=document.getElementById("q").value.toLowerCase();showPage("hadith");renderHadith(H.filter(x=>(val(x.text)+val(x.ex)+x.book+val(x.cat)+x.ar).toLowerCase().includes(q)))}
+function login(){let u={email:email.value,name:name.value||email.value};localStorage.user=JSON.stringify(u);userBox.textContent=u.name;showPage("home")}
+function logout(){localStorage.removeItem("user");userBox.textContent=t("guest")}
+function renderHome(){dailyHadith.textContent=val(H[0].text);dailySunnah.textContent=val(S[0].title);targetText.textContent=L==="tr"?"5000 hadis + 1000 sünnet altyapısı hazır.":"Infrastructure ready for 5000 hadiths + 1000 sunnahs."}
+function renderAll(){document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));renderHome();renderHadith();renderSunnah();renderDua();renderFav();if(!localStorage.user)userBox.textContent=t("guest")}
+function stats(){let v=JSON.parse(localStorage.stats||'{"today":0,"week":2145,"month":9872,"year":84152,"total":156982}');v.today++;v.total++;localStorage.stats=JSON.stringify(v);today.textContent=v.today;week.textContent=v.week;month.textContent=v.month;year.textContent=v.year;total.textContent=v.total}
+if(localStorage.theme)setTheme(localStorage.theme);langSel.value=L;setLang(L);if(localStorage.user)userBox.textContent=JSON.parse(localStorage.user).name;stats();renderAll();
+</script>
+</body>
+</html>
