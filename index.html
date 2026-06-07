@@ -1941,7 +1941,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 <header class="header">
   <div class="header-inner">
     <div class="logo" onclick="showPage('home')">
-      <div class="logo-icon">☪</div>
+      <div class="logo-icon" style="background:none;box-shadow:none;padding:0"><img src="/icons/icon-192.png" alt="Kuran-ı Kerim" style="width:44px;height:44px;border-radius:12px;object-fit:cover;box-shadow:0 0 16px rgba(0,200,83,0.5)"></div>
       <div>
         <div class="logo-text">القرآن الكريم</div>
         <div class="logo-sub">Kuran-ı Kerim</div>
@@ -1994,6 +1994,33 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   <div class="search-wrap">
     <input class="search-inp" id="homeQ" placeholder="Sure ara..." oninput="filterSurahs(this.value)">
     <button class="search-ico" onclick="filterSurahs(document.getElementById('homeQ').value)">🔍</button>
+  </div>
+  <!-- ── GÜNÜN AYETİ / DUASI / HADİSİ ── -->
+  <div id="gunlukKart" style="padding:0 20px;margin:16px 0 4px">
+    <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:18px;padding:18px 20px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-16px;right:-16px;font-size:70px;opacity:0.05;pointer-events:none">📖</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <div style="background:var(--g2);border-radius:8px;padding:3px 10px;font-size:11px;font-weight:800;color:#fff" id="gunlukTarih"></div>
+        <div style="font-size:12px;color:var(--text3);font-weight:600" id="gunlukLabel">📅 Günün İçeriği</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;margin-bottom:8px">
+        <div style="font-size:10px;font-weight:800;color:var(--g1);letter-spacing:0.08em;margin-bottom:8px" id="gunlukAyetBaslik">📖 GÜNÜN AYETİ</div>
+        <div id="gunlukAyetAr" style="font-family:'Scheherazade New',serif;font-size:21px;line-height:2;text-align:right;direction:rtl;color:var(--text);margin-bottom:8px"></div>
+        <div id="gunlukAyetTr" style="font-size:14px;line-height:1.8;color:var(--text2);font-weight:500;padding-top:8px;border-top:1px solid var(--border)"></div>
+        <div id="gunlukAyetRef" style="font-size:11px;color:var(--g1);font-weight:800;margin-top:6px"></div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;margin-bottom:8px">
+        <div style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:0.08em;margin-bottom:8px" id="gunlukDuaBaslik">🤲 GÜNÜN DUASI</div>
+        <div id="gunlukDuaAr" style="font-family:'Scheherazade New',serif;font-size:19px;line-height:2;text-align:right;direction:rtl;color:var(--text);margin-bottom:8px"></div>
+        <div id="gunlukDuaTr" style="font-size:14px;line-height:1.8;color:var(--text2);font-weight:500;padding-top:8px;border-top:1px solid var(--border)"></div>
+        <div id="gunlukDuaRef" style="font-size:11px;color:var(--gold);font-weight:700;margin-top:6px"></div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px">
+        <div style="font-size:10px;font-weight:800;color:var(--text3);letter-spacing:0.08em;margin-bottom:8px" id="gunlukHadisBaslik">💡 GÜNÜN HADİSİ</div>
+        <div id="gunlukHadisTr" style="font-size:14px;line-height:1.9;color:var(--text2);font-weight:500;font-style:italic"></div>
+        <div id="gunlukHadisRef" style="font-size:11px;color:var(--text3);font-weight:700;margin-top:6px"></div>
+      </div>
+    </div>
   </div>
   <div class="main">
     <div class="sec-head"><h2 id="gridTitle">114 Sure</h2><span class="sec-badge" id="gridBadge">TÜM SURELER</span></div>
@@ -2223,6 +2250,244 @@ const ESMA = [
   {ar:"الصَّبُورُ",tr:"Es-Sabur",de:"Der Geduldige",en:"The Patient",fr:"Le Patient",ru:"Терпеливый",id:"Yang Maha Penyabar",ur:"الصبور",es:"El Paciente",bn:"ধৈর্যশীল",ac:"Günahkârları ve zalimleri hemen cezalandırmayan, sabırlı."}
 ];
 
+
+// ══════════════════════════════════════════════════════════════
+// GÜNLÜK AYET / DUA / HADİS — 15 DİL — Her gece gece yarısı değişir
+// ══════════════════════════════════════════════════════════════
+
+const GUNLUK_DATA = [
+  {
+    ayet_ar: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+    ayet_ref: "İnşirah 94:6",
+    dua_ar: "رَبِّ اشْرَحْ لِي صَدْرِي",
+    dua_ref: "Tâhâ 20:25",
+    hadis_tr: "Kolaylaştırınız, güçleştirmeyiniz. Müjdeleyiniz, nefret ettirmeyiniz.",
+    hadis_ref: "Buhârî, İlim 11",
+    tr: { ayet: "Gerçekten güçlükle birlikte kolaylık vardır.", dua: "Rabbim! Göğsümü (kalbimi) aç, bana kolaylık ver." },
+    de: { ayet: "Wahrlich, mit der Schwierigkeit kommt Erleichterung.", dua: "Mein Herr, öffne mir meine Brust." },
+    en: { ayet: "Indeed, with hardship comes ease.", dua: "My Lord, expand my breast for me." },
+    fr: { ayet: "Certes, avec la difficulté vient la facilité.", dua: "Seigneur, ouvre ma poitrine." },
+    ru: { ayet: "Поистине, вместе с трудностью приходит облегчение.", dua: "Господь мой! Расширь мне грудь мою." },
+    id: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhanku, lapangkanlah dadaku." },
+    ur: { ayet: "بیشک تکلیف کے ساتھ آسانی ہے۔", dua: "اے میرے رب! میرا سینہ کھول دے۔" },
+    es: { ayet: "En verdad, junto con la dificultad viene la facilidad.", dua: "Señor mío, ensánchame el pecho." },
+    bn: { ayet: "নিশ্চয়ই কষ্টের সাথে স্বস্তি আছে।", dua: "হে আমার রব! আমার বুক প্রশস্ত করে দাও।" },
+    ar: { ayet: "إِنَّ مَعَ الْعُسْرِ يُسْرًا", dua: "رَبِّ اشْرَحْ لِي صَدْرِي" },
+    nl: { ayet: "Voorwaar, met moeilijkheid komt gemak.", dua: "Mijn Heer, open mijn borst voor mij." },
+    it: { ayet: "In verità, con la difficoltà viene la facilità.", dua: "Signore mio, aprimi il petto." },
+    fa: { ayet: "به راستی با سختی آسانی است.", dua: "پروردگارا! سینه‌ام را برایم بگشا." },
+    ms: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhanku, lapangkanlah dadaku." },
+    sw: { ayet: "Hakika pamoja na ugumu kuna urahisi.", dua: "Mola wangu, nipanulie kifua changu." }
+  },
+  {
+    ayet_ar: "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ",
+    ayet_ref: "Bakara 2:45",
+    dua_ar: "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ",
+    dua_ref: "Ebû Dâvûd, Vitir 26",
+    hadis_tr: "Sabır bir nurdur. Allah sabredenlerle beraberdir.",
+    hadis_ref: "Müslim, Taharet 1",
+    tr: { ayet: "Sabır ve namazla yardım isteyin.", dua: "Allah'ım! Seni zikretmem, şükretmem ve güzel ibadet etmem için bana yardım et." },
+    de: { ayet: "Sucht Beistand durch Geduld und Gebet.", dua: "O Allah, hilf mir, Dich zu gedenken, Dir zu danken und Dich schön zu verehren." },
+    en: { ayet: "Seek help through patience and prayer.", dua: "O Allah, help me remember You, thank You, and worship You well." },
+    fr: { ayet: "Cherchez secours par la patience et la prière.", dua: "Ô Allah, aide-moi à Te rappeler, à Te remercier et à T'adorer." },
+    ru: { ayet: "Прибегайте к помощи через терпение и молитву.", dua: "О Аллах, помоги мне поминать Тебя, благодарить Тебя и хорошо поклоняться Тебе." },
+    id: { ayet: "Mohonlah pertolongan dengan sabar dan shalat.", dua: "Ya Allah, bantulah aku untuk mengingat-Mu, bersyukur kepada-Mu, dan beribadah dengan baik." },
+    ur: { ayet: "صبر اور نماز سے مدد مانگو۔", dua: "اے اللہ! مجھے تیرا ذکر کرنے، شکر کرنے اور اچھی عبادت کرنے میں مدد فرما۔" },
+    es: { ayet: "Buscad ayuda con la paciencia y la oración.", dua: "¡Oh Alá, ayúdame a recordarte, agradecerte y adorarte bien!" },
+    bn: { ayet: "ধৈর্য ও নামাযের মাধ্যমে সাহায্য চাও।", dua: "হে আল্লাহ! আমাকে তোমাকে স্মরণ করতে, কৃতজ্ঞ হতে এবং সুন্দরভাবে ইবাদত করতে সাহায্য কর।" },
+    ar: { ayet: "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ", dua: "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ" },
+    nl: { ayet: "Zoek hulp door geduld en gebed.", dua: "O Allah, help mij U te gedenken, U te danken en U goed te aanbidden." },
+    it: { ayet: "Cercate aiuto nella pazienza e nella preghiera.", dua: "O Allah, aiutami a ricordarTi, ringraziarTi e adorarTi bene." },
+    fa: { ayet: "از صبر و نماز یاری بجویید.", dua: "خدایا! مرا در یاد تو، سپاسگزاری از تو و نیکو عبادت کردنت یاری ده." },
+    ms: { ayet: "Pohonlah pertolongan dengan sabar dan solat.", dua: "Ya Allah, bantulah aku mengingatiMu, bersyukur kepadaMu dan beribadah dengan baik." },
+    sw: { ayet: "Tafuteni msaada kwa subira na sala.", dua: "Ee Mwenyezi Mungu, nikusaidie kukukumbuka, kukushukuru na kukuabudu vizuri." }
+  },
+  {
+    ayet_ar: "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ",
+    ayet_ref: "Âl-i İmrân 3:173",
+    dua_ar: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ",
+    dua_ref: "Buhârî, Daavât 39",
+    hadis_tr: "Allah'a tevekkül eden kimseye Allah yeter.",
+    hadis_ref: "İbn Mâce, Zühd 14",
+    tr: { ayet: "Allah bize yeter; O ne güzel vekildir!", dua: "Allah'ım! Keder ve üzüntüden sana sığınırım." },
+    de: { ayet: "Allah genügt uns, und Er ist der beste Verwalter!", dua: "O Allah, ich suche Zuflucht bei Dir vor Kummer und Trauer." },
+    en: { ayet: "Allah is sufficient for us, and He is the best Disposer of affairs!", dua: "O Allah, I seek refuge in You from worry and grief." },
+    fr: { ayet: "Allah nous suffit et quel excellent Protecteur !", dua: "Ô Allah, je cherche refuge en Toi contre le souci et le chagrin." },
+    ru: { ayet: "Нам достаточно Аллаха, и как прекрасен Он, покровитель!", dua: "О Аллах, прибегаю к Тебе от тревоги и печали." },
+    id: { ayet: "Cukuplah Allah bagi kami, dan Dia sebaik-baik Pelindung!", dua: "Ya Allah, aku berlindung kepada-Mu dari rasa cemas dan sedih." },
+    ur: { ayet: "اللہ ہمارے لیے کافی ہے اور وہ بہترین وکیل ہے!", dua: "اے اللہ! میں فکر اور غم سے تیری پناہ مانگتا ہوں۔" },
+    es: { ayet: "¡Allah nos basta y Él es el mejor Protector!", dua: "¡Oh Alá, me refugio en Ti de la preocupación y la tristeza!" },
+    bn: { ayet: "আল্লাহ আমাদের জন্য যথেষ্ট এবং তিনি কত উত্তম অভিভাবক!", dua: "হে আল্লাহ! আমি উদ্বেগ ও দুঃখ থেকে তোমার আশ্রয় চাই।" },
+    ar: { ayet: "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ", dua: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ" },
+    nl: { ayet: "Allah is genoeg voor ons, en Hij is de beste Beschermer!", dua: "O Allah, ik zoek mijn toevlucht bij U voor zorgen en verdriet." },
+    it: { ayet: "Allah ci basta, ed Egli è il miglior Protettore!", dua: "O Allah, mi rifugio in Te dall'ansia e dal dolore." },
+    fa: { ayet: "خداوند برای ما کافی است و چه نیکو وکیلی است!", dua: "خدایا! از غم و اندوه به تو پناه می‌برم." },
+    ms: { ayet: "Allah memadai bagi kami dan Dia sebaik-baik Penjaga!", dua: "Ya Allah, aku berlindung kepada-Mu dari rasa bimbang dan sedih." },
+    sw: { ayet: "Allah anatutosha, na Yeye ni bora wa mawakala!", dua: "Ee Mwenyezi Mungu, ninaomba hifadhi yako dhidi ya wasiwasi na huzuni." }
+  },
+  {
+    ayet_ar: "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
+    ayet_ref: "Talâk 65:2",
+    dua_ar: "اللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي",
+    dua_ref: "Müslim, Zikir 71",
+    hadis_tr: "Kim Allah'tan korkarsa, Allah ona her sıkıntıdan bir çıkış yolu açar.",
+    hadis_ref: "Tirmizî, Talâk 12",
+    tr: { ayet: "Kim Allah'tan korkarsa, Allah ona bir çıkış yolu açar.", dua: "Allah'ım! İşimin özü olan dinimi bana güzelleştir." },
+    de: { ayet: "Wer Allah fürchtet, dem öffnet Er einen Ausweg.", dua: "O Allah, verbessere für mich meine Religion, die das Fundament meiner Angelegenheiten ist." },
+    en: { ayet: "Whoever fears Allah, He will make a way out for him.", dua: "O Allah, rectify for me my religion which is the safeguard of my affairs." },
+    fr: { ayet: "Quiconque craint Allah, Il lui trouvera une issue.", dua: "Ô Allah, améliore pour moi ma religion qui est la sauvegarde de mes affaires." },
+    ru: { ayet: "Кто боится Аллаха, тому Он откроет выход.", dua: "О Аллах, исправь мою религию, которая является основой моих дел." },
+    id: { ayet: "Barangsiapa bertakwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", dua: "Ya Allah, perbaikilah agamaku yang menjadi penjaga urusanku." },
+    ur: { ayet: "جو اللہ سے ڈرتا ہے، اللہ اس کے لیے راستہ نکالتا ہے۔", dua: "اے اللہ! میرے دین کو درست کر جو میرے معاملات کی بنیاد ہے۔" },
+    es: { ayet: "A quien teme a Alá, Él le abrirá una salida.", dua: "¡Oh Alá, rectifica para mí mi religión que es la salvaguarda de mis asuntos!" },
+    bn: { ayet: "যে ব্যক্তি আল্লাহকে ভয় করে, তিনি তার জন্য পথ বের করে দেন।", dua: "হে আল্লাহ! আমার দ্বীনকে সংশোধন করে দাও যা আমার বিষয়সমূহের রক্ষাকবচ।" },
+    ar: { ayet: "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا", dua: "اللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي" },
+    nl: { ayet: "Wie Allah vreest, voor hem opent Hij een uitweg.", dua: "O Allah, verbeter mijn religie voor mij, die de bescherming van mijn zaken is." },
+    it: { ayet: "Chi teme Allah, Egli gli aprirà una via d'uscita.", dua: "O Allah, rettifica per me la mia religione che è il baluardo delle mie faccende." },
+    fa: { ayet: "هر کس از خدا بترسد، خداوند برای او راه خروجی می‌گشاید.", dua: "خدایا! دینم را که حافظ امور من است برایم اصلاح کن." },
+    ms: { ayet: "Sesiapa yang bertakwa kepada Allah, nescaya Dia akan membukakan jalan keluar baginya.", dua: "Ya Allah, perbaikilah agamaku yang menjadi penjaga urusanku." },
+    sw: { ayet: "Anayemcha Mwenyezi Mungu, Yeye atamleteea njia ya kutoka.", dua: "Ee Mwenyezi Mungu, ninisahihishie dini yangu ambayo ni kinga ya mambo yangu." }
+  },
+  {
+    ayet_ar: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
+    ayet_ref: "İnşirah 94:5",
+    dua_ar: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً",
+    dua_ref: "Bakara 2:201",
+    hadis_tr: "Mümin için her hal hayırlıdır. Sevinirse şükreder, üzülürse sabreder.",
+    hadis_ref: "Müslim, Zühd 64",
+    tr: { ayet: "Şüphesiz güçlükle birlikte kolaylık vardır.", dua: "Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver." },
+    de: { ayet: "Wahrlich, mit der Schwierigkeit kommt Erleichterung.", dua: "Unser Herr, gib uns im Diesseits das Gute und im Jenseits das Gute." },
+    en: { ayet: "For indeed, with hardship comes ease.", dua: "Our Lord, give us good in this world and good in the Hereafter." },
+    fr: { ayet: "Car certes, avec la difficulté vient la facilité.", dua: "Notre Seigneur, accorde-nous dans cette vie ce qui est bien et dans l'au-delà ce qui est bien." },
+    ru: { ayet: "Воистину, вместе с трудностью приходит облегчение.", dua: "Господь наш, дай нам благо в этом мире и благо в будущей жизни." },
+    id: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhan kami, berilah kami kebaikan di dunia dan kebaikan di akhirat." },
+    ur: { ayet: "بلاشبہ تکلیف کے ساتھ آسانی ہے۔", dua: "اے ہمارے رب! ہمیں دنیا میں بھی بھلائی دے اور آخرت میں بھی بھلائی دے۔" },
+    es: { ayet: "Ciertamente, junto con la dificultad hay facilidad.", dua: "Señor nuestro, concédenos el bien en esta vida y el bien en la otra vida." },
+    bn: { ayet: "নিশ্চয়ই কষ্টের সাথে স্বস্তি আছে।", dua: "হে আমাদের রব! আমাদের দুনিয়ায় কল্যাণ দাও এবং আখিরাতেও কল্যাণ দাও।" },
+    ar: { ayet: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", dua: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً" },
+    nl: { ayet: "Want voorwaar, met moeilijkheid komt gemak.", dua: "Onze Heer, geef ons het goede in deze wereld en het goede in het Hiernamaals." },
+    it: { ayet: "Invero, con la difficoltà c'è la facilità.", dua: "Signore nostro, donaci il bene in questo mondo e il bene nell'aldilà." },
+    fa: { ayet: "پس به یقین با سختی آسانی است.", dua: "پروردگارا! در دنیا به ما نیکی عطا کن و در آخرت هم نیکی عطا کن." },
+    ms: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhan kami, kurniakanlah kami kebaikan di dunia dan kebaikan di akhirat." },
+    sw: { ayet: "Hakika pamoja na ugumu kuna urahisi.", dua: "Mola wetu, tupe kheri duniani na kheri akhera." }
+  },
+  {
+    ayet_ar: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
+    ayet_ref: "Bakara 2:153",
+    dua_ar: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ",
+    dua_ref: "İbn Mâce, Duâ 2",
+    hadis_tr: "Hikmeti arayanlar için en güzel şey sabırdır.",
+    hadis_ref: "Tirmizî, Birr 76",
+    tr: { ayet: "Şüphesiz Allah sabredenlerle beraberdir.", dua: "Allah'ım! Senden af ve afiyet diliyorum." },
+    de: { ayet: "Wahrlich, Allah ist mit den Geduldigen.", dua: "O Allah, ich bitte Dich um Vergebung und Wohlbefinden." },
+    en: { ayet: "Indeed, Allah is with the patient.", dua: "O Allah, I ask You for forgiveness and well-being." },
+    fr: { ayet: "Certes, Allah est avec les endurants.", dua: "Ô Allah, je Te demande le pardon et la santé." },
+    ru: { ayet: "Поистине, Аллах с терпеливыми.", dua: "О Аллах, прошу Тебя о прощении и благополучии." },
+    id: { ayet: "Sesungguhnya Allah beserta orang-orang yang sabar.", dua: "Ya Allah, aku memohon kepada-Mu ampunan dan keselamatan." },
+    ur: { ayet: "بیشک اللہ صبر کرنے والوں کے ساتھ ہے۔", dua: "اے اللہ! میں تجھ سے معافی اور عافیت مانگتا ہوں۔" },
+    es: { ayet: "Ciertamente, Alá está con los pacientes.", dua: "¡Oh Alá, te pido perdón y bienestar!" },
+    bn: { ayet: "নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।", dua: "হে আল্লাহ! আমি তোমার কাছে ক্ষমা ও সুস্থতা চাই।" },
+    ar: { ayet: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", dua: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ" },
+    nl: { ayet: "Voorwaar, Allah is met de geduldigen.", dua: "O Allah, ik vraag U om vergiffenis en welzijn." },
+    it: { ayet: "Certo, Allah è con i pazienti.", dua: "O Allah, Ti chiedo perdono e benessere." },
+    fa: { ayet: "همانا خداوند با صابران است.", dua: "خدایا! از تو عفو و عافیت می‌خواهم." },
+    ms: { ayet: "Sesungguhnya Allah bersama orang-orang yang sabar.", dua: "Ya Allah, aku memohon keampunan dan kesejahteraan daripada-Mu." },
+    sw: { ayet: "Hakika Mwenyezi Mungu yuko pamoja na wanaovumilia.", dua: "Ee Mwenyezi Mungu, nakuomba msamaha na afya." }
+  },
+  {
+    ayet_ar: "وَتَوَكَّلْ عَلَى اللَّهِ وَكَفَىٰ بِاللَّهِ وَكِيلًا",
+    ayet_ref: "Ahzâb 33:3",
+    dua_ar: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ",
+    dua_ref: "Tirmizî, Daavat 97",
+    hadis_tr: "Allah'a güven, ancak deveni de bağla.",
+    hadis_ref: "Tirmizî, Kıyâme 60",
+    tr: { ayet: "Allah'a tevekkül et. Vekil olarak Allah yeter.", dua: "Ey Hay ve Kayyum olan Allah! Rahmetinle senden yardım istiyorum." },
+    de: { ayet: "Vertrau auf Allah, denn Allah genügt als Verwalter.", dua: "O Lebendiger, o Allerhaltender, durch Deine Barmherzigkeit flehe ich Dich um Hilfe an." },
+    en: { ayet: "Put your trust in Allah; Allah is sufficient as a Trustee.", dua: "O Ever-Living, O Sustainer, by Your mercy I call for help." },
+    fr: { ayet: "Fais confiance à Allah, car Allah suffit comme Protecteur.", dua: "Ô Vivant, ô Subsistant, par Ta miséricorde je T'implore." },
+    ru: { ayet: "Уповай на Аллаха, ведь Аллаха достаточно как Покровителя.", dua: "О Живой, о Вечносущий, Твоим милосердием взываю к Тебе." },
+    id: { ayet: "Bertawakallah kepada Allah, cukuplah Allah sebagai Pelindung.", dua: "Wahai Yang Maha Hidup, wahai Yang Maha Berdiri Sendiri, dengan rahmat-Mu aku memohon pertolongan." },
+    ur: { ayet: "اللہ پر توکل کرو اور اللہ کافی وکیل ہے۔", dua: "اے زندہ اور قائم! تیری رحمت سے مدد مانگتا ہوں۔" },
+    es: { ayet: "Confía en Alá; Alá es suficiente como Garante.", dua: "¡Oh Viviente, oh Sustentador, por Tu misericordia imploro Tu ayuda!" },
+    bn: { ayet: "আল্লাহর উপর তাওয়াক্কুল করো। অভিভাবক হিসেবে আল্লাহ যথেষ্ট।", dua: "হে চিরঞ্জীব, হে চিরস্থায়ী! তোমার রহমতের মাধ্যমে সাহায্য চাই।" },
+    ar: { ayet: "وَتَوَكَّلْ عَلَى اللَّهِ وَكَفَىٰ بِاللَّهِ وَكِيلًا", dua: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ" },
+    nl: { ayet: "Vertrouw op Allah; Allah is genoeg als Beschermer.", dua: "O Levende, o Eeuwig Bestaande, door Uw barmhartigheid roep ik U om hulp." },
+    it: { ayet: "Affidati ad Allah; Allah basta come Garante.", dua: "O Vivente, o Autosussistente, per la Tua misericordia imploro aiuto." },
+    fa: { ayet: "بر خداوند توکل کن و خداوند به عنوان وکیل کافی است.", dua: "ای زنده، ای پاینده! به رحمتت از تو یاری می‌خواهم." },
+    ms: { ayet: "Bertawakkallah kepada Allah; cukuplah Allah sebagai Pelindung.", dua: "Wahai Yang Maha Hidup, wahai Yang Maha Berdiri Sendiri, dengan rahmat-Mu aku memohon pertolongan." },
+    sw: { ayet: "Mtegemee Mwenyezi Mungu; Mwenyezi Mungu anatosha kama Mlezi.", dua: "Ewe Mwenye Uhai, ewe Mwenye Kudumu, kwa rehema Yako ninakuomba msaada." }
+  }
+];
+
+// Dil bazlı etiketler
+const GUNLUK_LABELS = {
+  tr: { label:"📅 Günün İçeriği", ayet:"📖 GÜNÜN AYETİ", dua:"🤲 GÜNÜN DUASI", hadis:"💡 GÜNÜN HADİSİ" },
+  de: { label:"📅 Heutiger Inhalt", ayet:"📖 VERS DES TAGES", dua:"🤲 DUA DES TAGES", hadis:"💡 HADITH DES TAGES" },
+  en: { label:"📅 Daily Content", ayet:"📖 VERSE OF THE DAY", dua:"🤲 DUA OF THE DAY", hadis:"💡 HADITH OF THE DAY" },
+  fr: { label:"📅 Contenu du jour", ayet:"📖 VERSET DU JOUR", dua:"🤲 DUA DU JOUR", hadis:"💡 HADITH DU JOUR" },
+  ru: { label:"📅 Контент дня", ayet:"📖 АЯТ ДНЯ", dua:"🤲 ДУА ДНЯ", hadis:"💡 ХАДИС ДНЯ" },
+  id: { label:"📅 Konten Hari Ini", ayet:"📖 AYAT HARI INI", dua:"🤲 DOA HARI INI", hadis:"💡 HADIS HARI INI" },
+  ur: { label:"📅 آج کا مواد", ayet:"📖 آج کی آیت", dua:"🤲 آج کی دعا", hadis:"💡 آج کی حدیث" },
+  es: { label:"📅 Contenido del día", ayet:"📖 VERSÍCULO DEL DÍA", dua:"🤲 DUA DEL DÍA", hadis:"💡 HADIZ DEL DÍA" },
+  bn: { label:"📅 আজকের বিষয়বস্তু", ayet:"📖 আজকের আয়াত", dua:"🤲 আজকের দোয়া", hadis:"💡 আজকের হাদিস" },
+  ar: { label:"📅 محتوى اليوم", ayet:"📖 آية اليوم", dua:"🤲 دعاء اليوم", hadis:"💡 حديث اليوم" },
+  nl: { label:"📅 Dagelijkse inhoud", ayet:"📖 VERS VAN DE DAG", dua:"🤲 DUA VAN DE DAG", hadis:"💡 HADITH VAN DE DAG" },
+  it: { label:"📅 Contenuto del giorno", ayet:"📖 VERSETTO DEL GIORNO", dua:"🤲 DUA DEL GIORNO", hadis:"💡 HADITH DEL GIORNO" },
+  fa: { label:"📅 محتوای روز", ayet:"📖 آیه روز", dua:"🤲 دعای روز", hadis:"💡 حدیث روز" },
+  ms: { label:"📅 Kandungan Hari Ini", ayet:"📖 AYAT HARI INI", dua:"🤲 DOA HARI INI", hadis:"💡 HADIS HARI INI" },
+  sw: { label:"📅 Maudhui ya Leo", ayet:"📖 AYA YA LEO", dua:"🤲 DUA YA LEO", hadis:"💡 HADITHI YA LEO" }
+};
+
+function renderGunlukKart() {
+  const today = new Date();
+  // Her gün farklı içerik: yıl başından gün sayısı mod kaç adet içerik
+  const start = new Date(today.getFullYear(), 0, 0);
+  const diff = today - start;
+  const dayOfYear = Math.floor(diff / 86400000);
+  const idx = dayOfYear % GUNLUK_DATA.length;
+  const d = GUNLUK_DATA[idx];
+  const l = lang || 'tr';
+  const lbl = GUNLUK_LABELS[l] || GUNLUK_LABELS['tr'];
+
+  // Tarih formatı
+  const tarihStr = today.toLocaleDateString(l === 'ar' || l === 'ur' || l === 'fa' ? 'en' : l, { day:'numeric', month:'long', year:'numeric' });
+
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val || ''; };
+
+  set('gunlukTarih', tarihStr);
+  set('gunlukLabel', lbl.label);
+  set('gunlukAyetBaslik', lbl.ayet);
+  set('gunlukDuaBaslik', lbl.dua);
+  set('gunlukHadisBaslik', lbl.hadis);
+
+  // Ayet
+  set('gunlukAyetAr', d.ayet_ar);
+  const ayetLang = (d[l] || d['tr']);
+  set('gunlukAyetTr', ayetLang.ayet);
+  set('gunlukAyetRef', d.ayet_ref);
+
+  // Dua
+  set('gunlukDuaAr', d.dua_ar);
+  set('gunlukDuaTr', ayetLang.dua);
+  set('gunlukDuaRef', d.dua_ref);
+
+  // Hadis (şimdilik Türkçe + ref, dil desteği data'ya sonra eklenebilir)
+  set('gunlukHadisTr', '"' + d.hadis_tr + '"');
+  set('gunlukHadisRef', d.hadis_ref);
+}
+
+// Gece yarısı otomatik güncelle
+function scheduleGunlukUpdate() {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const msUntilMidnight = midnight - now;
+  setTimeout(() => {
+    renderGunlukKart();
+    scheduleGunlukUpdate(); // Yarın için tekrar kur
+  }, msUntilMidnight);
+}
+
 // STATE
 let lang = (JSON.parse(localStorage.getItem('qSettings')||'{}').lang) || 'tr', surahData = null, ayahs = [], favs = JSON.parse(localStorage.getItem('qfavs')||'[]');
 let playing = false, curAyah = 0, reciter = (JSON.parse(localStorage.getItem('qSettings')||'{}').reciter) || 'ar.alafasy', showTrans = true, showTafsir = false, autoScroll = false, cache = {};
@@ -2235,7 +2500,7 @@ let hizliSureler = JSON.parse(localStorage.getItem('hizliSureler')||'[1,36,55,67
 // INIT
 
 function savePrayerMethod() {
-  const method = document.getElementById('prayerMethod')?.value || 4;
+  const method = document.getElementById('prayerMethod')?.value || '13';
   localStorage.setItem('prayerMethod', method);
   // Namaz vakitleri yeniden çek (API)
   loadPrayerTimes();
@@ -2254,7 +2519,7 @@ function savePrayerTimes(times) {
 
 
 function loadPrayerTimes() {
-  const method = localStorage.getItem('prayerMethod') || 4;
+  const method = localStorage.getItem('prayerMethod') || '13';
   const lat = parseFloat(localStorage.getItem('savedLat')) || 52.52;
   const lng = parseFloat(localStorage.getItem('savedLng')) || 13.405;
   
@@ -2319,6 +2584,7 @@ window.onload = () => {
   tesbiCounts = savedCounts.slice(0, fullList.length);
   localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
 
+  renderGunlukKart(); scheduleGunlukUpdate();
   buildSurahGrid(buildSurahs()); buildEsma(); updateFavCount(); setupSearch(); renderTesbiSel(); updateTesbiUI(); renderDiniGunler(); loadEzanSettings();
 
   // Kayıtlı dil ve kıraat seçimini UI'ya yansıt
@@ -2337,6 +2603,12 @@ window.onload = () => {
 
   // Kayıtlı ezan ayarlarını yükle (DOM hazır olduktan sonra)
   setTimeout(loadEzanSettings, 100);
+
+  // Kayıtlı konumu yükle — namaz vakitleri ve ezan zamanlayıcıları
+  setTimeout(loadSavedLocation, 200);
+
+  // Dakika bazlı ezan kontrolü başlat (mobil arka plan güvenli)
+  startEzanInterval();
 };
 
 function buildSurahs() {
@@ -4918,6 +5190,8 @@ const UI_TEXT = {
 
 // ── applyUITranslations ──
 function applyUITranslations(l) {
+  // Günlük kartı da yeni dille güncelle
+  setTimeout(renderGunlukKart, 50);
   const t = UI_TEXT[l] || UI_TEXT['tr'];
 
   // Header nav butonları
@@ -5655,7 +5929,8 @@ async function getNamazTimes() {
 
 async function loadNamazForCoords(lat, lng) {
   try {
-    const r = await fetch('https://api.aladhan.com/v1/timings?latitude='+lat+'&longitude='+lng+'&method=13');
+    const method = localStorage.getItem('prayerMethod') || '13';
+    const r = await fetch('https://api.aladhan.com/v1/timings?latitude='+lat+'&longitude='+lng+'&method='+method);
     const j = await r.json();
     const t = j.data.timings;
     const meta = j.data.meta;
@@ -5681,20 +5956,22 @@ async function loadNamazForCoords(lat, lng) {
   }
 }
 
-// Sayfa açılınca kayıtlı konumu yükle
-(function loadSavedLocation() {
+// Sayfa açılınca kayıtlı konumu yükle — DOM hazır olduktan sonra window.onload içinde çağrılır
+function loadSavedLocation() {
   try {
     const lat = parseFloat(localStorage.getItem('savedLat'));
     const lng = parseFloat(localStorage.getItem('savedLng'));
     const city = localStorage.getItem('savedCity') || '';
     if(lat && lng) {
       savedLat = lat; savedLng = lng; savedCity = city;
-      document.getElementById('locInfo').textContent = '📍 ' + (city || 'Kaydedilmiş Konum') + ' (yükleniyor...)';
-      document.getElementById('namazCity').textContent = city;
+      const locEl = document.getElementById('locInfo');
+      const cityEl = document.getElementById('namazCity');
+      if(locEl) locEl.textContent = '📍 ' + (city || 'Kaydedilmiş Konum') + ' (yükleniyor...)';
+      if(cityEl) cityEl.textContent = city;
       loadNamazForCoords(lat, lng);
     }
   } catch(e){}
-})();
+}
 
 function startCountdown(times) {
   const names = ['İmsak','Güneş','Öğle','İkindi','Akşam','Yatsı'];
@@ -5772,6 +6049,7 @@ function calcKibleAngle(lat, lng) {
   const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
   kibleAngle = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   kibleActive = true;
+  try { localStorage.setItem('savedKibleAngle', kibleAngle.toFixed(4)); } catch(e) {}
   
   // UI güncelle
   document.getElementById('kibleDeg').style.display = 'block';
@@ -7368,6 +7646,9 @@ function initAyarlar() {
   const fd = document.getElementById('fontSizeDesc'); if(fd) fd.textContent = fsize+'% — '+(fsize<100?'Küçük':fsize===100?'Varsayılan':'Büyük');
   const fc = document.getElementById('favCountDesc'); if(fc) fc.textContent = favs.length+' ayet kaydedildi';
   const ec = document.getElementById('ezberCountDesc'); if(ec) ec.textContent = ezberList.length+' sure ezberlendi';
+  // Kaydedilmiş hesaplama yöntemini select'e yansıt
+  const pmEl = document.getElementById('prayerMethod');
+  if(pmEl) { const saved = localStorage.getItem('prayerMethod'); if(saved) pmEl.value = saved; }
 }
 
 const _origShowPage = showPage;
@@ -7832,6 +8113,45 @@ function scheduleAllEzan(timings) {
   }
 }
 
+// ── Dakika bazlı ezan kontrolü — mobil arka plan için güvenli ──
+let _ezanLastPlayed = {};
+function startEzanInterval() {
+  setInterval(() => {
+    const saved = localStorage.getItem('savedPrayerTimes');
+    if(!saved) return;
+    let timings;
+    try { timings = JSON.parse(saved); } catch(e) { return; }
+    const now = new Date();
+    const vakitMap = {
+      sabah: timings.Fajr || timings.Imsak,
+      ogle: timings.Dhuhr,
+      ikindi: timings.Asr,
+      aksam: timings.Maghrib,
+      yatsi: timings.Isha
+    };
+    const vakitTR2 = {sabah:'🌅 Sabah',ogle:'☀️ Öğle',ikindi:'🌤️ İkindi',aksam:'🌆 Akşam',yatsi:'🌙 Yatsı'};
+    for(const [vakit, timeStr] of Object.entries(vakitMap)) {
+      if(!timeStr) continue;
+      const clean = timeStr.replace(/ \(.*?\)/g,'').trim();
+      const [hh, mm] = clean.split(':').map(Number);
+      if(isNaN(hh)||isNaN(mm)) continue;
+      const key = vakit + '_' + hh + ':' + mm;
+      if(now.getHours() === hh && now.getMinutes() === mm) {
+        if(_ezanLastPlayed[key]) continue;
+        _ezanLastPlayed[key] = true;
+        const selEl = document.getElementById('ezan-' + vakit);
+        const n = selEl ? parseInt(selEl.value) || 1 : 1;
+        if(n > 0) playEzanVakit(vakit); // n===0 ise playEzanVakit içinde zaten return eder
+        if(_ezanNotifGranted && 'Notification' in window && Notification.permission === 'granted') {
+          try { new Notification('🕌 ' + (vakitTR2[vakit]||vakit) + ' vakti geldi!', { body: 'Kuran-ı Kerim', icon: '/icons/icon-192.png', tag: 'ezan-'+vakit }); } catch(e) {}
+        }
+      } else {
+        delete _ezanLastPlayed[key];
+      }
+    }
+  }, 30000);
+}
+
 // Offline ezan çal (CDN çalışmazsa)
 function playOfflineEzan() {
   try {
@@ -7903,6 +8223,9 @@ function loadEzanSettings() {
 async function playEzanVakit(vakit) {
   const audio = document.getElementById('ezanAudio');
   if(!audio) return;
+  // Kapalı seçiliyse çalma
+  const selCheck = document.getElementById('ezan-' + vakit);
+  if(selCheck && parseInt(selCheck.value) === 0) return;
 
   document.querySelectorAll('.ezan-btn').forEach(b => b.classList.remove('playing'));
 
@@ -7984,7 +8307,8 @@ async function fetchMonthlyTimes(lat, lng, container) {
     const year = now.getFullYear();
     const today = now.getDate();
     
-    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}&method=13`);
+    const method = localStorage.getItem("prayerMethod") || "13";
+    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}&method=${method}`);
     const j = await r.json();
     
     if(!j.data) throw new Error('Veri yok');
@@ -9287,7 +9611,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
         <div style="padding:16px;border-bottom:1px solid var(--border)">
           <label style="font-size:12px;color:var(--text3)">📍 Hesaplama Kaynağı:</label>
           <select id="prayerMethod" onchange="savePrayerMethod()" style="width:100%;padding:8px;margin-top:6px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text1)">
-            <option value="4">🇹🇷 Diyanet (Türkiye)</option>
+            <option value="13">🇹🇷 Diyanet (Türkiye)</option>
             <option value="2">🇸🇦 Semerkand (Hanefî)</option>
             <option value="9">🇩🇪 IGMG (Almanya)</option>
             <option value="8">🕋️ NVC (Ramazan)</option>
@@ -9321,57 +9645,52 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
           <span style="font-size:12px;font-weight:700">🌅 Sabah</span>
-          <select class="reciter-sel" id="ezan-sabah" style="font-size:12px" onchange="saveEzanSettings()"><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel" id="ezan-sabah" style="font-size:12px" onchange="saveEzanSettings()"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-sabah" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option>
-<option value="-30">30 dk sonra</option></select><button class="ezan-btn" onclick="playEzanVakit('sabah')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('sabah')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
         </div>
 
         <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
           <span style="font-size:12px;font-weight:700">☀️ Öğle</span>
-          <select class="reciter-sel" id="ezan-ogle" style="font-size:12px" onchange="saveEzanSettings()"><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel" id="ezan-ogle" style="font-size:12px" onchange="saveEzanSettings()"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-ogle" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option>
-<option value="-30">30 dk sonra</option></select><button class="ezan-btn" onclick="playEzanVakit('ogle')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('ogle')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
         </div>
 
         <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
           <span style="font-size:12px;font-weight:700">🌤️ İkindi</span>
-          <select class="reciter-sel" id="ezan-ikindi" style="font-size:12px" onchange="saveEzanSettings()"><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel" id="ezan-ikindi" style="font-size:12px" onchange="saveEzanSettings()"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-ikindi" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option>
-<option value="-30">30 dk sonra</option></select><button class="ezan-btn" onclick="playEzanVakit('ikindi')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('ikindi')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
         </div>
 
         <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
           <span style="font-size:12px;font-weight:700">🌆 Akşam</span>
-          <select class="reciter-sel" id="ezan-aksam" style="font-size:12px" onchange="saveEzanSettings()"><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel" id="ezan-aksam" style="font-size:12px" onchange="saveEzanSettings()"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-aksam" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option>
-<option value="-30">30 dk sonra</option></select><button class="ezan-btn" onclick="playEzanVakit('aksam')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('aksam')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
         </div>
 
         <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
           <span style="font-size:12px;font-weight:700">🌙 Yatsı</span>
-          <select class="reciter-sel" id="ezan-yatsi" style="font-size:12px" onchange="saveEzanSettings()"><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel" id="ezan-yatsi" style="font-size:12px" onchange="saveEzanSettings()"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-yatsi" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option>
-<option value="-30">30 dk sonra</option></select><button class="ezan-btn" onclick="playEzanVakit('yatsi')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('yatsi')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
         </div>
 
       </div>
@@ -9418,8 +9737,8 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
     </div>
 
     <div class="info-card" style="margin-top:16px">
-      <h3>🕌 Cuma Namazı</h3>
-      <p>Cuma namazı öğle vakti kılınır. Hutbe dinlenmesi farzdır. Camilerde cemaatle kılınır.</p>
+      <h3 id="cumaTitle">🕌 Cuma Namazı</h3>
+      <p id="cumaDesc">Cuma namazı öğle vakti kılınır. Hutbe dinlenmesi farzdır. Camilerde cemaatle kılınır.</p>
     </div>
   </div>
 </div>
@@ -10084,7 +10403,7 @@ function showQRModal() {
     if(!e.target.closest('.ayah-ar,.s-ar,.esma-ar,input,textarea,[data-selectable]')){e.preventDefault();return false;}
   });
   document.addEventListener('dragstart',function(e){e.preventDefault();return false;});
-  if(window.top!==window.self){try{window.top.location.href=window.self.location.href;}catch(e){document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#c00">⛔ Bu içerik iframe içinde gösterilemez.</div>';}}
+  // iframe kontrolü kaldırıldı — gerekirse ayarlar menüsünde yönetilebilir
   let _dv=false;
   setInterval(function(){
     const w=window.outerWidth-window.innerWidth>160,h=window.outerHeight-window.innerHeight>160;
