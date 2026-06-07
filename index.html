@@ -2233,7 +2233,81 @@ let settings = JSON.parse(localStorage.getItem('qSettings')||'{"sayimSes":false,
 let hizliSureler = JSON.parse(localStorage.getItem('hizliSureler')||'[1,36,55,67,112,113,114]');
 
 // INIT
+
+function savePrayerMethod() {
+  const method = document.getElementById('prayerMethod')?.value || 4;
+  localStorage.setItem('prayerMethod', method);
+  // Namaz vakitleri yeniden çek (API)
+  loadPrayerTimes();
+}
+
+
+
+// ── NAMAZ VAKITLERI KAYIT ──
+function savePrayerTimes(times) {
+  if(times) {
+    localStorage.setItem('savedPrayerTimes', JSON.stringify(times));
+    localStorage.setItem('prayerTimesDate', new Date().toDateString());
+    console.log('✅ Namaz vakitleri kaydedildi');
+  }
+}
+
+
+function loadPrayerTimes() {
+  const method = localStorage.getItem('prayerMethod') || 4;
+  const lat = parseFloat(localStorage.getItem('savedLat')) || 52.52;
+  const lng = parseFloat(localStorage.getItem('savedLng')) || 13.405;
+  
+  const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${method}&date=${new Date().getDate()}-${new Date().getMonth()+1}-${new Date().getFullYear()}`;
+  
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if(data.data && data.data.timings) {
+        savePrayerTimes(data.data.timings);
+        updatePrayerUI(data.data.timings);
+      }
+    })
+    .catch(e => console.error('Namaz API hatası:', e));
+}
+
+
+function updatePrayerUI(timings) {
+  if(!timings) return;
+  
+  // Saatler varsa güncelle
+  const prayerNames = ['Imsak', 'Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Sunset', 'Maghrib', 'Isha', 'Midnight'];
+  const turkishNames = ['İmsak', 'Sabah', 'Sunrise', 'Öğle', 'İkindi', 'Sunset', 'Akşam', 'Yatsı', 'Gece Yarısı'];
+  
+  prayerNames.forEach((name, i) => {
+    const elem = document.getElementById('prayer-' + name.toLowerCase());
+    if(elem && timings[name]) {
+      elem.textContent = timings[name];
+    }
+  });
+  
+  console.log('✅ Namaz saatleri güncellendi:', timings);
+}
+
 window.onload = () => {
+
+  // 500ms sonra pusula otomatik başlasın (DOM hazır olsun)
+  setTimeout(() => {
+    if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // iOS 13+
+      DeviceOrientationEvent.requestPermission().then(perm => {
+        if(perm === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      }).catch(() => {
+        // Android vb.
+        window.addEventListener('deviceorientation', handleOrientation);
+      });
+    } else {
+      // Android (permission yok)
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+  }, 500);
   // Tema — kaydedilen ayarı uygula, yoksa light
   const savedTheme = localStorage.getItem('qtheme') || 'light';
   document.getElementById('htmlRoot').setAttribute('data-theme', savedTheme);
@@ -2261,23 +2335,6 @@ window.onload = () => {
   // Kayıtlı ezan ayarlarını yükle (DOM hazır olduktan sonra)
   setTimeout(loadEzanSettings, 100);
 };
-
-// Namaz sayfası otomatik açılması
-function initNamezPage() {
-  const savedPage = localStorage.getItem('lastOpenPage') || 'home';
-  if(savedPage === 'namaz') {
-    setTimeout(() => showPage('namaz'), 100);
-  }
-}
-
-// showPage çağrısında sayfayı kaydet
-const originalShowPage = showPage;
-showPage = function(p) {
-  localStorage.setItem('lastOpenPage', p);
-  originalShowPage(p);
-};
-
-
 
 function buildSurahs() {
   return AYAH_COUNT.map((cnt, i) => ({
@@ -2536,8 +2593,6 @@ function playAyah(i) {
   aud.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${ayahs[i].number}.mp3`;
   aud.play().catch(()=>{});
   playing = true;
-  autoScroll = true;  // OTOMATIK SCROLL ENABLE
-  highlightAndFollow(i);  // Otomatik scroll
   document.getElementById('playBtn').textContent = '⏸';
   document.getElementById('pTrack').textContent = `${surahData.name} — ${ayahs[i].numberInSurah}. Ayet`;
   document.querySelectorAll('.ayah-card').forEach(c=>c.classList.remove('playing','active'));
@@ -2697,20 +2752,6 @@ function setupSearch(){
   const inp=document.getElementById('searchQ');let t;
   inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>doSearch(inp.value.trim()),450);});
 }
-
-// ── TÜRKÇE NORMALIZE ──
-function normalizeText(text) {
-  return text
-    .toLowerCase()
-    .replace(/ş/g, 's').replace(/Ş/g, 's')
-    .replace(/ı/g, 'i').replace(/I/g, 'i')
-    .replace(/ğ/g, 'g').replace(/Ğ/g, 'g')
-    .replace(/ü/g, 'u').replace(/Ü/g, 'u')
-    .replace(/ö/g, 'o').replace(/Ö/g, 'o')
-    .replace(/ç/g, 'c').replace(/Ç/g, 'c')
-    .trim();
-}
-
 async function doSearch(q){
   const res=document.getElementById('searchRes');
   if(q.length<2){res.innerHTML='';return;}
@@ -2979,38 +3020,26 @@ function getDir(a){
 }
 
 function startKible() {
-  const statusEl = document.getElementById('kibleStatus') || document.querySelector('.kible-status');
+  if(!navigator.geolocation){ alert('Konum desteklenmiyor'); return; }
   
-  // Konum gerekli
-  if(!savedLat || !savedLng) {
-    statusEl.textContent = '📍 Önce konumu al';
-    getLocation();
-    return;
+  const statusEl = document.getElementById('kibleStatus');
+  const infoEl = document.getElementById('kibleInfo');
+  statusEl.textContent = '📍 Konum alınıyor...';
+  statusEl.className = 'kible-status kible-wait';
+  
+  // Önce kaydedilmiş konum varsa kullan
+  const savedLat2 = parseFloat(localStorage.getItem('savedLat'));
+  const savedLng2 = parseFloat(localStorage.getItem('savedLng'));
+  
+  if(savedLat2 && savedLng2) {
+    calcKibleAngle(savedLat2, savedLng2);
   }
   
-  // iOS 13+
-  if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission()
-      .then(permission => {
-        if(permission === 'granted') {
-          // İzin alındı — listener ekle
-          window.addEventListener('deviceorientation', handleOrientation);
-          statusEl.textContent = '🧭 Kıble hazır — Telefonu döndür';
-          startCompassTracking();
-        } else {
-          statusEl.textContent = '⚠️ İzin gerekli';
-        }
-      })
-      .catch(() => {
-        // Hata — listener yine ekle (Android)
-        window.addEventListener('deviceorientation', handleOrientation);
-        startCompassTracking();
-      });
-  } else {
-    // Android — direkt listener
-    window.addEventListener('deviceorientation', handleOrientation);
-    startCompassTracking();
-  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    calcKibleAngle(pos.coords.latitude, pos.coords.longitude);
+  }, () => {
+    if(!savedLat2) statusEl.textContent = '❌ Konum izni reddedildi';
+  }, {enableHighAccuracy: true, timeout: 10000});
 }
 
 function calcKibleAngle(lat, lng) {
@@ -3100,41 +3129,6 @@ function updatePusula(heading) {
       statusEl.className = 'kible-status kible-wait';
       statusEl.textContent = '✅ Kıble: ' + Math.round(kibleAngle) + '° — Altın oku takip et';
     }
-  }
-}
-
-function updateCompassDisplay() {
-  const deg = Math.round(compassHeading);
-  
-  // Display element
-  let degEl = document.getElementById('compassDegreeDisplay');
-  if(!degEl) {
-    degEl = document.createElement('div');
-    degEl.id = 'compassDegreeDisplay';
-    degEl.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.2em;font-weight:bold;z-index:100;font-family:monospace;text-shadow:0 2px 8px rgba(0,0,0,0.3)';
-    const compassRing = document.querySelector('.compass-ring');
-    if(compassRing && compassRing.parentElement) {
-      compassRing.parentElement.style.position = 'relative';
-      compassRing.parentElement.appendChild(degEl);
-    }
-  }
-  
-  degEl.textContent = deg + '°';
-  
-  // Kabe: 137° (Berlin)
-  const kabeAngle = 137;
-  const diff = Math.abs(deg - kabeAngle);
-  const minDiff = Math.min(diff, 360 - diff);
-  
-  if(minDiff <= 5) {
-    degEl.style.color = '#00ff00';
-    degEl.style.fontSize = '2.5em';
-  } else if(minDiff <= 15) {
-    degEl.style.color = '#ffaa00';
-    degEl.style.fontSize = '2.1em';
-  } else {
-    degEl.style.color = '#ff0000';
-    degEl.style.fontSize = '1.8em';
   }
 }
 
@@ -6538,7 +6532,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
       <div class="settings-row">
         <div>
           <div class="settings-label">📅 Versiyon</div>
-          <div class="settings-desc">v16 — Haziran 2026</div>
+          <div class="settings-desc">v15 — Haziran 2026</div>
         </div>
       </div>
 
@@ -6568,7 +6562,19 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 <!-- NAMAZ VAKİTLERİ -->
 <div class="page" id="page-namaz">
   <div class="main" style="padding-top:16px">
-    <div class="sec-head"><h2>Namaz Vakitleri</h2><span class="sec-badge" id="namazCity">Konum bekleniyor...</span></div>
+    
+        <div style="padding:16px;border-bottom:1px solid var(--border)">
+          <label style="font-size:12px;color:var(--text3)">📍 Hesaplama Kaynağı:</label>
+          <select id="prayerMethod" onchange="savePrayerMethod()" style="width:100%;padding:8px;margin-top:6px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text1)">
+            <option value="4">🇹🇷 Diyanet (Türkiye)</option>
+            <option value="2">🇸🇦 Semerkand (Hanefî)</option>
+            <option value="9">🇩🇪 IGMG (Almanya)</option>
+            <option value="8">🕋️ NVC (Ramazan)</option>
+            <option value="5">📐 Calc (Matematiksel)</option>
+          </select>
+        </div>
+        
+<div class="sec-head"><h2>Namaz Vakitleri</h2><span class="sec-badge" id="namazCity">Konum bekleniyor...</span></div>
     <p class="sec-desc">Bulunduğun konuma göre günlük namaz vakitleri</p>
 
     <div class="location-bar">
