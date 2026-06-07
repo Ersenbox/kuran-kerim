@@ -2327,6 +2327,9 @@ window.onload = () => {
   const reciterSel = document.getElementById('reciterSel');
   if(reciterSel) reciterSel.value = reciter;
 
+  // UI çevirilerini uygula (kaydedilen dil ile)
+  applyUITranslations(lang);
+
   // Bildirim izni durumunu kontrol et
   if('Notification' in window && Notification.permission === 'granted') {
     _ezanNotifGranted = true;
@@ -2384,11 +2387,1038 @@ function toggleTheme() {
 })();
 
 // ── LANGUAGE ──
+// ════════════════════════════════════════
+// UI_TEXT — 15 DİL UI ÇEVİRİLERİ
+// ════════════════════════════════════════
+const UI_TEXT = {
+  tr: {
+    // Header nav
+    nav_home: "📖 Sureler", nav_esma: "✨ Esmaül Hüsna", nav_namaz: "🕌 Namaz",
+    nav_kible: "🧭 Kıble", nav_tesbi: "📿 Tesbihat", nav_dini: "📅 Dini Günler",
+    nav_oncesi: "📋 Önce", nav_dua: "🤲 Dualar", nav_sifa: "💚 Şifa",
+    nav_hizli: "⚡ Hızlı", nav_favs: "🔖 Favoriler", nav_search: "🔍 Ara",
+    nav_ayarlar: "⚙️ Ayarlar",
+    // Bottom nav
+    bnav_home: "Sureler", bnav_namaz: "Namaz", bnav_tesbi: "Tesbi",
+    bnav_favs: "Favori", bnav_more: "Daha",
+    // More menu
+    more_esma: "✨ Esmaül Hüsna", more_kible: "🧭 Kıble", more_dini: "📅 Dini Günler",
+    more_oncesi: "📋 Önce Oku", more_dua: "🤲 Dualar", more_sifa: "💚 Şifa Ayetleri",
+    more_hizli: "⚡ Hızlı Erişim", more_search: "🔍 Ara", more_ayarlar: "⚙️ Ayarlar",
+    // Home
+    hero_sub: "Rahman ve Rahim olan Allah'ın adıyla",
+    search_placeholder: "Sure ara...",
+    grid_title: "114 Sure", grid_badge: "TÜM SURELER",
+    sec_desc_home: "Okumak istediğin sureye tıkla",
+    vt_sure: "📖 Sureler", vt_juz: "📚 30 Cüz",
+    // Reader
+    back_btn: "← Geri",
+    player_track: "Sure seçildi — ▶ ile başlat",
+    btn_trans: "🌍 Tercüme", btn_okunus: "🔤 Okunuş",
+    btn_tafsir: "📚 Tefsir", btn_follow: "👁 Takip",
+    // Esma
+    esma_title: "Esmaül Hüsna — الأسماء الحسنى", esma_badge: "99 İSİM",
+    esma_desc: "Allah'ın 99 güzel ismi — karta tıkla, manasını gör",
+    // Favs
+    favs_title: "Favorilerim", favs_desc: "Kaydettiğin ayetler",
+    // Search
+    search_title: "Ayet Ara", search_desc: "Seçili dilde kelime veya ifade ara",
+    search_inp: "Kelime gir...",
+    // Namaz
+    namaz_title: "Namaz Vakitleri", namaz_city: "Konum bekleniyor...",
+    namaz_desc: "Bulunduğun konuma göre günlük namaz vakitleri",
+    namaz_imsakiye: "📅 Aylık İmsakiye",
+    namaz_cuma: "🕌 Cuma Namazı",
+    namaz_cuma_desc: "Cuma namazı öğle vakti kılınır. Hutbe dinlenmesi farzdır. Camilerde cemaatle kılınır.",
+    // Kible
+    kible_title: "Kıble Pusulası", kible_desc: "Telefonunu düz tut — altın ok Kabe yönünü gösterir",
+    kible_info_title: "📍 Kıble Hakkında",
+    // Tesbi
+    tesbi_title: "Tesbihat & Zikir", tesbi_desc: "Zikir seç, ekle veya kütüphaneden bul",
+    // Dini
+    dini_title: "Dini Günler 2026", dini_desc: "2026 yılı İslami özel gün ve geceler",
+    // Oncesi
+    oncesi_title: "Kuran Okumadan Önce", oncesi_badge: "ÖNEMLİ",
+    oncesi_desc: "Kur'an-ı Kerim'i okumadan önce dikkat edilmesi gerekenler",
+    // Dua
+    dua_title: "Dualar", dua_badge: "KATEGORİLER",
+    dua_desc: "Kategori seç ve duaları oku",
+    dua_cat_sabah: "🌅 Sabah & Akşam", dua_cat_uyku: "😴 Uyku",
+    dua_cat_yemek: "🍽️ Yemek", dua_cat_seyahat: "✈️ Seyahat",
+    dua_cat_saglik: "💊 Hastalık", dua_cat_aile: "👨‍👩‍👧 Aile",
+    dua_cat_koruma: "🛡️ Koruma", dua_cat_istigfar: "🙏 İstiğfar",
+    dua_cat_rizik: "💰 Rızık", dua_cat_ramazan: "🌙 Ramazan",
+    dua_cat_namaz: "🕌 Namaz", dua_cat_keder: "💔 Keder",
+    // Sifa
+    sifa_title: "Şifa Ayetleri", sifa_badge: "7 AYET",
+    sifa_desc: "Kuran-ı Kerim'de şifaya işaret eden mübarek ayetler",
+    // Hizli
+    hizli_title: "Surelere Hızlı Erişim", hizli_badge: "POPÜLER",
+    hizli_desc: "En çok okunan ve önemli sureler",
+    hizli_her_gun: "⭐ Her Gün Okunan Sureler",
+    hizli_namaz: "🕌 Namaz Sureleri",
+    hizli_sifa: "💚 Şifa ve Koruma",
+    hizli_tesbih: "📿 Tesbih ve Zikir Ayetleri",
+    // Ayarlar
+    ayarlar_title: "Ayarlar", ayarlar_desc: "Uygulama tercihlerini ayarla",
+    // App install
+    aib_label: "📱 UYGULAMAYI İNDİR",
+    aib_title: "Her zaman yanında —<br>App olarak kullan",
+    aib_desc: "QR kodu tara, sayfayı aç ve ana ekrana ekle.<br>App Store gerekmez — tamamen ücretsiz.",
+  },
+  de: {
+    nav_home: "📖 Suren", nav_esma: "✨ Schöne Namen", nav_namaz: "🕌 Gebet",
+    nav_kible: "🧭 Kibla", nav_tesbi: "📿 Dhikr", nav_dini: "📅 Isl. Tage",
+    nav_oncesi: "📋 Vor dem Lesen", nav_dua: "🤲 Gebete", nav_sifa: "💚 Heilung",
+    nav_hizli: "⚡ Schnell", nav_favs: "🔖 Favoriten", nav_search: "🔍 Suche",
+    nav_ayarlar: "⚙️ Einstellungen",
+    bnav_home: "Suren", bnav_namaz: "Gebet", bnav_tesbi: "Dhikr",
+    bnav_favs: "Favorit", bnav_more: "Mehr",
+    more_esma: "✨ Schöne Namen", more_kible: "🧭 Kibla", more_dini: "📅 Isl. Tage",
+    more_oncesi: "📋 Vor dem Lesen", more_dua: "🤲 Gebete", more_sifa: "💚 Heilungsverse",
+    more_hizli: "⚡ Schnellzugriff", more_search: "🔍 Suche", more_ayarlar: "⚙️ Einstellungen",
+    hero_sub: "Im Namen Allahs, des Erbarmers, des Barmherzigen",
+    search_placeholder: "Sure suchen...",
+    grid_title: "114 Suren", grid_badge: "ALLE SUREN",
+    sec_desc_home: "Klicke auf die Sure, die du lesen möchtest",
+    vt_sure: "📖 Suren", vt_juz: "📚 30 Dschuz",
+    back_btn: "← Zurück",
+    player_track: "Sure gewählt — ▶ zum Starten",
+    btn_trans: "🌍 Übersetzung", btn_okunus: "🔤 Aussprache",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Folgen",
+    esma_title: "Schöne Namen — الأسماء الحسنى", esma_badge: "99 NAMEN",
+    esma_desc: "99 schöne Namen Allahs — Karte anklicken für Bedeutung",
+    favs_title: "Meine Favoriten", favs_desc: "Gespeicherte Verse",
+    search_title: "Vers Suchen", search_desc: "Wort oder Ausdruck in gewählter Sprache suchen",
+    search_inp: "Stichwort eingeben...",
+    namaz_title: "Gebetszeiten", namaz_city: "Standort wird gesucht...",
+    namaz_desc: "Tägliche Gebetszeiten basierend auf deinem Standort",
+    namaz_imsakiye: "📅 Monatlicher Imsakiye",
+    namaz_cuma: "🕌 Freitagsgebet",
+    namaz_cuma_desc: "Das Freitagsgebet wird zur Mittagszeit verrichtet. Das Anhören der Predigt ist Pflicht. Es wird in Moscheen in Gemeinschaft verrichtet.",
+    kible_title: "Kibla-Kompass", kible_desc: "Handy flach halten — goldener Pfeil zeigt Richtung der Kaaba",
+    kible_info_title: "📍 Über die Kibla",
+    tesbi_title: "Dhikr & Tesbih", tesbi_desc: "Dhikr wählen, hinzufügen oder aus Bibliothek suchen",
+    dini_title: "Islamische Tage 2026", dini_desc: "Islamische Festtage und besondere Nächte 2026",
+    oncesi_title: "Vor der Koranlesung", oncesi_badge: "WICHTIG",
+    oncesi_desc: "Was vor dem Lesen des Heiligen Qurans beachtet werden sollte",
+    dua_title: "Gebete", dua_badge: "KATEGORIEN",
+    dua_desc: "Kategorie wählen und Gebete lesen",
+    dua_cat_sabah: "🌅 Morgen & Abend", dua_cat_uyku: "😴 Schlaf",
+    dua_cat_yemek: "🍽️ Essen", dua_cat_seyahat: "✈️ Reise",
+    dua_cat_saglik: "💊 Krankheit", dua_cat_aile: "👨‍👩‍👧 Familie",
+    dua_cat_koruma: "🛡️ Schutz", dua_cat_istigfar: "🙏 Vergebung",
+    dua_cat_rizik: "💰 Rizq", dua_cat_ramazan: "🌙 Ramadan",
+    dua_cat_namaz: "🕌 Gebet", dua_cat_keder: "💔 Trauer",
+    sifa_title: "Heilungsverse", sifa_badge: "7 VERSE",
+    sifa_desc: "Gesegnete Verse im Heiligen Quran, die auf Heilung hinweisen",
+    hizli_title: "Schnellzugriff auf Suren", hizli_badge: "BELIEBT",
+    hizli_desc: "Am häufigsten gelesene und wichtige Suren",
+    hizli_her_gun: "⭐ Täglich gelesene Suren",
+    hizli_namaz: "🕌 Gebetssuren",
+    hizli_sifa: "💚 Heilung und Schutz",
+    hizli_tesbih: "📿 Tesbih und Dhikr-Verse",
+    ayarlar_title: "Einstellungen", ayarlar_desc: "App-Einstellungen anpassen",
+    aib_label: "📱 APP HERUNTERLADEN",
+    aib_title: "Immer dabei —<br>Als App verwenden",
+    aib_desc: "QR-Code scannen, Seite öffnen und zum Startbildschirm hinzufügen.<br>Kein App Store nötig — völlig kostenlos.",
+  },
+  en: {
+    nav_home: "📖 Surahs", nav_esma: "✨ 99 Names", nav_namaz: "🕌 Prayer",
+    nav_kible: "🧭 Qibla", nav_tesbi: "📿 Dhikr", nav_dini: "📅 Isl. Days",
+    nav_oncesi: "📋 Before Reading", nav_dua: "🤲 Duas", nav_sifa: "💚 Healing",
+    nav_hizli: "⚡ Quick", nav_favs: "🔖 Favorites", nav_search: "🔍 Search",
+    nav_ayarlar: "⚙️ Settings",
+    bnav_home: "Surahs", bnav_namaz: "Prayer", bnav_tesbi: "Dhikr",
+    bnav_favs: "Favorites", bnav_more: "More",
+    more_esma: "✨ 99 Names", more_kible: "🧭 Qibla", more_dini: "📅 Isl. Days",
+    more_oncesi: "📋 Before Reading", more_dua: "🤲 Duas", more_sifa: "💚 Healing Verses",
+    more_hizli: "⚡ Quick Access", more_search: "🔍 Search", more_ayarlar: "⚙️ Settings",
+    hero_sub: "In the name of Allah, the Most Gracious, the Most Merciful",
+    search_placeholder: "Search surah...",
+    grid_title: "114 Surahs", grid_badge: "ALL SURAHS",
+    sec_desc_home: "Click on the surah you want to read",
+    vt_sure: "📖 Surahs", vt_juz: "📚 30 Juz",
+    back_btn: "← Back",
+    player_track: "Surah selected — press ▶ to start",
+    btn_trans: "🌍 Translation", btn_okunus: "🔤 Transliteration",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Follow",
+    esma_title: "99 Names — الأسماء الحسنى", esma_badge: "99 NAMES",
+    esma_desc: "Allah's 99 beautiful names — click a card to see the meaning",
+    favs_title: "My Favorites", favs_desc: "Saved verses",
+    search_title: "Search Verse", search_desc: "Search words or phrases in selected language",
+    search_inp: "Enter keyword...",
+    namaz_title: "Prayer Times", namaz_city: "Waiting for location...",
+    namaz_desc: "Daily prayer times based on your location",
+    namaz_imsakiye: "📅 Monthly Schedule",
+    namaz_cuma: "🕌 Friday Prayer",
+    namaz_cuma_desc: "Friday prayer is performed at noon. Attending the sermon is obligatory. It is performed in congregation at mosques.",
+    kible_title: "Qibla Compass", kible_desc: "Hold phone flat — golden arrow points toward the Kaaba",
+    kible_info_title: "📍 About the Qibla",
+    tesbi_title: "Dhikr & Tasbih", tesbi_desc: "Select, add or find dhikr from library",
+    dini_title: "Islamic Days 2026", dini_desc: "Islamic special days and nights of 2026",
+    oncesi_title: "Before Reading Quran", oncesi_badge: "IMPORTANT",
+    oncesi_desc: "Things to pay attention to before reading the Holy Quran",
+    dua_title: "Duas", dua_badge: "CATEGORIES",
+    dua_desc: "Select a category and read duas",
+    dua_cat_sabah: "🌅 Morning & Evening", dua_cat_uyku: "😴 Sleep",
+    dua_cat_yemek: "🍽️ Food", dua_cat_seyahat: "✈️ Travel",
+    dua_cat_saglik: "💊 Illness", dua_cat_aile: "👨‍👩‍👧 Family",
+    dua_cat_koruma: "🛡️ Protection", dua_cat_istigfar: "🙏 Forgiveness",
+    dua_cat_rizik: "💰 Provision", dua_cat_ramazan: "🌙 Ramadan",
+    dua_cat_namaz: "🕌 Prayer", dua_cat_keder: "💔 Grief",
+    sifa_title: "Healing Verses", sifa_badge: "7 VERSES",
+    sifa_desc: "Blessed verses in the Holy Quran pointing to healing",
+    hizli_title: "Quick Access to Surahs", hizli_badge: "POPULAR",
+    hizli_desc: "Most read and important surahs",
+    hizli_her_gun: "⭐ Daily Surahs",
+    hizli_namaz: "🕌 Prayer Surahs",
+    hizli_sifa: "💚 Healing and Protection",
+    hizli_tesbih: "📿 Tasbih and Dhikr Verses",
+    ayarlar_title: "Settings", ayarlar_desc: "Customize app preferences",
+    aib_label: "📱 DOWNLOAD APP",
+    aib_title: "Always with you —<br>Use as an App",
+    aib_desc: "Scan QR code, open the page and add to home screen.<br>No App Store needed — completely free.",
+  },
+  fr: {
+    nav_home: "📖 Sourates", nav_esma: "✨ 99 Noms", nav_namaz: "🕌 Prière",
+    nav_kible: "🧭 Qibla", nav_tesbi: "📿 Dhikr", nav_dini: "📅 Jours isl.",
+    nav_oncesi: "📋 Avant Lecture", nav_dua: "🤲 Invocations", nav_sifa: "💚 Guérison",
+    nav_hizli: "⚡ Rapide", nav_favs: "🔖 Favoris", nav_search: "🔍 Recherche",
+    nav_ayarlar: "⚙️ Paramètres",
+    bnav_home: "Sourates", bnav_namaz: "Prière", bnav_tesbi: "Dhikr",
+    bnav_favs: "Favoris", bnav_more: "Plus",
+    more_esma: "✨ 99 Noms", more_kible: "🧭 Qibla", more_dini: "📅 Jours isl.",
+    more_oncesi: "📋 Avant Lecture", more_dua: "🤲 Invocations", more_sifa: "💚 Versets Guérison",
+    more_hizli: "⚡ Accès Rapide", more_search: "🔍 Recherche", more_ayarlar: "⚙️ Paramètres",
+    hero_sub: "Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux",
+    search_placeholder: "Rechercher une sourate...",
+    grid_title: "114 Sourates", grid_badge: "TOUTES LES SOURATES",
+    sec_desc_home: "Cliquez sur la sourate que vous souhaitez lire",
+    vt_sure: "📖 Sourates", vt_juz: "📚 30 Djuz",
+    back_btn: "← Retour",
+    player_track: "Sourate sélectionnée — ▶ pour démarrer",
+    btn_trans: "🌍 Traduction", btn_okunus: "🔤 Translittération",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Suivre",
+    esma_title: "99 Noms — الأسماء الحسنى", esma_badge: "99 NOMS",
+    esma_desc: "Les 99 beaux noms d'Allah — cliquez sur une carte pour voir le sens",
+    favs_title: "Mes Favoris", favs_desc: "Versets enregistrés",
+    search_title: "Rechercher un Verset", search_desc: "Rechercher un mot ou une expression dans la langue sélectionnée",
+    search_inp: "Entrez un mot-clé...",
+    namaz_title: "Horaires de Prière", namaz_city: "En attente de localisation...",
+    namaz_desc: "Horaires de prière quotidiens selon votre localisation",
+    namaz_imsakiye: "📅 Calendrier Mensuel",
+    namaz_cuma: "🕌 Prière du Vendredi",
+    namaz_cuma_desc: "La prière du vendredi est effectuée à l'heure du midi. Écouter le sermon est obligatoire. Elle est effectuée en congrégation dans les mosquées.",
+    kible_title: "Boussole Qibla", kible_desc: "Tenez le téléphone à plat — la flèche dorée indique la direction de la Kaaba",
+    kible_info_title: "📍 À propos de la Qibla",
+    tesbi_title: "Dhikr & Tasbih", tesbi_desc: "Sélectionner, ajouter ou trouver un dhikr dans la bibliothèque",
+    dini_title: "Jours Islamiques 2026", dini_desc: "Jours et nuits islamiques spéciaux de 2026",
+    oncesi_title: "Avant de Lire le Coran", oncesi_badge: "IMPORTANT",
+    oncesi_desc: "Ce à quoi il faut faire attention avant de lire le Saint Coran",
+    dua_title: "Invocations", dua_badge: "CATÉGORIES",
+    dua_desc: "Sélectionner une catégorie et lire les invocations",
+    dua_cat_sabah: "🌅 Matin & Soir", dua_cat_uyku: "😴 Sommeil",
+    dua_cat_yemek: "🍽️ Repas", dua_cat_seyahat: "✈️ Voyage",
+    dua_cat_saglik: "💊 Maladie", dua_cat_aile: "👨‍👩‍👧 Famille",
+    dua_cat_koruma: "🛡️ Protection", dua_cat_istigfar: "🙏 Pardon",
+    dua_cat_rizik: "💰 Rizq", dua_cat_ramazan: "🌙 Ramadan",
+    dua_cat_namaz: "🕌 Prière", dua_cat_keder: "💔 Tristesse",
+    sifa_title: "Versets de Guérison", sifa_badge: "7 VERSETS",
+    sifa_desc: "Versets bénis du Saint Coran indiquant la guérison",
+    hizli_title: "Accès Rapide aux Sourates", hizli_badge: "POPULAIRES",
+    hizli_desc: "Les sourates les plus lues et importantes",
+    hizli_her_gun: "⭐ Sourates Quotidiennes",
+    hizli_namaz: "🕌 Sourates de Prière",
+    hizli_sifa: "💚 Guérison et Protection",
+    hizli_tesbih: "📿 Versets de Tasbih et Dhikr",
+    ayarlar_title: "Paramètres", ayarlar_desc: "Personnaliser les préférences de l'application",
+    aib_label: "📱 TÉLÉCHARGER L'APP",
+    aib_title: "Toujours avec vous —<br>Utiliser comme application",
+    aib_desc: "Scannez le QR code, ouvrez la page et ajoutez à l'écran d'accueil.<br>Pas besoin d'App Store — entièrement gratuit.",
+  },
+  ru: {
+    nav_home: "📖 Суры", nav_esma: "✨ 99 Имён", nav_namaz: "🕌 Намаз",
+    nav_kible: "🧭 Кибла", nav_tesbi: "📿 Зикр", nav_dini: "📅 Исл. дни",
+    nav_oncesi: "📋 До чтения", nav_dua: "🤲 Дуа", nav_sifa: "💚 Исцеление",
+    nav_hizli: "⚡ Быстро", nav_favs: "🔖 Избранное", nav_search: "🔍 Поиск",
+    nav_ayarlar: "⚙️ Настройки",
+    bnav_home: "Суры", bnav_namaz: "Намаз", bnav_tesbi: "Зикр",
+    bnav_favs: "Избранное", bnav_more: "Ещё",
+    more_esma: "✨ 99 Имён", more_kible: "🧭 Кибла", more_dini: "📅 Исл. дни",
+    more_oncesi: "📋 До чтения", more_dua: "🤲 Дуа", more_sifa: "💚 Аяты исцеления",
+    more_hizli: "⚡ Быстрый доступ", more_search: "🔍 Поиск", more_ayarlar: "⚙️ Настройки",
+    hero_sub: "Во имя Аллаха, Милостивого, Милосердного",
+    search_placeholder: "Поиск суры...",
+    grid_title: "114 Сур", grid_badge: "ВСЕ СУРЫ",
+    sec_desc_home: "Нажмите на суру, которую хотите прочитать",
+    vt_sure: "📖 Суры", vt_juz: "📚 30 Джузов",
+    back_btn: "← Назад",
+    player_track: "Сура выбрана — нажмите ▶ для начала",
+    btn_trans: "🌍 Перевод", btn_okunus: "🔤 Транслитерация",
+    btn_tafsir: "📚 Тафсир", btn_follow: "👁 Следить",
+    esma_title: "99 Имён — الأسماء الحسنى", esma_badge: "99 ИМЁН",
+    esma_desc: "99 прекрасных имён Аллаха — нажмите на карточку для значения",
+    favs_title: "Мои Избранные", favs_desc: "Сохранённые аяты",
+    search_title: "Поиск Аята", search_desc: "Поиск слова или фразы на выбранном языке",
+    search_inp: "Введите ключевое слово...",
+    namaz_title: "Времена Намаза", namaz_city: "Ожидание местоположения...",
+    namaz_desc: "Ежедневные времена намаза по вашему местоположению",
+    namaz_imsakiye: "📅 Месячный имсакие",
+    namaz_cuma: "🕌 Пятничный намаз",
+    namaz_cuma_desc: "Пятничный намаз совершается в полдень. Слушание хутбы обязательно. Совершается коллективно в мечетях.",
+    kible_title: "Компас Киблы", kible_desc: "Держите телефон горизонтально — золотая стрелка указывает на Каабу",
+    kible_info_title: "📍 О Кибле",
+    tesbi_title: "Зикр & Тасбих", tesbi_desc: "Выбрать, добавить или найти зикр в библиотеке",
+    dini_title: "Исламские дни 2026", dini_desc: "Исламские особые дни и ночи 2026 года",
+    oncesi_title: "Перед чтением Корана", oncesi_badge: "ВАЖНО",
+    oncesi_desc: "На что следует обратить внимание перед чтением Священного Корана",
+    dua_title: "Дуа", dua_badge: "КАТЕГОРИИ",
+    dua_desc: "Выберите категорию и читайте дуа",
+    dua_cat_sabah: "🌅 Утро & Вечер", dua_cat_uyku: "😴 Сон",
+    dua_cat_yemek: "🍽️ Еда", dua_cat_seyahat: "✈️ Путешествие",
+    dua_cat_saglik: "💊 Болезнь", dua_cat_aile: "👨‍👩‍👧 Семья",
+    dua_cat_koruma: "🛡️ Защита", dua_cat_istigfar: "🙏 Прощение",
+    dua_cat_rizik: "💰 Ризк", dua_cat_ramazan: "🌙 Рамадан",
+    dua_cat_namaz: "🕌 Намаз", dua_cat_keder: "💔 Горе",
+    sifa_title: "Аяты Исцеления", sifa_badge: "7 АЯТОВ",
+    sifa_desc: "Благословенные аяты в Священном Коране, указывающие на исцеление",
+    hizli_title: "Быстрый доступ к сурам", hizli_badge: "ПОПУЛЯРНЫЕ",
+    hizli_desc: "Наиболее читаемые и важные суры",
+    hizli_her_gun: "⭐ Ежедневные суры",
+    hizli_namaz: "🕌 Суры намаза",
+    hizli_sifa: "💚 Исцеление и защита",
+    hizli_tesbih: "📿 Аяты тасбиха и зикра",
+    ayarlar_title: "Настройки", ayarlar_desc: "Настроить параметры приложения",
+    aib_label: "📱 СКАЧАТЬ ПРИЛОЖЕНИЕ",
+    aib_title: "Всегда с вами —<br>Использовать как приложение",
+    aib_desc: "Отсканируйте QR-код, откройте страницу и добавьте на главный экран.<br>App Store не нужен — совершенно бесплатно.",
+  },
+  id: {
+    nav_home: "📖 Surah", nav_esma: "✨ Asmaul Husna", nav_namaz: "🕌 Shalat",
+    nav_kible: "🧭 Kiblat", nav_tesbi: "📿 Dzikir", nav_dini: "📅 Hari Islam",
+    nav_oncesi: "📋 Sebelum Baca", nav_dua: "🤲 Doa", nav_sifa: "💚 Syifa",
+    nav_hizli: "⚡ Cepat", nav_favs: "🔖 Favorit", nav_search: "🔍 Cari",
+    nav_ayarlar: "⚙️ Pengaturan",
+    bnav_home: "Surah", bnav_namaz: "Shalat", bnav_tesbi: "Dzikir",
+    bnav_favs: "Favorit", bnav_more: "Lainnya",
+    more_esma: "✨ Asmaul Husna", more_kible: "🧭 Kiblat", more_dini: "📅 Hari Islam",
+    more_oncesi: "📋 Sebelum Baca", more_dua: "🤲 Doa", more_sifa: "💚 Ayat Syifa",
+    more_hizli: "⚡ Akses Cepat", more_search: "🔍 Cari", more_ayarlar: "⚙️ Pengaturan",
+    hero_sub: "Dengan menyebut nama Allah Yang Maha Pengasih lagi Maha Penyayang",
+    search_placeholder: "Cari surah...",
+    grid_title: "114 Surah", grid_badge: "SEMUA SURAH",
+    sec_desc_home: "Klik surah yang ingin kamu baca",
+    vt_sure: "📖 Surah", vt_juz: "📚 30 Juz",
+    back_btn: "← Kembali",
+    player_track: "Surah dipilih — tekan ▶ untuk mulai",
+    btn_trans: "🌍 Terjemahan", btn_okunus: "🔤 Transliterasi",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Ikuti",
+    esma_title: "Asmaul Husna — الأسماء الحسنى", esma_badge: "99 NAMA",
+    esma_desc: "99 nama indah Allah — klik kartu untuk melihat maknanya",
+    favs_title: "Favorit Saya", favs_desc: "Ayat yang disimpan",
+    search_title: "Cari Ayat", search_desc: "Cari kata atau frasa dalam bahasa yang dipilih",
+    search_inp: "Masukkan kata kunci...",
+    namaz_title: "Waktu Shalat", namaz_city: "Menunggu lokasi...",
+    namaz_desc: "Waktu shalat harian berdasarkan lokasi Anda",
+    namaz_imsakiye: "📅 Jadwal Bulanan",
+    namaz_cuma: "🕌 Shalat Jumat",
+    namaz_cuma_desc: "Shalat Jumat dilakukan pada waktu dhuhur. Mendengarkan khutbah adalah wajib. Dilakukan secara berjamaah di masjid.",
+    kible_title: "Kompas Kiblat", kible_desc: "Pegang ponsel mendatar — panah emas menunjuk arah Ka'bah",
+    kible_info_title: "📍 Tentang Kiblat",
+    tesbi_title: "Dzikir & Tasbih", tesbi_desc: "Pilih, tambah atau cari dzikir dari perpustakaan",
+    dini_title: "Hari Islam 2026", dini_desc: "Hari dan malam istimewa Islam tahun 2026",
+    oncesi_title: "Sebelum Membaca Al-Quran", oncesi_badge: "PENTING",
+    oncesi_desc: "Hal-hal yang perlu diperhatikan sebelum membaca Al-Quran",
+    dua_title: "Doa", dua_badge: "KATEGORI",
+    dua_desc: "Pilih kategori dan baca doa",
+    dua_cat_sabah: "🌅 Pagi & Sore", dua_cat_uyku: "😴 Tidur",
+    dua_cat_yemek: "🍽️ Makan", dua_cat_seyahat: "✈️ Perjalanan",
+    dua_cat_saglik: "💊 Sakit", dua_cat_aile: "👨‍👩‍👧 Keluarga",
+    dua_cat_koruma: "🛡️ Perlindungan", dua_cat_istigfar: "🙏 Istighfar",
+    dua_cat_rizik: "💰 Rizki", dua_cat_ramazan: "🌙 Ramadan",
+    dua_cat_namaz: "🕌 Shalat", dua_cat_keder: "💔 Kesedihan",
+    sifa_title: "Ayat Penyembuhan", sifa_badge: "7 AYAT",
+    sifa_desc: "Ayat-ayat penuh berkah dalam Al-Quran yang mengisyaratkan penyembuhan",
+    hizli_title: "Akses Cepat ke Surah", hizli_badge: "POPULER",
+    hizli_desc: "Surah yang paling banyak dibaca dan penting",
+    hizli_her_gun: "⭐ Surah Harian",
+    hizli_namaz: "🕌 Surah Shalat",
+    hizli_sifa: "💚 Penyembuhan dan Perlindungan",
+    hizli_tesbih: "📿 Ayat Tasbih dan Dzikir",
+    ayarlar_title: "Pengaturan", ayarlar_desc: "Sesuaikan preferensi aplikasi",
+    aib_label: "📱 UNDUH APLIKASI",
+    aib_title: "Selalu bersamamu —<br>Gunakan sebagai Aplikasi",
+    aib_desc: "Pindai QR code, buka halaman dan tambahkan ke layar utama.<br>Tidak perlu App Store — sepenuhnya gratis.",
+  },
+  ur: {
+    nav_home: "📖 سورتیں", nav_esma: "✨ اسماء الحسنیٰ", nav_namaz: "🕌 نماز",
+    nav_kible: "🧭 قبلہ", nav_tesbi: "📿 ذکر", nav_dini: "📅 اسلامی دن",
+    nav_oncesi: "📋 پہلے پڑھیں", nav_dua: "🤲 دعائیں", nav_sifa: "💚 شفا",
+    nav_hizli: "⚡ فوری", nav_favs: "🔖 پسندیدہ", nav_search: "🔍 تلاش",
+    nav_ayarlar: "⚙️ ترتیبات",
+    bnav_home: "سورتیں", bnav_namaz: "نماز", bnav_tesbi: "ذکر",
+    bnav_favs: "پسندیدہ", bnav_more: "مزید",
+    more_esma: "✨ اسماء الحسنیٰ", more_kible: "🧭 قبلہ", more_dini: "📅 اسلامی دن",
+    more_oncesi: "📋 پہلے پڑھیں", more_dua: "🤲 دعائیں", more_sifa: "💚 آیات شفا",
+    more_hizli: "⚡ فوری رسائی", more_search: "🔍 تلاش", more_ayarlar: "⚙️ ترتیبات",
+    hero_sub: "اللہ کے نام سے جو بڑا مہربان نہایت رحم والا ہے",
+    search_placeholder: "سورت تلاش کریں...",
+    grid_title: "١١٤ سورتیں", grid_badge: "تمام سورتیں",
+    sec_desc_home: "وہ سورت کلک کریں جو آپ پڑھنا چاہتے ہیں",
+    vt_sure: "📖 سورتیں", vt_juz: "📚 ٣٠ پارے",
+    back_btn: "← واپس",
+    player_track: "سورت منتخب کی گئی — ▶ دبائیں شروع کریں",
+    btn_trans: "🌍 ترجمہ", btn_okunus: "🔤 تلفظ",
+    btn_tafsir: "📚 تفسیر", btn_follow: "👁 فالو",
+    esma_title: "اسماء الحسنیٰ — الأسماء الحسنى", esma_badge: "٩٩ نام",
+    esma_desc: "اللہ کے ٩٩ خوبصورت نام — معنی دیکھنے کے لیے کارڈ کلک کریں",
+    favs_title: "میرے پسندیدہ", favs_desc: "محفوظ آیات",
+    search_title: "آیت تلاش کریں", search_desc: "منتخب زبان میں لفظ یا جملہ تلاش کریں",
+    search_inp: "کلیدی لفظ درج کریں...",
+    namaz_title: "نماز کے اوقات", namaz_city: "مقام کا انتظار...",
+    namaz_desc: "آپ کے مقام کے مطابق روزانہ نماز کے اوقات",
+    namaz_imsakiye: "📅 ماہانہ امساکیہ",
+    namaz_cuma: "🕌 جمعہ کی نماز",
+    namaz_cuma_desc: "جمعہ کی نماز ظہر کے وقت ادا کی جاتی ہے۔ خطبہ سننا فرض ہے۔ مساجد میں باجماعت ادا کی جاتی ہے۔",
+    kible_title: "قبلہ نما", kible_desc: "فون کو سیدھا رکھیں — سنہری تیر کعبہ کی سمت دکھاتا ہے",
+    kible_info_title: "📍 قبلہ کے بارے میں",
+    tesbi_title: "ذکر و تسبیح", tesbi_desc: "ذکر منتخب کریں، شامل کریں یا لائبریری سے تلاش کریں",
+    dini_title: "اسلامی دن ٢٠٢٦", dini_desc: "٢٠٢٦ کے اسلامی خاص دن اور راتیں",
+    oncesi_title: "قرآن پڑھنے سے پہلے", oncesi_badge: "اہم",
+    oncesi_desc: "قرآن پاک پڑھنے سے پہلے جن باتوں کا خیال رکھنا چاہیے",
+    dua_title: "دعائیں", dua_badge: "زمرے",
+    dua_desc: "زمرہ منتخب کریں اور دعائیں پڑھیں",
+    dua_cat_sabah: "🌅 صبح و شام", dua_cat_uyku: "😴 سونا",
+    dua_cat_yemek: "🍽️ کھانا", dua_cat_seyahat: "✈️ سفر",
+    dua_cat_saglik: "💊 بیماری", dua_cat_aile: "👨‍👩‍👧 خاندان",
+    dua_cat_koruma: "🛡️ حفاظت", dua_cat_istigfar: "🙏 استغفار",
+    dua_cat_rizik: "💰 رزق", dua_cat_ramazan: "🌙 رمضان",
+    dua_cat_namaz: "🕌 نماز", dua_cat_keder: "💔 غم",
+    sifa_title: "آیات شفا", sifa_badge: "٧ آیات",
+    sifa_desc: "قرآن پاک میں شفا کی طرف اشارہ کرنے والی مبارک آیات",
+    hizli_title: "سورتوں تک فوری رسائی", hizli_badge: "مقبول",
+    hizli_desc: "سب سے زیادہ پڑھی جانے والی اور اہم سورتیں",
+    hizli_her_gun: "⭐ روزانہ کی سورتیں",
+    hizli_namaz: "🕌 نماز کی سورتیں",
+    hizli_sifa: "💚 شفا اور حفاظت",
+    hizli_tesbih: "📿 تسبیح و ذکر کی آیات",
+    ayarlar_title: "ترتیبات", ayarlar_desc: "ایپ کی ترجیحات ترتیب دیں",
+    aib_label: "📱 ایپ ڈاؤن لوڈ کریں",
+    aib_title: "ہمیشہ آپ کے ساتھ —<br>ایپ کے طور پر استعمال کریں",
+    aib_desc: "QR کوڈ اسکین کریں، صفحہ کھولیں اور ہوم اسکرین پر شامل کریں۔<br>App Store کی ضرورت نہیں — بالکل مفت۔",
+  },
+  es: {
+    nav_home: "📖 Suras", nav_esma: "✨ 99 Nombres", nav_namaz: "🕌 Oración",
+    nav_kible: "🧭 Qibla", nav_tesbi: "📿 Dhikr", nav_dini: "📅 Días isl.",
+    nav_oncesi: "📋 Antes de leer", nav_dua: "🤲 Duás", nav_sifa: "💚 Curación",
+    nav_hizli: "⚡ Rápido", nav_favs: "🔖 Favoritos", nav_search: "🔍 Buscar",
+    nav_ayarlar: "⚙️ Ajustes",
+    bnav_home: "Suras", bnav_namaz: "Oración", bnav_tesbi: "Dhikr",
+    bnav_favs: "Favoritos", bnav_more: "Más",
+    more_esma: "✨ 99 Nombres", more_kible: "🧭 Qibla", more_dini: "📅 Días isl.",
+    more_oncesi: "📋 Antes de leer", more_dua: "🤲 Duás", more_sifa: "💚 Versículos curación",
+    more_hizli: "⚡ Acceso rápido", more_search: "🔍 Buscar", more_ayarlar: "⚙️ Ajustes",
+    hero_sub: "En el nombre de Allah, el Misericordioso, el Compasivo",
+    search_placeholder: "Buscar sura...",
+    grid_title: "114 Suras", grid_badge: "TODAS LAS SURAS",
+    sec_desc_home: "Haz clic en la sura que quieres leer",
+    vt_sure: "📖 Suras", vt_juz: "📚 30 Yuz",
+    back_btn: "← Volver",
+    player_track: "Sura seleccionada — pulsa ▶ para empezar",
+    btn_trans: "🌍 Traducción", btn_okunus: "🔤 Transliteración",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Seguir",
+    esma_title: "99 Nombres — الأسماء الحسنى", esma_badge: "99 NOMBRES",
+    esma_desc: "Los 99 hermosos nombres de Allah — haz clic en la tarjeta para ver el significado",
+    favs_title: "Mis Favoritos", favs_desc: "Versículos guardados",
+    search_title: "Buscar Versículo", search_desc: "Buscar palabra o frase en el idioma seleccionado",
+    search_inp: "Ingrese palabra clave...",
+    namaz_title: "Horarios de Oración", namaz_city: "Esperando ubicación...",
+    namaz_desc: "Horarios de oración diarios según tu ubicación",
+    namaz_imsakiye: "📅 Calendario Mensual",
+    namaz_cuma: "🕌 Oración del Viernes",
+    namaz_cuma_desc: "La oración del viernes se realiza a mediodía. Escuchar el sermón es obligatorio. Se realiza en congregación en las mezquitas.",
+    kible_title: "Brújula Qibla", kible_desc: "Mantén el teléfono plano — la flecha dorada señala la dirección de la Kaaba",
+    kible_info_title: "📍 Sobre la Qibla",
+    tesbi_title: "Dhikr & Tasbih", tesbi_desc: "Seleccionar, añadir o buscar dhikr de la biblioteca",
+    dini_title: "Días Islámicos 2026", dini_desc: "Días y noches islámicos especiales de 2026",
+    oncesi_title: "Antes de leer el Corán", oncesi_badge: "IMPORTANTE",
+    oncesi_desc: "Lo que hay que tener en cuenta antes de leer el Sagrado Corán",
+    dua_title: "Duás", dua_badge: "CATEGORÍAS",
+    dua_desc: "Selecciona una categoría y lee las duás",
+    dua_cat_sabah: "🌅 Mañana & Tarde", dua_cat_uyku: "😴 Sueño",
+    dua_cat_yemek: "🍽️ Comida", dua_cat_seyahat: "✈️ Viaje",
+    dua_cat_saglik: "💊 Enfermedad", dua_cat_aile: "👨‍👩‍👧 Familia",
+    dua_cat_koruma: "🛡️ Protección", dua_cat_istigfar: "🙏 Perdón",
+    dua_cat_rizik: "💰 Sustento", dua_cat_ramazan: "🌙 Ramadán",
+    dua_cat_namaz: "🕌 Oración", dua_cat_keder: "💔 Tristeza",
+    sifa_title: "Versículos de Curación", sifa_badge: "7 VERSÍCULOS",
+    sifa_desc: "Versículos benditos del Sagrado Corán que indican curación",
+    hizli_title: "Acceso Rápido a Suras", hizli_badge: "POPULARES",
+    hizli_desc: "Las suras más leídas e importantes",
+    hizli_her_gun: "⭐ Suras Diarias",
+    hizli_namaz: "🕌 Suras de Oración",
+    hizli_sifa: "💚 Curación y Protección",
+    hizli_tesbih: "📿 Versículos de Tasbih y Dhikr",
+    ayarlar_title: "Ajustes", ayarlar_desc: "Personalizar preferencias de la aplicación",
+    aib_label: "📱 DESCARGAR APP",
+    aib_title: "Siempre contigo —<br>Usar como aplicación",
+    aib_desc: "Escanea el código QR, abre la página y añade a la pantalla de inicio.<br>No se necesita App Store — completamente gratuito.",
+  },
+  bn: {
+    nav_home: "📖 সূরাসমূহ", nav_esma: "✨ ৯৯ নাম", nav_namaz: "🕌 নামাজ",
+    nav_kible: "🧭 কিবলা", nav_tesbi: "📿 জিকর", nav_dini: "📅 ইসল. দিন",
+    nav_oncesi: "📋 পড়ার আগে", nav_dua: "🤲 দোয়া", nav_sifa: "💚 শিফা",
+    nav_hizli: "⚡ দ্রুত", nav_favs: "🔖 প্রিয়", nav_search: "🔍 খোঁজুন",
+    nav_ayarlar: "⚙️ সেটিংস",
+    bnav_home: "সূরা", bnav_namaz: "নামাজ", bnav_tesbi: "জিকর",
+    bnav_favs: "প্রিয়", bnav_more: "আরও",
+    more_esma: "✨ ৯৯ নাম", more_kible: "🧭 কিবলা", more_dini: "📅 ইসল. দিন",
+    more_oncesi: "📋 পড়ার আগে", more_dua: "🤲 দোয়া", more_sifa: "💚 শিফার আয়াত",
+    more_hizli: "⚡ দ্রুত প্রবেশ", more_search: "🔍 খোঁজুন", more_ayarlar: "⚙️ সেটিংস",
+    hero_sub: "পরম করুণাময়, অতি দয়ালু আল্লাহর নামে",
+    search_placeholder: "সূরা খোঁজুন...",
+    grid_title: "১১৪ সূরা", grid_badge: "সকল সূরা",
+    sec_desc_home: "যে সূরাটি পড়তে চান সেটিতে ক্লিক করুন",
+    vt_sure: "📖 সূরা", vt_juz: "📚 ৩০ পারা",
+    back_btn: "← ফিরে যান",
+    player_track: "সূরা নির্বাচিত — শুরু করতে ▶ চাপুন",
+    btn_trans: "🌍 অনুবাদ", btn_okunus: "🔤 উচ্চারণ",
+    btn_tafsir: "📚 তাফসির", btn_follow: "👁 অনুসরণ",
+    esma_title: "আসমাউল হুসনা — الأسماء الحسنى", esma_badge: "৯৯ নাম",
+    esma_desc: "আল্লাহর ৯৯টি সুন্দর নাম — অর্থ দেখতে কার্ডে ক্লিক করুন",
+    favs_title: "আমার প্রিয়", favs_desc: "সংরক্ষিত আয়াত",
+    search_title: "আয়াত খোঁজুন", search_desc: "নির্বাচিত ভাষায় শব্দ বা বাক্যাংশ খোঁজুন",
+    search_inp: "কীওয়ার্ড লিখুন...",
+    namaz_title: "নামাজের সময়", namaz_city: "অবস্থান অপেক্ষায়...",
+    namaz_desc: "আপনার অবস্থান অনুযায়ী দৈনিক নামাজের সময়",
+    namaz_imsakiye: "📅 মাসিক সেহরি ক্যালেন্ডার",
+    namaz_cuma: "🕌 জুমার নামাজ",
+    namaz_cuma_desc: "জুমার নামাজ জোহরের সময় আদায় করা হয়। খুতবা শোনা ফরজ। মসজিদে জামাতের সাথে আদায় করা হয়।",
+    kible_title: "কিবলা কম্পাস", kible_desc: "ফোন সমতল রাখুন — সোনালি তীর কাবার দিক দেখায়",
+    kible_info_title: "📍 কিবলা সম্পর্কে",
+    tesbi_title: "জিকর ও তাসবিহ", tesbi_desc: "জিকর নির্বাচন করুন, যোগ করুন বা লাইব্রেরি থেকে খুঁজুন",
+    dini_title: "ইসলামিক দিন ২০২৬", dini_desc: "২০২৬ সালের ইসলামিক বিশেষ দিন ও রাত",
+    oncesi_title: "কুরআন পড়ার আগে", oncesi_badge: "গুরুত্বপূর্ণ",
+    oncesi_desc: "পবিত্র কুরআন পড়ার আগে যে বিষয়গুলো মেনে চলতে হবে",
+    dua_title: "দোয়া", dua_badge: "বিভাগ",
+    dua_desc: "বিভাগ নির্বাচন করুন এবং দোয়া পড়ুন",
+    dua_cat_sabah: "🌅 সকাল ও সন্ধ্যা", dua_cat_uyku: "😴 ঘুম",
+    dua_cat_yemek: "🍽️ খাবার", dua_cat_seyahat: "✈️ ভ্রমণ",
+    dua_cat_saglik: "💊 অসুস্থতা", dua_cat_aile: "👨‍👩‍👧 পরিবার",
+    dua_cat_koruma: "🛡️ সুরক্ষা", dua_cat_istigfar: "🙏 ইস্তেগফার",
+    dua_cat_rizik: "💰 রিজিক", dua_cat_ramazan: "🌙 রমজান",
+    dua_cat_namaz: "🕌 নামাজ", dua_cat_keder: "💔 দুঃখ",
+    sifa_title: "শিফার আয়াত", sifa_badge: "৭ আয়াত",
+    sifa_desc: "পবিত্র কুরআনে শিফার দিকে নির্দেশকারী মোবারক আয়াত",
+    hizli_title: "সূরায় দ্রুত প্রবেশ", hizli_badge: "জনপ্রিয়",
+    hizli_desc: "সর্বাধিক পঠিত ও গুরুত্বপূর্ণ সূরা",
+    hizli_her_gun: "⭐ প্রতিদিনের সূরা",
+    hizli_namaz: "🕌 নামাজের সূরা",
+    hizli_sifa: "💚 শিফা ও সুরক্ষা",
+    hizli_tesbih: "📿 তাসবিহ ও জিকরের আয়াত",
+    ayarlar_title: "সেটিংস", ayarlar_desc: "অ্যাপের পছন্দ কাস্টমাইজ করুন",
+    aib_label: "📱 অ্যাপ ডাউনলোড করুন",
+    aib_title: "সবসময় আপনার সাথে —<br>অ্যাপ হিসেবে ব্যবহার করুন",
+    aib_desc: "QR কোড স্ক্যান করুন, পৃষ্ঠা খুলুন এবং হোম স্ক্রিনে যোগ করুন।<br>App Store প্রয়োজন নেই — সম্পূর্ণ বিনামূল্যে।",
+  },
+  ar: {
+    nav_home: "📖 السور", nav_esma: "✨ الأسماء الحسنى", nav_namaz: "🕌 الصلاة",
+    nav_kible: "🧭 القبلة", nav_tesbi: "📿 الذكر", nav_dini: "📅 الأيام الإسلامية",
+    nav_oncesi: "📋 قبل القراءة", nav_dua: "🤲 الأدعية", nav_sifa: "💚 الشفاء",
+    nav_hizli: "⚡ سريع", nav_favs: "🔖 المفضلة", nav_search: "🔍 بحث",
+    nav_ayarlar: "⚙️ الإعدادات",
+    bnav_home: "السور", bnav_namaz: "الصلاة", bnav_tesbi: "الذكر",
+    bnav_favs: "المفضلة", bnav_more: "المزيد",
+    more_esma: "✨ الأسماء الحسنى", more_kible: "🧭 القبلة", more_dini: "📅 الأيام الإسلامية",
+    more_oncesi: "📋 قبل القراءة", more_dua: "🤲 الأدعية", more_sifa: "💚 آيات الشفاء",
+    more_hizli: "⚡ وصول سريع", more_search: "🔍 بحث", more_ayarlar: "⚙️ الإعدادات",
+    hero_sub: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    search_placeholder: "ابحث عن سورة...",
+    grid_title: "١١٤ سورة", grid_badge: "جميع السور",
+    sec_desc_home: "انقر على السورة التي تريد قراءتها",
+    vt_sure: "📖 السور", vt_juz: "📚 ٣٠ جزءًا",
+    back_btn: "← رجوع",
+    player_track: "تم اختيار السورة — اضغط ▶ للبدء",
+    btn_trans: "🌍 الترجمة", btn_okunus: "🔤 النطق",
+    btn_tafsir: "📚 التفسير", btn_follow: "👁 متابعة",
+    esma_title: "الأسماء الحسنى", esma_badge: "٩٩ اسمًا",
+    esma_desc: "أسماء الله الـ٩٩ الحسنى — انقر على البطاقة لرؤية المعنى",
+    favs_title: "مفضلتي", favs_desc: "الآيات المحفوظة",
+    search_title: "البحث عن آية", search_desc: "ابحث عن كلمة أو عبارة باللغة المحددة",
+    search_inp: "أدخل كلمة مفتاحية...",
+    namaz_title: "مواقيت الصلاة", namaz_city: "في انتظار الموقع...",
+    namaz_desc: "مواقيت الصلاة اليومية بناءً على موقعك",
+    namaz_imsakiye: "📅 جدول شهري",
+    namaz_cuma: "🕌 صلاة الجمعة",
+    namaz_cuma_desc: "تُؤدَّى صلاة الجمعة في وقت الظهر. الاستماع إلى الخطبة فريضة. تُؤدَّى جماعةً في المساجد.",
+    kible_title: "بوصلة القبلة", kible_desc: "أمسك الهاتف بشكل أفقي — السهم الذهبي يشير نحو الكعبة",
+    kible_info_title: "📍 عن القبلة",
+    tesbi_title: "الذكر والتسبيح", tesbi_desc: "اختر ذكراً أو أضفه أو ابحث في المكتبة",
+    dini_title: "الأيام الإسلامية ٢٠٢٦", dini_desc: "الأيام والليالي الإسلامية المميزة لعام ٢٠٢٦",
+    oncesi_title: "قبل قراءة القرآن", oncesi_badge: "مهم",
+    oncesi_desc: "ما ينبغي مراعاته قبل قراءة القرآن الكريم",
+    dua_title: "الأدعية", dua_badge: "الفئات",
+    dua_desc: "اختر فئة واقرأ الأدعية",
+    dua_cat_sabah: "🌅 الصباح والمساء", dua_cat_uyku: "😴 النوم",
+    dua_cat_yemek: "🍽️ الطعام", dua_cat_seyahat: "✈️ السفر",
+    dua_cat_saglik: "💊 المرض", dua_cat_aile: "👨‍👩‍👧 الأسرة",
+    dua_cat_koruma: "🛡️ الحماية", dua_cat_istigfar: "🙏 الاستغفار",
+    dua_cat_rizik: "💰 الرزق", dua_cat_ramazan: "🌙 رمضان",
+    dua_cat_namaz: "🕌 الصلاة", dua_cat_keder: "💔 الحزن",
+    sifa_title: "آيات الشفاء", sifa_badge: "٧ آيات",
+    sifa_desc: "آيات مباركة في القرآن الكريم تشير إلى الشفاء",
+    hizli_title: "وصول سريع للسور", hizli_badge: "الأكثر قراءة",
+    hizli_desc: "السور الأكثر قراءةً والأكثر أهمية",
+    hizli_her_gun: "⭐ سور يومية",
+    hizli_namaz: "🕌 سور الصلاة",
+    hizli_sifa: "💚 الشفاء والحماية",
+    hizli_tesbih: "📿 آيات التسبيح والذكر",
+    ayarlar_title: "الإعدادات", ayarlar_desc: "تخصيص تفضيلات التطبيق",
+    aib_label: "📱 تحميل التطبيق",
+    aib_title: "دائماً معك —<br>استخدمه كتطبيق",
+    aib_desc: "امسح رمز QR وافتح الصفحة وأضفها للشاشة الرئيسية.<br>لا حاجة لـ App Store — مجاني تماماً.",
+  },
+  nl: {
+    nav_home: "📖 Soera's", nav_esma: "✨ 99 Namen", nav_namaz: "🕌 Gebed",
+    nav_kible: "🧭 Qibla", nav_tesbi: "📿 Dhikr", nav_dini: "📅 Isl. dagen",
+    nav_oncesi: "📋 Voor het lezen", nav_dua: "🤲 Smeekbeden", nav_sifa: "💚 Genezing",
+    nav_hizli: "⚡ Snel", nav_favs: "🔖 Favorieten", nav_search: "🔍 Zoeken",
+    nav_ayarlar: "⚙️ Instellingen",
+    bnav_home: "Soera's", bnav_namaz: "Gebed", bnav_tesbi: "Dhikr",
+    bnav_favs: "Favorieten", bnav_more: "Meer",
+    more_esma: "✨ 99 Namen", more_kible: "🧭 Qibla", more_dini: "📅 Isl. dagen",
+    more_oncesi: "📋 Voor het lezen", more_dua: "🤲 Smeekbeden", more_sifa: "💚 Genezingsverzen",
+    more_hizli: "⚡ Snelle toegang", more_search: "🔍 Zoeken", more_ayarlar: "⚙️ Instellingen",
+    hero_sub: "In de naam van Allah, de Barmhartige, de Genadevolle",
+    search_placeholder: "Soera zoeken...",
+    grid_title: "114 Soera's", grid_badge: "ALLE SOERA'S",
+    sec_desc_home: "Klik op de soera die je wilt lezen",
+    vt_sure: "📖 Soera's", vt_juz: "📚 30 Djuz",
+    back_btn: "← Terug",
+    player_track: "Soera geselecteerd — druk ▶ om te starten",
+    btn_trans: "🌍 Vertaling", btn_okunus: "🔤 Transliteratie",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Volgen",
+    esma_title: "99 Namen — الأسماء الحسنى", esma_badge: "99 NAMEN",
+    esma_desc: "De 99 mooie namen van Allah — klik op een kaart voor de betekenis",
+    favs_title: "Mijn Favorieten", favs_desc: "Opgeslagen verzen",
+    search_title: "Vers Zoeken", search_desc: "Zoek woord of uitdrukking in geselecteerde taal",
+    search_inp: "Trefwoord invoeren...",
+    namaz_title: "Gebedstijden", namaz_city: "Locatie wordt gezocht...",
+    namaz_desc: "Dagelijkse gebedstijden op basis van uw locatie",
+    namaz_imsakiye: "📅 Maandelijks schema",
+    namaz_cuma: "🕌 Vrijdagsgebed",
+    namaz_cuma_desc: "Het vrijdagsgebed wordt verricht op het middaguur. Het bijwonen van de preek is verplicht. Het wordt in congregatie verricht in moskeeën.",
+    kible_title: "Qibla-Kompas", kible_desc: "Houd de telefoon vlak — gouden pijl wijst richting de Kaäba",
+    kible_info_title: "📍 Over de Qibla",
+    tesbi_title: "Dhikr & Tasbih", tesbi_desc: "Dhikr selecteren, toevoegen of zoeken in bibliotheek",
+    dini_title: "Islamitische Dagen 2026", dini_desc: "Islamitische bijzondere dagen en nachten van 2026",
+    oncesi_title: "Voor het Lezen van de Koran", oncesi_badge: "BELANGRIJK",
+    oncesi_desc: "Wat aandacht verdient voor het lezen van de Heilige Koran",
+    dua_title: "Smeekbeden", dua_badge: "CATEGORIEËN",
+    dua_desc: "Selecteer een categorie en lees de smeekbeden",
+    dua_cat_sabah: "🌅 Ochtend & Avond", dua_cat_uyku: "😴 Slaap",
+    dua_cat_yemek: "🍽️ Eten", dua_cat_seyahat: "✈️ Reizen",
+    dua_cat_saglik: "💊 Ziekte", dua_cat_aile: "👨‍👩‍👧 Familie",
+    dua_cat_koruma: "🛡️ Bescherming", dua_cat_istigfar: "🙏 Vergiffenis",
+    dua_cat_rizik: "💰 Voorziening", dua_cat_ramazan: "🌙 Ramadan",
+    dua_cat_namaz: "🕌 Gebed", dua_cat_keder: "💔 Verdriet",
+    sifa_title: "Genezingsverzen", sifa_badge: "7 VERZEN",
+    sifa_desc: "Gezegende verzen in de Heilige Koran die wijzen op genezing",
+    hizli_title: "Snelle Toegang tot Soera's", hizli_badge: "POPULAIR",
+    hizli_desc: "Meest gelezen en belangrijke soera's",
+    hizli_her_gun: "⭐ Dagelijkse Soera's",
+    hizli_namaz: "🕌 Gebedssoera's",
+    hizli_sifa: "💚 Genezing en Bescherming",
+    hizli_tesbih: "📿 Tasbih en Dhikr-verzen",
+    ayarlar_title: "Instellingen", ayarlar_desc: "App-voorkeuren aanpassen",
+    aib_label: "📱 APP DOWNLOADEN",
+    aib_title: "Altijd bij je —<br>Gebruik als App",
+    aib_desc: "Scan de QR-code, open de pagina en voeg toe aan het startscherm.<br>Geen App Store nodig — volledig gratis.",
+  },
+  it: {
+    nav_home: "📖 Sure", nav_esma: "✨ 99 Nomi", nav_namaz: "🕌 Preghiera",
+    nav_kible: "🧭 Qibla", nav_tesbi: "📿 Dhikr", nav_dini: "📅 Giorni isl.",
+    nav_oncesi: "📋 Prima della lettura", nav_dua: "🤲 Suppliche", nav_sifa: "💚 Guarigione",
+    nav_hizli: "⚡ Veloce", nav_favs: "🔖 Preferiti", nav_search: "🔍 Cerca",
+    nav_ayarlar: "⚙️ Impostazioni",
+    bnav_home: "Sure", bnav_namaz: "Preghiera", bnav_tesbi: "Dhikr",
+    bnav_favs: "Preferiti", bnav_more: "Altro",
+    more_esma: "✨ 99 Nomi", more_kible: "🧭 Qibla", more_dini: "📅 Giorni isl.",
+    more_oncesi: "📋 Prima della lettura", more_dua: "🤲 Suppliche", more_sifa: "💚 Versetti Guarigione",
+    more_hizli: "⚡ Accesso rapido", more_search: "🔍 Cerca", more_ayarlar: "⚙️ Impostazioni",
+    hero_sub: "Nel nome di Allah, il Compassionevole, il Misericordioso",
+    search_placeholder: "Cerca sura...",
+    grid_title: "114 Sure", grid_badge: "TUTTE LE SURE",
+    sec_desc_home: "Clicca sulla sura che vuoi leggere",
+    vt_sure: "📖 Sure", vt_juz: "📚 30 Juz",
+    back_btn: "← Indietro",
+    player_track: "Sura selezionata — premi ▶ per iniziare",
+    btn_trans: "🌍 Traduzione", btn_okunus: "🔤 Traslitterazione",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Segui",
+    esma_title: "99 Nomi — الأسماء الحسنى", esma_badge: "99 NOMI",
+    esma_desc: "I 99 bellissimi nomi di Allah — clicca su una carta per il significato",
+    favs_title: "I Miei Preferiti", favs_desc: "Versetti salvati",
+    search_title: "Cerca Versetto", search_desc: "Cerca parola o frase nella lingua selezionata",
+    search_inp: "Inserisci parola chiave...",
+    namaz_title: "Orari di Preghiera", namaz_city: "In attesa della posizione...",
+    namaz_desc: "Orari di preghiera giornalieri in base alla tua posizione",
+    namaz_imsakiye: "📅 Calendario Mensile",
+    namaz_cuma: "🕌 Preghiera del Venerdì",
+    namaz_cuma_desc: "La preghiera del venerdì si svolge all'ora di mezzogiorno. Ascoltare la khutba è obbligatorio. Si svolge in congregazione nelle moschee.",
+    kible_title: "Bussola Qibla", kible_desc: "Tieni il telefono piatto — la freccia dorata indica la direzione della Kaaba",
+    kible_info_title: "📍 Sulla Qibla",
+    tesbi_title: "Dhikr & Tasbih", tesbi_desc: "Seleziona, aggiungi o trova dhikr dalla biblioteca",
+    dini_title: "Giorni Islamici 2026", dini_desc: "Giorni e notti islamici speciali del 2026",
+    oncesi_title: "Prima di Leggere il Corano", oncesi_badge: "IMPORTANTE",
+    oncesi_desc: "Cosa tenere a mente prima di leggere il Sacro Corano",
+    dua_title: "Suppliche", dua_badge: "CATEGORIE",
+    dua_desc: "Seleziona una categoria e leggi le suppliche",
+    dua_cat_sabah: "🌅 Mattina & Sera", dua_cat_uyku: "😴 Sonno",
+    dua_cat_yemek: "🍽️ Cibo", dua_cat_seyahat: "✈️ Viaggio",
+    dua_cat_saglik: "💊 Malattia", dua_cat_aile: "👨‍👩‍👧 Famiglia",
+    dua_cat_koruma: "🛡️ Protezione", dua_cat_istigfar: "🙏 Perdono",
+    dua_cat_rizik: "💰 Sostentamento", dua_cat_ramazan: "🌙 Ramadan",
+    dua_cat_namaz: "🕌 Preghiera", dua_cat_keder: "💔 Tristezza",
+    sifa_title: "Versetti di Guarigione", sifa_badge: "7 VERSETTI",
+    sifa_desc: "Versetti benedetti nel Sacro Corano che indicano la guarigione",
+    hizli_title: "Accesso Rapido alle Sure", hizli_badge: "POPOLARI",
+    hizli_desc: "Le sure più lette e importanti",
+    hizli_her_gun: "⭐ Sure Quotidiane",
+    hizli_namaz: "🕌 Sure della Preghiera",
+    hizli_sifa: "💚 Guarigione e Protezione",
+    hizli_tesbih: "📿 Versetti Tasbih e Dhikr",
+    ayarlar_title: "Impostazioni", ayarlar_desc: "Personalizza le preferenze dell'app",
+    aib_label: "📱 SCARICA L'APP",
+    aib_title: "Sempre con te —<br>Usa come App",
+    aib_desc: "Scansiona il QR code, apri la pagina e aggiungi alla schermata iniziale.<br>Nessun App Store necessario — completamente gratuito.",
+  },
+  fa: {
+    nav_home: "📖 سوره‌ها", nav_esma: "✨ اسماء الحسنی", nav_namaz: "🕌 نماز",
+    nav_kible: "🧭 قبله", nav_tesbi: "📿 ذکر", nav_dini: "📅 روزهای اسلامی",
+    nav_oncesi: "📋 قبل از قرائت", nav_dua: "🤲 دعاها", nav_sifa: "💚 شفا",
+    nav_hizli: "⚡ سریع", nav_favs: "🔖 موردعلاقه‌ها", nav_search: "🔍 جستجو",
+    nav_ayarlar: "⚙️ تنظیمات",
+    bnav_home: "سوره‌ها", bnav_namaz: "نماز", bnav_tesbi: "ذکر",
+    bnav_favs: "علاقه‌مندی", bnav_more: "بیشتر",
+    more_esma: "✨ اسماء الحسنی", more_kible: "🧭 قبله", more_dini: "📅 روزهای اسلامی",
+    more_oncesi: "📋 قبل از قرائت", more_dua: "🤲 دعاها", more_sifa: "💚 آیات شفا",
+    more_hizli: "⚡ دسترسی سریع", more_search: "🔍 جستجو", more_ayarlar: "⚙️ تنظیمات",
+    hero_sub: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    search_placeholder: "جستجوی سوره...",
+    grid_title: "۱۱۴ سوره", grid_badge: "همه سوره‌ها",
+    sec_desc_home: "روی سوره‌ای که می‌خواهید بخوانید کلیک کنید",
+    vt_sure: "📖 سوره‌ها", vt_juz: "📚 ۳۰ جزء",
+    back_btn: "← بازگشت",
+    player_track: "سوره انتخاب شد — ▶ را فشار دهید",
+    btn_trans: "🌍 ترجمه", btn_okunus: "🔤 تلفظ",
+    btn_tafsir: "📚 تفسیر", btn_follow: "👁 پیگیری",
+    esma_title: "اسماء الحسنی — الأسماء الحسنى", esma_badge: "۹۹ نام",
+    esma_desc: "۹۹ نام زیبای الله — برای دیدن معنی روی کارت کلیک کنید",
+    favs_title: "موردعلاقه‌های من", favs_desc: "آیات ذخیره‌شده",
+    search_title: "جستجوی آیه", search_desc: "کلمه یا عبارت را در زبان انتخابی جستجو کنید",
+    search_inp: "کلیدواژه وارد کنید...",
+    namaz_title: "اوقات نماز", namaz_city: "در انتظار موقعیت...",
+    namaz_desc: "اوقات نماز روزانه بر اساس موقعیت شما",
+    namaz_imsakiye: "📅 تقویم ماهانه",
+    namaz_cuma: "🕌 نماز جمعه",
+    namaz_cuma_desc: "نماز جمعه در وقت ظهر خوانده می‌شود. شنیدن خطبه واجب است. به صورت جماعت در مساجد خوانده می‌شود.",
+    kible_title: "قطب‌نمای قبله", kible_desc: "گوشی را صاف نگه دارید — فلش طلایی جهت کعبه را نشان می‌دهد",
+    kible_info_title: "📍 درباره قبله",
+    tesbi_title: "ذکر و تسبیح", tesbi_desc: "ذکر انتخاب کنید، اضافه کنید یا در کتابخانه بیابید",
+    dini_title: "روزهای اسلامی ۲۰۲۶", dini_desc: "روزها و شب‌های اسلامی ویژه سال ۲۰۲۶",
+    oncesi_title: "قبل از تلاوت قرآن", oncesi_badge: "مهم",
+    oncesi_desc: "آنچه قبل از خواندن قرآن کریم باید رعایت شود",
+    dua_title: "دعاها", dua_badge: "دسته‌بندی‌ها",
+    dua_desc: "دسته‌بندی را انتخاب کنید و دعاها را بخوانید",
+    dua_cat_sabah: "🌅 صبح و شب", dua_cat_uyku: "😴 خواب",
+    dua_cat_yemek: "🍽️ غذا", dua_cat_seyahat: "✈️ سفر",
+    dua_cat_saglik: "💊 بیماری", dua_cat_aile: "👨‍👩‍👧 خانواده",
+    dua_cat_koruma: "🛡️ حفاظت", dua_cat_istigfar: "🙏 استغفار",
+    dua_cat_rizik: "💰 رزق", dua_cat_ramazan: "🌙 رمضان",
+    dua_cat_namaz: "🕌 نماز", dua_cat_keder: "💔 غم",
+    sifa_title: "آیات شفا", sifa_badge: "۷ آیه",
+    sifa_desc: "آیات مبارک قرآن کریم که به شفا اشاره دارند",
+    hizli_title: "دسترسی سریع به سوره‌ها", hizli_badge: "محبوب",
+    hizli_desc: "پرخوانده‌ترین و مهم‌ترین سوره‌ها",
+    hizli_her_gun: "⭐ سوره‌های روزانه",
+    hizli_namaz: "🕌 سوره‌های نماز",
+    hizli_sifa: "💚 شفا و حفاظت",
+    hizli_tesbih: "📿 آیات تسبیح و ذکر",
+    ayarlar_title: "تنظیمات", ayarlar_desc: "تنظیمات برنامه را سفارشی کنید",
+    aib_label: "📱 دانلود برنامه",
+    aib_title: "همیشه همراه شما —<br>به عنوان اپلیکیشن استفاده کنید",
+    aib_desc: "QR کد را اسکن کنید، صفحه را باز کنید و به صفحه اصلی اضافه کنید.<br>نیازی به App Store نیست — کاملاً رایگان.",
+  },
+  ms: {
+    nav_home: "📖 Surah", nav_esma: "✨ Asmaul Husna", nav_namaz: "🕌 Solat",
+    nav_kible: "🧭 Kiblat", nav_tesbi: "📿 Zikir", nav_dini: "📅 Hari Islam",
+    nav_oncesi: "📋 Sebelum Baca", nav_dua: "🤲 Doa", nav_sifa: "💚 Penyembuhan",
+    nav_hizli: "⚡ Pantas", nav_favs: "🔖 Kegemaran", nav_search: "🔍 Cari",
+    nav_ayarlar: "⚙️ Tetapan",
+    bnav_home: "Surah", bnav_namaz: "Solat", bnav_tesbi: "Zikir",
+    bnav_favs: "Kegemaran", bnav_more: "Lagi",
+    more_esma: "✨ Asmaul Husna", more_kible: "🧭 Kiblat", more_dini: "📅 Hari Islam",
+    more_oncesi: "📋 Sebelum Baca", more_dua: "🤲 Doa", more_sifa: "💚 Ayat Penyembuhan",
+    more_hizli: "⚡ Akses Pantas", more_search: "🔍 Cari", more_ayarlar: "⚙️ Tetapan",
+    hero_sub: "Dengan nama Allah Yang Maha Pemurah lagi Maha Penyayang",
+    search_placeholder: "Cari surah...",
+    grid_title: "114 Surah", grid_badge: "SEMUA SURAH",
+    sec_desc_home: "Klik pada surah yang ingin anda baca",
+    vt_sure: "📖 Surah", vt_juz: "📚 30 Juzuk",
+    back_btn: "← Kembali",
+    player_track: "Surah dipilih — tekan ▶ untuk mula",
+    btn_trans: "🌍 Terjemahan", btn_okunus: "🔤 Transliterasi",
+    btn_tafsir: "📚 Tafsir", btn_follow: "👁 Ikuti",
+    esma_title: "Asmaul Husna — الأسماء الحسنى", esma_badge: "99 NAMA",
+    esma_desc: "99 nama indah Allah — klik kad untuk lihat makna",
+    favs_title: "Kegemaran Saya", favs_desc: "Ayat yang disimpan",
+    search_title: "Cari Ayat", search_desc: "Cari perkataan atau frasa dalam bahasa yang dipilih",
+    search_inp: "Masukkan kata kunci...",
+    namaz_title: "Waktu Solat", namaz_city: "Menunggu lokasi...",
+    namaz_desc: "Waktu solat harian berdasarkan lokasi anda",
+    namaz_imsakiye: "📅 Jadual Bulanan",
+    namaz_cuma: "🕌 Solat Jumaat",
+    namaz_cuma_desc: "Solat Jumaat dilakukan pada waktu Zohor. Mendengar khutbah adalah wajib. Dilakukan secara berjemaah di masjid.",
+    kible_title: "Kompas Kiblat", kible_desc: "Pegang telefon mendatar — anak panah emas menunjuk arah Kaabah",
+    kible_info_title: "📍 Tentang Kiblat",
+    tesbi_title: "Zikir & Tasbih", tesbi_desc: "Pilih, tambah atau cari zikir dari perpustakaan",
+    dini_title: "Hari Islam 2026", dini_desc: "Hari dan malam istimewa Islam tahun 2026",
+    oncesi_title: "Sebelum Membaca Al-Quran", oncesi_badge: "PENTING",
+    oncesi_desc: "Perkara yang perlu diperhatikan sebelum membaca Al-Quran",
+    dua_title: "Doa", dua_badge: "KATEGORI",
+    dua_desc: "Pilih kategori dan baca doa",
+    dua_cat_sabah: "🌅 Pagi & Petang", dua_cat_uyku: "😴 Tidur",
+    dua_cat_yemek: "🍽️ Makan", dua_cat_seyahat: "✈️ Perjalanan",
+    dua_cat_saglik: "💊 Sakit", dua_cat_aile: "👨‍👩‍👧 Keluarga",
+    dua_cat_koruma: "🛡️ Perlindungan", dua_cat_istigfar: "🙏 Istighfar",
+    dua_cat_rizik: "💰 Rezeki", dua_cat_ramazan: "🌙 Ramadan",
+    dua_cat_namaz: "🕌 Solat", dua_cat_keder: "💔 Kesedihan",
+    sifa_title: "Ayat Penyembuhan", sifa_badge: "7 AYAT",
+    sifa_desc: "Ayat-ayat berkat dalam Al-Quran yang menunjukkan penyembuhan",
+    hizli_title: "Akses Pantas ke Surah", hizli_badge: "POPULAR",
+    hizli_desc: "Surah yang paling banyak dibaca dan penting",
+    hizli_her_gun: "⭐ Surah Harian",
+    hizli_namaz: "🕌 Surah Solat",
+    hizli_sifa: "💚 Penyembuhan dan Perlindungan",
+    hizli_tesbih: "📿 Ayat Tasbih dan Zikir",
+    ayarlar_title: "Tetapan", ayarlar_desc: "Sesuaikan pilihan aplikasi",
+    aib_label: "📱 MUAT TURUN APLIKASI",
+    aib_title: "Sentiasa bersama anda —<br>Guna sebagai Aplikasi",
+    aib_desc: "Imbas kod QR, buka halaman dan tambah ke skrin utama.<br>Tidak perlu App Store — percuma sepenuhnya.",
+  },
+  sw: {
+    nav_home: "📖 Sura", nav_esma: "✨ Majina 99", nav_namaz: "🕌 Sala",
+    nav_kible: "🧭 Qibla", nav_tesbi: "📿 Dhikr", nav_dini: "📅 Siku za Kiislamu",
+    nav_oncesi: "📋 Kabla ya Kusoma", nav_dua: "🤲 Dua", nav_sifa: "💚 Uponyaji",
+    nav_hizli: "⚡ Haraka", nav_favs: "🔖 Vipendwa", nav_search: "🔍 Tafuta",
+    nav_ayarlar: "⚙️ Mipangilio",
+    bnav_home: "Sura", bnav_namaz: "Sala", bnav_tesbi: "Dhikr",
+    bnav_favs: "Vipendwa", bnav_more: "Zaidi",
+    more_esma: "✨ Majina 99", more_kible: "🧭 Qibla", more_dini: "📅 Siku za Kiislamu",
+    more_oncesi: "📋 Kabla ya Kusoma", more_dua: "🤲 Dua", more_sifa: "💚 Aya za Uponyaji",
+    more_hizli: "⚡ Ufikiaji wa Haraka", more_search: "🔍 Tafuta", more_ayarlar: "⚙️ Mipangilio",
+    hero_sub: "Kwa jina la Mwenyezi Mungu, Mwenye rehema nyingi, Mwenye kurehemu",
+    search_placeholder: "Tafuta sura...",
+    grid_title: "Sura 114", grid_badge: "SURA ZOTE",
+    sec_desc_home: "Bonyeza sura unayotaka kusoma",
+    vt_sure: "📖 Sura", vt_juz: "📚 Juzuu 30",
+    back_btn: "← Rudi",
+    player_track: "Sura imechaguliwa — bonyeza ▶ kuanza",
+    btn_trans: "🌍 Tafsiri", btn_okunus: "🔤 Matamshi",
+    btn_tafsir: "📚 Tafsiri", btn_follow: "👁 Fuata",
+    esma_title: "Majina 99 — الأسماء الحسنى", esma_badge: "MAJINA 99",
+    esma_desc: "Majina 99 mazuri ya Allah — bonyeza kadi kuona maana",
+    favs_title: "Vipendwa Vyangu", favs_desc: "Aya zilizohifadhiwa",
+    search_title: "Tafuta Aya", search_desc: "Tafuta neno au msemo katika lugha iliyochaguliwa",
+    search_inp: "Ingiza neno la utafutaji...",
+    namaz_title: "Nyakati za Sala", namaz_city: "Inasubiri eneo...",
+    namaz_desc: "Nyakati za sala za kila siku kulingana na mahali ulipo",
+    namaz_imsakiye: "📅 Ratiba ya Kila Mwezi",
+    namaz_cuma: "🕌 Sala ya Ijumaa",
+    namaz_cuma_desc: "Sala ya Ijumaa inafanywa wakati wa adhuhuri. Kusikia khutba ni faradhi. Inafanywa kwa jamaa msikitini.",
+    kible_title: "Dira ya Qibla", kible_desc: "Shikilia simu usawa — mshale wa dhahabu unaelekeza Kaaba",
+    kible_info_title: "📍 Kuhusu Qibla",
+    tesbi_title: "Dhikr & Tasbih", tesbi_desc: "Chagua, ongeza au tafuta dhikr kutoka maktabani",
+    dini_title: "Siku za Kiislamu 2026", dini_desc: "Siku na usiku maalum wa Kiislamu wa 2026",
+    oncesi_title: "Kabla ya Kusoma Qurani", oncesi_badge: "MUHIMU",
+    oncesi_desc: "Mambo ya kuzingatia kabla ya kusoma Qurani Tukufu",
+    dua_title: "Dua", dua_badge: "MAKUNDI",
+    dua_desc: "Chagua kundi na usome dua",
+    dua_cat_sabah: "🌅 Asubuhi & Jioni", dua_cat_uyku: "😴 Usingizi",
+    dua_cat_yemek: "🍽️ Chakula", dua_cat_seyahat: "✈️ Safari",
+    dua_cat_saglik: "💊 Ugonjwa", dua_cat_aile: "👨‍👩‍👧 Familia",
+    dua_cat_koruma: "🛡️ Ulinzi", dua_cat_istigfar: "🙏 Msamaha",
+    dua_cat_rizik: "💰 Riziki", dua_cat_ramazan: "🌙 Ramadhani",
+    dua_cat_namaz: "🕌 Sala", dua_cat_keder: "💔 Huzuni",
+    sifa_title: "Aya za Uponyaji", sifa_badge: "AYA 7",
+    sifa_desc: "Aya zenye baraka katika Qurani Tukufu zinazoashiria uponyaji",
+    hizli_title: "Ufikiaji wa Haraka wa Sura", hizli_badge: "MAARUFU",
+    hizli_desc: "Sura zinazosomwa zaidi na muhimu",
+    hizli_her_gun: "⭐ Sura za Kila Siku",
+    hizli_namaz: "🕌 Sura za Sala",
+    hizli_sifa: "💚 Uponyaji na Ulinzi",
+    hizli_tesbih: "📿 Aya za Tasbih na Dhikr",
+    ayarlar_title: "Mipangilio", ayarlar_desc: "Binafsisha mapendeleo ya programu",
+    aib_label: "📱 PAKUA PROGRAMU",
+    aib_title: "Daima nawe —<br>Tumia kama Programu",
+    aib_desc: "Skani msimbo wa QR, fungua ukurasa na ongeza kwenye skrini ya nyumbani.<br>Hakuna haja ya App Store — bila malipo kabisa.",
+  }
+};
+
+// ── applyUITranslations ──
+function applyUITranslations(l) {
+  const t = UI_TEXT[l] || UI_TEXT['tr'];
+
+  // Header nav butonları
+  const setTxt = (id, v) => { const el=document.getElementById(id); if(el && v) el.innerHTML=v; };
+  const setPlaceholder = (id, v) => { const el=document.getElementById(id); if(el && v) el.placeholder=v; };
+  const setInner = (sel, v) => { const el=document.querySelector(sel); if(el && v) el.innerHTML=v; };
+
+  setTxt('tab-home', t.nav_home);
+  setTxt('tab-esma', t.nav_esma);
+  setTxt('tab-namaz', t.nav_namaz);
+  setTxt('tab-kible', t.nav_kible);
+  setTxt('tab-tesbi', t.nav_tesbi);
+  setTxt('tab-dini', t.nav_dini);
+  setTxt('tab-oncesi', t.nav_oncesi);
+  setTxt('tab-dua', t.nav_dua);
+  setTxt('tab-sifa', t.nav_sifa);
+  setTxt('tab-hizli', t.nav_hizli);
+  setTxt('tab-favs', t.nav_favs);
+  setTxt('tab-search', t.nav_search);
+  setTxt('tab-ayarlar', t.nav_ayarlar);
+
+  // Bottom nav
+  setInner('#bnav-home .ico + *', null); // span dışı text node
+  const bnavLabels = document.querySelectorAll('.bnav-btn');
+  // ID bazlı yaklaşım
+  ['home','namaz','tesbi','favs','more'].forEach(k => {
+    const btn = document.getElementById('bnav-'+k);
+    if(!btn) return;
+    // İkon span hariç text node'u güncelle
+    const txtNode = [...btn.childNodes].find(n=>n.nodeType===3);
+    if(txtNode) txtNode.textContent = t['bnav_'+k];
+  });
+
+  // More menu
+  const moreItems = document.querySelectorAll('#moreMenu .more-item');
+  const moreKeys = ['esma','kible','dini','oncesi','dua','sifa','hizli','search','ayarlar'];
+  moreItems.forEach((el,i)=>{ if(t['more_'+moreKeys[i]]) el.innerHTML=t['more_'+moreKeys[i]]; });
+
+  // Home
+  setInner('.hero-sub', t.hero_sub);
+  setPlaceholder('homeQ', t.search_placeholder);
+  setTxt('gridTitle', t.grid_title);
+  setTxt('gridBadge', t.grid_badge);
+  setInner('#page-home .sec-desc', t.sec_desc_home);
+  setTxt('vt-sure', t.vt_sure);
+  setTxt('vt-juz', t.vt_juz);
+
+  // Reader
+  setTxt('playBtn', '▶');
+  const backBtn = document.querySelector('.back-btn');
+  if(backBtn) backBtn.innerHTML = t.back_btn;
+  const pTrack = document.getElementById('pTrack');
+  if(pTrack && pTrack.textContent.trim() !== '' && !pTrack.dataset.playing) pTrack.textContent = t.player_track;
+  setTxt('btnTrans', t.btn_trans);
+  setTxt('btnGlobalOkunus', t.btn_okunus);
+  setTxt('btnGlobalTafsir', t.btn_tafsir);
+  setTxt('btnFollow', t.btn_follow);
+
+  // Esma
+  setInner('#page-esma .sec-head h2', t.esma_title);
+  setInner('#page-esma .sec-badge', t.esma_badge);
+  setInner('#page-esma .sec-desc', t.esma_desc);
+
+  // Favs
+  setInner('#page-favs .sec-head h2', t.favs_title);
+  setInner('#page-favs .sec-desc', t.favs_desc);
+
+  // Search
+  setInner('#page-search .sec-head h2', t.search_title);
+  setInner('#page-search .sec-desc', t.search_desc);
+  setPlaceholder('searchQ', t.search_inp);
+
+  // Namaz
+  setInner('#page-namaz .sec-head h2', t.namaz_title);
+  const namazCity = document.getElementById('namazCity');
+  if(namazCity && !namazCity.dataset.set) namazCity.textContent = t.namaz_city;
+  setInner('#page-namaz .sec-desc', t.namaz_desc);
+  const imsakiyeH = document.querySelector('#page-namaz .sec-head h2[style]');
+  if(imsakiyeH) imsakiyeH.innerHTML = t.namaz_imsakiye;
+  // Cuma namazı card
+  const cumaCards = document.querySelectorAll('#page-namaz .info-card h3');
+  cumaCards.forEach(h => { if(h.textContent.includes('Cuma') || h.innerHTML.includes('🕌')) h.innerHTML = t.namaz_cuma; });
+  const cumaDescs = document.querySelectorAll('#page-namaz .info-card p');
+  cumaDescs.forEach(p => { if(p.textContent.includes('Cuma') || p.textContent.includes('hutbe') || p.textContent.includes('Friday') || p.textContent.includes('Freitag')) p.textContent = t.namaz_cuma_desc; });
+
+  // Kible
+  setInner('#page-kible .sec-head h2', t.kible_title);
+  setInner('#page-kible .sec-desc', t.kible_desc);
+  const kibleInfoH = document.querySelector('#page-kible .info-card h3');
+  if(kibleInfoH) kibleInfoH.innerHTML = t.kible_info_title;
+
+  // Tesbi
+  setInner('#page-tesbi .sec-head h2', t.tesbi_title);
+  setInner('#page-tesbi .sec-desc', t.tesbi_desc);
+
+  // Dini
+  setInner('#page-dini .sec-head h2', t.dini_title);
+  setInner('#page-dini .sec-desc', t.dini_desc);
+
+  // Oncesi
+  setInner('#page-oncesi .sec-head h2', t.oncesi_title);
+  setInner('#page-oncesi .sec-badge', t.oncesi_badge);
+  setInner('#page-oncesi .sec-desc', t.oncesi_desc);
+
+  // Dua
+  setInner('#page-dua .sec-head h2', t.dua_title);
+  setInner('#page-dua .sec-badge', t.dua_badge);
+  setInner('#page-dua .sec-desc', t.dua_desc);
+  // Dua kategorileri
+  const duaBtns = document.querySelectorAll('.dua-cat-btn');
+  const duaCatKeys = ['sabah','uyku','yemek','seyahat','saglik','aile','koruma','istigfar','rizik','ramazan','namaz','keder'];
+  duaBtns.forEach((btn,i) => { if(t['dua_cat_'+duaCatKeys[i]]) btn.innerHTML = t['dua_cat_'+duaCatKeys[i]]; });
+
+  // Sifa
+  setInner('#page-sifa .sec-head h2', t.sifa_title);
+  setInner('#page-sifa .sec-badge', t.sifa_badge);
+  setInner('#page-sifa .sec-desc', t.sifa_desc);
+
+  // Hizli
+  setInner('#page-hizli .sec-head h2', t.hizli_title);
+  setInner('#page-hizli .sec-badge', t.hizli_badge);
+  setInner('#page-hizli .sec-desc', t.hizli_desc);
+  // Hizli alt başlıklar
+  const hizliHeads = document.querySelectorAll('#page-hizli .sec-head h2[style]');
+  const hizliKeys = ['hizli_her_gun','hizli_namaz','hizli_sifa','hizli_tesbih'];
+  hizliHeads.forEach((h,i) => { if(t[hizliKeys[i]]) h.innerHTML = t[hizliKeys[i]]; });
+
+  // Ayarlar
+  setInner('#page-ayarlar .sec-head h2', t.ayarlar_title);
+  setInner('#page-ayarlar .sec-desc', t.ayarlar_desc);
+
+  // App install banner
+  const aibLabel = document.querySelector('.aib-label');
+  if(aibLabel) aibLabel.innerHTML = t.aib_label;
+  const aibTitle = document.querySelector('.aib-title');
+  if(aibTitle) aibTitle.innerHTML = t.aib_title;
+  const aibDesc = document.querySelector('.aib-desc');
+  if(aibDesc) aibDesc.innerHTML = t.aib_desc;
+
+  // RTL dil desteği (Arapça, Urdu, Farsça)
+  const rtlLangs = ['ar','ur','fa'];
+  document.body.dir = rtlLangs.includes(l) ? 'rtl' : 'ltr';
+}
+
 function changeLang(l) {
   lang = l;
   saveSetting('lang', l);
   buildSurahGrid(buildSurahs());
   if(surahData) openSurah(surahData.n);
+  // UI çevirilerini uygula
+  applyUITranslations(l);
   // Dil değişince tefsir cache'i temizle (yeniden yüklensin)
   document.querySelectorAll('[id^="tafsir"]').forEach(el => {
     if(el.id.startsWith('tafsir') && !el.id.startsWith('tafsirWrap') && !el.id.startsWith('tafsirBtn') && !el.id.startsWith('tafsirLabel')) {
