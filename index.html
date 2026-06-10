@@ -7,7 +7,7 @@
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#00c853">
+<meta name="theme-color" content="#2a4a4e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,87 +21,91 @@
    THEME VARIABLES
 ══════════════════════════════════════ */
 :root {
-  --g1: #00e676;
-  --g2: #00c853;
-  --g3: #1b5e20;
-  --g4: #2e7d32;
-  --g5: #43a047;
-  --gold: #ffd600;
-  --gold2: #ffee58;
+  /* DARK MODE accent: altın/amber */
+  --g1: #c9a84c;
+  --g2: #b8922e;
+  --g3: #7a5c1a;
+  --g4: #8f6d22;
+  --g5: #a07c2a;
+  --gold: #c9a84c;
+  --gold2: #e0c070;
   --radius: 14px;
   --radius-lg: 20px;
 }
 [data-theme="dark"] {
-  --bg: #0d1f0e;
-  --bg2: #122614;
-  --bg3: #183018;
-  --bg4: #1e3a20;
-  --bg5: #254426;
-  --card: #162e18;
-  --card2: #1c3a1e;
-  --card-esma: #1e3820;
-  --border: rgba(0,220,100,0.22);
-  --border2: rgba(0,220,100,0.38);
-  --border3: rgba(0,220,100,0.6);
-  --text: #f0f7f0;
-  --text2: #d4ecd5;
-  --text3: #8fd490;
-  --text4: #5cb85c;
-  --shadow: rgba(0,200,83,0.18);
-  --esma-bg: #1a3a1c;
-  --esma-border: rgba(0,200,83,0.45);
-  --esma-ar: #69f0ae;
-  --surah-card: #162e18;
-  --surah-hover: #1e3820;
+  /* Derin lacivert-antrasit, Osmanlı gecesi */
+  --bg: #0e1017;
+  --bg2: #13151e;
+  --bg3: #191c28;
+  --bg4: #1f2333;
+  --bg5: #252a3d;
+  --card: #14172200;
+  --card: #141720;
+  --card2: #1a1e2c;
+  --card-esma: #1c1f2e;
+  --border: rgba(180,148,60,0.16);
+  --border2: rgba(180,148,60,0.28);
+  --border3: rgba(180,148,60,0.48);
+  --text: #f0ece0;
+  --text2: #d8d0b8;
+  --text3: #a09070;
+  --text4: #786848;
+  --shadow: rgba(180,148,60,0.12);
+  --esma-bg: #191a28;
+  --esma-border: rgba(180,148,60,0.32);
+  --esma-ar: #d4b86a;
+  --surah-card: #141720;
+  --surah-hover: #1a1e2c;
 }
 [data-theme="light"] {
-  --bg: #f0f7f0;
-  --bg2: #e3f0e4;
-  --bg3: #c8e6ca;
-  --bg4: #a5d6a7;
-  --bg5: #81c784;
+  /* Krem fildişi, temiz premium */
+  --bg: #f7f3eb;
+  --bg2: #efe9db;
+  --bg3: #e2d9c8;
+  --bg4: #d0c4ae;
+  --bg5: #bfb098;
   --card: #ffffff;
-  --card2: #f5fbf5;
-  --card-esma: #e8f5e9;
-  --border: rgba(46,125,50,0.15);
-  --border2: rgba(46,125,50,0.3);
-  --border3: rgba(46,125,50,0.6);
-  --text: #0d1f0e;
-  --text2: #1b3a1d;
-  --text3: #2e5e30;
-  --text4: #4a7d4c;
-  --shadow: rgba(46,125,50,0.1);
-  --esma-bg: #2e7d32;
-  --esma-border: rgba(27,94,32,0.5);
+  --card2: #faf7f2;
+  --card-esma: #f0ebe0;
+  --border: rgba(100,80,40,0.12);
+  --border2: rgba(100,80,40,0.22);
+  --border3: rgba(100,80,40,0.42);
+  --text: #1a160e;
+  --text2: #2e2618;
+  --text3: #5a4a28;
+  --text4: #7a6840;
+  --shadow: rgba(100,80,40,0.10);
+  --esma-bg: #2a4a4e;
+  --esma-border: rgba(42,74,78,0.5);
   --esma-ar: #ffffff;
   --surah-card: #ffffff;
-  --surah-hover: #f1f8f1;
+  --surah-hover: #faf7f2;
 }
-/* Light mod — tutarlı koyu yeşil renk sistemi */
-[data-theme="light"] .bismillah { color: #1b5e20 !important; text-shadow: none !important; }
-[data-theme="light"] .s-ar { color: #1b5e20 !important; }
-[data-theme="light"] .s-num { color: #fff !important; background: #2e7d32 !important; }
-[data-theme="light"] .s-name { color: #1b3a1d !important; font-weight: 700 !important; }
-[data-theme="light"] .s-meta { color: #4a7d4c !important; }
-[data-theme="light"] .sec-head h2 { color: #1b5e20 !important; }
-[data-theme="light"] .r-title { color: #1b5e20 !important; }
-[data-theme="light"] .e-ar { color: #1b5e20 !important; }
-[data-theme="light"] .fav-ref { color: #1b5e20 !important; }
-[data-theme="light"] .res-ref { color: #1b5e20 !important; }
-[data-theme="light"] .logo-text { color: #1b5e20 !important; }
-[data-theme="light"] .dua-title { color: #1b5e20 !important; }
-[data-theme="light"] .info-card h3 { color: #1b5e20 !important; }
-[data-theme="light"] .quick-ar { color: #1b5e20 !important; }
-[data-theme="light"] .nav-btn.active { background: #2e7d32 !important; color: #fff !important; }
-[data-theme="light"] .nav-btn:hover { color: #1b5e20 !important; }
-[data-theme="light"] .sec-badge { background: rgba(27,94,32,0.1) !important; color: #1b5e20 !important; border-color: rgba(27,94,32,0.3) !important; }
-[data-theme="light"] .badge-m { background: rgba(27,94,32,0.1) !important; color: #1b5e20 !important; }
-[data-theme="light"] .ay-btn:hover, [data-theme="light"] .ay-btn.saved { color: #1b5e20 !important; border-color: #2e7d32 !important; }
-[data-theme="light"] .ctrl-btn.on, [data-theme="light"] .ctrl-btn:hover { color: #1b5e20 !important; }
-[data-theme="light"] .play-btn { background: linear-gradient(135deg, #2e7d32, #1b5e20) !important; }
-[data-theme="light"] .ayah-card.active, [data-theme="light"] .ayah-card.playing { border-color: #2e7d32 !important; }
-[data-theme="light"] .juz-num { color: #1b5e20 !important; }
-[data-theme="light"] .juz-surah-pill:hover { color: #1b5e20 !important; border-color: #2e7d32 !important; }
+/* Light mod — krem & koyu teal renk sistemi */
+[data-theme="light"] .bismillah { color: #2a4a4e !important; text-shadow: none !important; }
+[data-theme="light"] .s-ar { color: #2a4a4e !important; }
+[data-theme="light"] .s-num { color: #fff !important; background: #2a4a4e !important; }
+[data-theme="light"] .s-name { color: #1a160e !important; font-weight: 700 !important; }
+[data-theme="light"] .s-meta { color: #7a6840 !important; }
+[data-theme="light"] .sec-head h2 { color: #2a4a4e !important; }
+[data-theme="light"] .r-title { color: #2a4a4e !important; }
+[data-theme="light"] .e-ar { color: #2a4a4e !important; }
+[data-theme="light"] .fav-ref { color: #2a4a4e !important; }
+[data-theme="light"] .res-ref { color: #2a4a4e !important; }
+[data-theme="light"] .logo-text { color: #2a4a4e !important; }
+[data-theme="light"] .dua-title { color: #2a4a4e !important; }
+[data-theme="light"] .info-card h3 { color: #2a4a4e !important; }
+[data-theme="light"] .quick-ar { color: #2a4a4e !important; }
+[data-theme="light"] .nav-btn.active { background: #2a4a4e !important; color: #fff !important; }
+[data-theme="light"] .nav-btn:hover { color: #2a4a4e !important; }
+[data-theme="light"] .sec-badge { background: rgba(42,74,78,0.08) !important; color: #2a4a4e !important; border-color: rgba(42,74,78,0.25) !important; }
+[data-theme="light"] .badge-m { background: rgba(42,74,78,0.08) !important; color: #2a4a4e !important; }
+[data-theme="light"] .ay-btn:hover, [data-theme="light"] .ay-btn.saved { color: #2a4a4e !important; border-color: #2a4a4e !important; }
+[data-theme="light"] .ctrl-btn.on, [data-theme="light"] .ctrl-btn:hover { color: #2a4a4e !important; }
+[data-theme="light"] .play-btn { background: linear-gradient(135deg, #2a4a4e, #1e3638) !important; }
+[data-theme="light"] .ayah-card.active, [data-theme="light"] .ayah-card.playing { border-color: #2a4a4e !important; }
+[data-theme="light"] .juz-num { color: #2a4a4e !important; }
+[data-theme="light"] .juz-surah-pill:hover { color: #2a4a4e !important; border-color: #2a4a4e !important; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -121,8 +125,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(0,230,118,0.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(0,200,83,0.04) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, rgba(180,148,60,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(160,120,50,0.04) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -161,7 +165,7 @@ body::before {
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   font-size: 22px;
-  box-shadow: 0 0 16px rgba(0,200,83,0.5);
+  box-shadow: 0 0 16px rgba(160,120,50,0.5);
 }
 .logo-text { font-size: 17px; font-weight: 800; color: var(--g1); letter-spacing: -0.3px; }
 .logo-sub { font-size: 11px; color: var(--text3); font-family: 'Noto Naskh Arabic'; }
@@ -186,7 +190,7 @@ body::before {
   background: var(--g2);
   color: #fff;
   font-weight: 800;
-  box-shadow: 0 3px 12px rgba(0,200,83,0.35);
+  box-shadow: 0 3px 12px rgba(160,120,50,0.35);
 }
 
 .header-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
@@ -230,7 +234,7 @@ body::before {
   font-size: clamp(28px, 5vw, 58px);
   line-height: 1.6;
   color: var(--g1);
-  text-shadow: 0 0 30px rgba(0,230,118,0.3);
+  text-shadow: 0 0 30px rgba(180,148,60,0.3);
   margin-bottom: 8px;
 }
 .hero-sub { font-size: 14px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
@@ -257,7 +261,7 @@ body::before {
   font-family: 'Outfit', sans-serif;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.search-inp:focus { border-color: var(--g1); box-shadow: 0 0 0 3px rgba(0,230,118,0.1); }
+.search-inp:focus { border-color: var(--g1); box-shadow: 0 0 0 3px rgba(180,148,60,0.1); }
 .search-inp::placeholder { color: var(--text4); }
 .search-ico {
   position: absolute;
@@ -285,7 +289,7 @@ body::before {
 .sec-head h2 { font-size: 17px; font-weight: 600; color: var(--g1); }
 .sec-badge {
   font-size: 10px; font-weight: 600;
-  background: rgba(0,230,118,0.12);
+  background: rgba(180,148,60,0.12);
   color: var(--g1);
   border: 1px solid var(--border2);
   padding: 2px 8px; border-radius: 20px;
@@ -316,16 +320,16 @@ body::before {
   transform: translateY(-3px);
   box-shadow: 0 8px 28px var(--shadow);
 }
-[data-theme="light"] .surah-card { background: #2e7d32; border-color: #1b5e20; }
-[data-theme="light"] .surah-card:hover { background: #388e3c; border-color: #1b5e20; }
+[data-theme="light"] .surah-card { background: #2a4a4e; border-color: #1e3638; }
+[data-theme="light"] .surah-card:hover { background: #345a60; border-color: #1e3638; }
 [data-theme="light"] .s-ar { color: #ffffff !important; }
 [data-theme="light"] .s-name { color: rgba(255,255,255,0.95) !important; font-weight: 700 !important; }
 [data-theme="light"] .s-meta { color: rgba(255,255,255,0.75) !important; }
 [data-theme="light"] .s-num { background: rgba(255,255,255,0.2) !important; color: #ffffff !important; border-color: rgba(255,255,255,0.3) !important; }
 [data-theme="light"] .badge-m { background: rgba(255,255,255,0.2) !important; color: #ffffff !important; border-color: rgba(255,255,255,0.3) !important; }
 [data-theme="light"] .badge-md { background: rgba(255,214,0,0.3) !important; color: #fff8e1 !important; border-color: rgba(255,214,0,0.4) !important; }
-[data-theme="dark"] .surah-card { background: #0e2e12; border-color: rgba(0,200,83,0.35); }
-[data-theme="dark"] .surah-card:hover { background: #122e16; border-color: rgba(0,230,118,0.6); }
+[data-theme="dark"] .surah-card { background: #0e2e12; border-color: rgba(160,120,50,0.35); }
+[data-theme="dark"] .surah-card:hover { background: #1a1e2c; border-color: rgba(180,148,60,0.6); }
 .s-num {
   width: 40px; height: 40px;
   background: linear-gradient(135deg, var(--bg3), var(--bg4));
@@ -345,7 +349,7 @@ body::before {
   padding: 1px 6px; border-radius: 10px;
   letter-spacing: 0.05em;
 }
-.badge-m { background: rgba(0,230,118,0.12); color: var(--g1); border: 1px solid var(--border); }
+.badge-m { background: rgba(180,148,60,0.12); color: var(--g1); border: 1px solid var(--border); }
 .badge-md { background: rgba(255,214,0,0.12); color: var(--gold); border: 1px solid rgba(255,214,0,0.3); }
 
 /* ══════════════════════════════════════
@@ -399,7 +403,7 @@ body::before {
   color: #fff; font-size: 18px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,200,83,0.4);
+  box-shadow: 0 4px 12px rgba(160,120,50,0.4);
   transition: transform 0.2s;
   flex-shrink: 0;
 }
@@ -419,7 +423,7 @@ body::before {
   font-family: 'Outfit', sans-serif;
   transition: all 0.2s;
 }
-.ctrl-btn:hover, .ctrl-btn.on { background: rgba(0,230,118,0.12); border-color: var(--border3); color: var(--g1); }
+.ctrl-btn:hover, .ctrl-btn.on { background: rgba(180,148,60,0.12); border-color: var(--border3); color: var(--g1); }
 .reciter-sel {
   background: var(--bg4);
   border: 1px solid var(--border);
@@ -443,8 +447,8 @@ body::before {
   cursor: pointer;
 }
 .ayah-card:hover { border-color: var(--border2); }
-.ayah-card.active { border-color: var(--g1); background: rgba(0,230,118,0.04); box-shadow: 0 0 0 1px rgba(0,230,118,0.1); }
-.ayah-card.playing { border-color: var(--g2); background: rgba(0,200,83,0.06); }
+.ayah-card.active { border-color: var(--g1); background: rgba(180,148,60,0.04); box-shadow: 0 0 0 1px rgba(180,148,60,0.1); }
+.ayah-card.playing { border-color: var(--g2); background: rgba(160,120,50,0.06); }
 .ay-ar {
   font-family: 'Scheherazade New', serif;
   font-size: clamp(20px, 3.5vw, 32px);
@@ -492,8 +496,8 @@ body::before {
   font-family: 'Outfit', sans-serif;
   transition: all 0.2s;
 }
-.ay-btn:hover { border-color: var(--g1); color: var(--g1); background: rgba(0,230,118,0.07); }
-.ay-btn.saved { border-color: var(--g1); color: var(--g1); background: rgba(0,230,118,0.1); }
+.ay-btn:hover { border-color: var(--g1); color: var(--g1); background: rgba(180,148,60,0.07); }
+.ay-btn.saved { border-color: var(--g1); color: var(--g1); background: rgba(180,148,60,0.1); }
 
 /* ══════════════════════════════════════
    ESMAUL HUSNA
@@ -525,11 +529,11 @@ body::before {
   box-shadow: 0 14px 44px var(--shadow);
   z-index: 2;
 }
-[data-theme="light"] .esma-card { background: #2e7d32; border-color: #1b5e20; }
+[data-theme="light"] .esma-card { background: #2a4a4e; border-color: #1e3638; }
 [data-theme="light"] .esma-card:hover { background: #388e3c; }
-[data-theme="light"] .esma-card.open { background: #1b5e20; }
-[data-theme="dark"] .esma-card { background: #0e2e12; border-color: rgba(0,200,83,0.35); }
-[data-theme="dark"] .esma-card:hover { background: #122e16; border-color: rgba(0,230,118,0.6); }
+[data-theme="light"] .esma-card.open { background: #1e3638; }
+[data-theme="dark"] .esma-card { background: #141720; border-color: rgba(160,120,50,0.35); }
+[data-theme="dark"] .esma-card:hover { background: #1a1e2c; border-color: rgba(180,148,60,0.6); }
 [data-theme="dark"] .esma-card.open { background: #163a1a; border-color: var(--g1); }
 
 .e-num { font-size: 12px; font-weight: 800; margin-bottom: 10px; letter-spacing: 0.1em; }
@@ -538,7 +542,7 @@ body::before {
 
 .e-ar { font-family: 'Noto Naskh Arabic', serif; font-size: 34px; line-height: 1.5; margin-bottom: 10px; }
 [data-theme="light"] .e-ar { color: #ffffff; }
-[data-theme="dark"] .e-ar { color: #69f0ae; }
+[data-theme="dark"] .e-ar { color: #d4b86a; }
 .e-names { font-size: 16px; font-weight: 800; margin-bottom: 5px; }
 [data-theme="light"] .e-names { color: #ffffff; }
 [data-theme="dark"] .e-names { color: #e8f5e9; }
@@ -556,7 +560,7 @@ body::before {
   font-weight: 500;
 }
 [data-theme="light"] .e-detail { color: rgba(255,255,255,0.9); border-top: 1px solid rgba(255,255,255,0.3); }
-[data-theme="dark"] .e-detail { color: #c8e6c9; border-top: 1px solid rgba(0,200,83,0.25); }
+[data-theme="dark"] .e-detail { color: #b0a080; border-top: 1px solid rgba(160,120,50,0.25); }
 .esma-card.open .e-detail { display: block; }
 
 /* ══════════════════════════════════════
@@ -601,7 +605,7 @@ body::before {
 .res-ref { font-size: 13px; color: var(--g1); font-weight: 800; margin-bottom: 8px; }
 .res-ar { font-family: 'Noto Naskh Arabic', serif; font-size: 17px; text-align: right; direction: rtl; color: var(--text); margin-bottom: 8px; }
 .res-tr { font-size: 15px; color: var(--text2); line-height: 1.8; font-weight: 500; }
-mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; padding: 0 2px; }
+mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; padding: 0 2px; }
 
 /* EMPTY / LOADING */
 .empty { text-align: center; padding: 60px 20px; color: var(--text4); }
@@ -698,7 +702,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 /* FOOTER ITHAF */
 /* ── QR / App Install bölümü ── */
 .app-install-banner {
-  background: linear-gradient(135deg, #1b5e20 0%, #00c853 100%);
+  background: linear-gradient(135deg, #1e3638 0%, #2a4a4e 100%);
   border-radius: 20px;
   padding: 28px 32px;
   display: flex;
@@ -724,11 +728,11 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 .aib-btns  { display:flex;gap:10px;flex-wrap:wrap; }
 .aib-btn   { background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:9px 16px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s; }
 .aib-btn:hover { background:rgba(255,255,255,0.25); }
-.aib-btn.primary { background:#fff;color:#1b5e20;border-color:#fff; }
+.aib-btn.primary { background:#fff;color:#2a4a4e;border-color:#fff; }
 .aib-btn.primary:hover { background:#e8f5e9; }
 .aib-qr    { background:#fff;border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:140px; }
 .aib-qr svg { width:110px;height:110px; }
-.aib-qr-label { font-size:11px;font-weight:700;color:#1b5e20;text-align:center; }
+.aib-qr-label { font-size:11px;font-weight:700;color:#2a4a4e;text-align:center; }
 
 .ithaf-footer {
   background: var(--card);
@@ -907,7 +911,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   transition: all 0.2s;
   white-space: nowrap;
 }
-.juz-surah-pill:hover { border-color: var(--g1); color: var(--g1); background: rgba(0,230,118,0.08); }
+.juz-surah-pill:hover { border-color: var(--g1); color: var(--g1); background: rgba(180,148,60,0.08); }
 
 
 /* ── YENİ SAYFALAR ── */
@@ -919,7 +923,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   margin-bottom: 12px;
   transition: border-color 0.2s;
 }
-[data-theme="dark"] .info-card { background: #0c2010; border-color: rgba(0,200,83,0.22); }
+[data-theme="dark"] .info-card { background: #141720; border-color: rgba(160,120,50,0.22); }
 .info-card h3 {
   font-size: 17px; font-weight: 800;
   color: var(--g1); margin-bottom: 10px;
@@ -943,8 +947,8 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   transition: all 0.2s;
 }
 .dua-card:hover { border-color: var(--g2); box-shadow: 0 4px 16px var(--shadow); }
-[data-theme="dark"] .dua-card { background: #0c2010; border-color: rgba(0,200,83,0.22); }
-[data-theme="dark"] .dua-card:hover { border-color: rgba(0,230,118,0.5); }
+[data-theme="dark"] .dua-card { background: #141720; border-color: rgba(160,120,50,0.22); }
+[data-theme="dark"] .dua-card:hover { border-color: rgba(180,148,60,0.5); }
 .dua-title {
   font-size: 16px; font-weight: 800;
   color: var(--g1); margin-bottom: 12px;
@@ -983,7 +987,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   font-size: 13px; font-weight: 700;
   font-family: 'Outfit', sans-serif;
 }
-.quick-btn:hover { border-color: var(--g1); color: var(--g1); background: rgba(0,230,118,0.06); transform: translateY(-2px); }
+.quick-btn:hover { border-color: var(--g1); color: var(--g1); background: rgba(180,148,60,0.06); transform: translateY(-2px); }
 .quick-ar {
   font-family: 'Noto Naskh Arabic';
   font-size: 18px; color: var(--g1);
@@ -1032,7 +1036,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   letter-spacing: 0.03em;
 }
 .bnav-btn .ico { font-size: 20px; line-height: 1; }
-.bnav-btn.active { color: var(--g1); background: rgba(0,230,118,0.1); }
+.bnav-btn.active { color: var(--g1); background: rgba(180,148,60,0.1); }
 .bnav-btn:hover { color: var(--g1); }
 
 /* Daha fazla menü */
@@ -1203,11 +1207,11 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 }
 .namaz-card.active-namaz {
   border-color: var(--g1);
-  background: rgba(0,200,83,0.08);
-  box-shadow: 0 0 20px rgba(0,200,83,0.2);
+  background: rgba(160,120,50,0.08);
+  box-shadow: 0 0 20px rgba(160,120,50,0.2);
 }
-[data-theme="light"] .namaz-card { background: #2e7d32; border-color: #1b5e20; }
-[data-theme="light"] .namaz-card.active-namaz { background: #1b5e20; border-color: #f9a825; }
+[data-theme="light"] .namaz-card { background: #2a4a4e; border-color: #1e3638; }
+[data-theme="light"] .namaz-card.active-namaz { background: #1e3638; border-color: #c9a84c; }
 .namaz-label {
   font-size: 13px;
   font-weight: 700;
@@ -1391,7 +1395,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   margin-top: 8px;
   display: inline-block;
 }
-.kible-ok { background: rgba(0,200,83,0.15); color: var(--g1); border: 1px solid var(--border2); }
+.kible-ok { background: rgba(160,120,50,0.15); color: var(--g1); border: 1px solid var(--border2); }
 .kible-wait { background: rgba(255,214,0,0.12); color: #ffd600; border: 1px solid rgba(255,214,0,0.3); }
 
 /* ── TEBİHAT ── */
@@ -1412,7 +1416,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(0,200,83,0.4);
+  box-shadow: 0 8px 32px rgba(160,120,50,0.4);
   transition: transform 0.1s;
   margin: 20px 0;
 }
@@ -1445,7 +1449,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   font-family: 'Outfit', sans-serif;
   transition: all 0.2s;
 }
-.tesbi-pill.active { border-color: var(--g1); color: var(--g1); background: rgba(0,200,83,0.1); }
+.tesbi-pill.active { border-color: var(--g1); color: var(--g1); background: rgba(160,120,50,0.1); }
 .tesbi-target { font-size: 14px; color: var(--text3); font-weight: 600; margin-top: 8px; }
 
 /* ── Kütüphane ── */
@@ -1454,12 +1458,12 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   border-radius:12px;border:1px solid var(--border);background:var(--card);
   cursor:pointer;transition:all 0.15s;
 }
-.kutuphane-item:hover { border-color:var(--g2);background:rgba(0,200,83,0.05); }
+.kutuphane-item:hover { border-color:var(--g2);background:rgba(160,120,50,0.05); }
 .kutuphane-item:active { transform:scale(0.98); }
 .kut-ar { font-family:'Scheherazade New',serif;font-size:18px;color:var(--g1);min-width:40px;text-align:center; }
 .kut-name { font-size:14px;font-weight:700;color:var(--text); }
 .kut-desc { font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px; }
-.kut-add { background:rgba(0,200,83,0.12);border:1px solid rgba(0,200,83,0.3);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--g2);cursor:pointer;white-space:nowrap; }
+.kut-add { background:rgba(160,120,50,0.12);border:1px solid rgba(160,120,50,0.3);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--g2);cursor:pointer;white-space:nowrap; }
 .kut-add:hover { background:var(--g2);color:#fff; }
 .kut-cat { font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;padding:10px 4px 4px;border-bottom:1px solid var(--border);margin-bottom:6px; }
 .tesbi-progress {
@@ -1484,9 +1488,9 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   gap: 16px;
   transition: all 0.2s;
 }
-[data-theme="light"] .dini-card { background: #2e7d32; border-color: #1b5e20; }
-.dini-card.today { border-color: var(--g1); background: rgba(0,200,83,0.08); }
-[data-theme="light"] .dini-card.today { background: #1b5e20; border-color: #f9a825; }
+[data-theme="light"] .dini-card { background: #2a4a4e; border-color: #1e3638; }
+.dini-card.today { border-color: var(--g1); background: rgba(160,120,50,0.08); }
+[data-theme="light"] .dini-card.today { background: #1e3638; border-color: #c9a84c; }
 .dini-date-box {
   min-width: 56px;
   text-align: center;
@@ -1510,7 +1514,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 /* ── SURE MENÜ & EZBERLENDI ── */
 .surah-card.ezberlendi { border-color: rgba(255,214,0,0.5) !important; }
 [data-theme="light"] .surah-card.ezberlendi { border-color: #f9a825 !important; }
-.surah-card.bookmarked { border-color: var(--g1) !important; box-shadow: 0 0 12px rgba(0,200,83,0.3); }
+.surah-card.bookmarked { border-color: var(--g1) !important; box-shadow: 0 0 12px rgba(160,120,50,0.3); }
 .smenu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .smenu-btn {
   background: var(--bg3);
@@ -1675,8 +1679,8 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 }
 .dua-cat-btn:hover { border-color: var(--g1); color: var(--g1); }
 .dua-cat-btn.active { background: var(--g2); border-color: var(--g2); color: #fff; }
-[data-theme="light"] .dua-cat-btn { background: #2e7d32; border-color: #1b5e20; color: #fff; }
-[data-theme="light"] .dua-cat-btn.active { background: #1b5e20; border-color: #f9a825; }
+[data-theme="light"] .dua-cat-btn { background: #2a4a4e; border-color: #1e3638; color: #fff; }
+[data-theme="light"] .dua-cat-btn.active { background: #1e3638; border-color: #c9a84c; }
 
 
 .dini-gecti { opacity: 0.55; }
@@ -1735,12 +1739,12 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 }
 .imsakiye-table tr:hover td { background: var(--bg3); }
 .imsakiye-table tr.today-row td {
-  background: rgba(0,200,83,0.12);
+  background: rgba(160,120,50,0.12);
   color: var(--g1);
   font-weight: 700;
 }
 [data-theme="light"] .imsakiye-table td { color: #0d1f0e; }
-[data-theme="light"] .imsakiye-table tr.today-row td { color: #1b5e20; background: rgba(46,125,50,0.1); }
+[data-theme="light"] .imsakiye-table tr.today-row td { color: #2a4a4e; background: rgba(42,74,78,0.1); }
 
 /* ── ZİKİR EKLEME FORMU ── */
 .zikir-form {
@@ -1778,7 +1782,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   align-items: center;
   gap: 10px;
 }
-.tesbi-stats-item.active { border-color: var(--g1); background: rgba(0,200,83,0.06); }
+.tesbi-stats-item.active { border-color: var(--g1); background: rgba(160,120,50,0.06); }
 .tsi-ar { font-family: 'Noto Naskh Arabic'; font-size: 18px; color: var(--g1); flex-shrink: 0; }
 .tsi-info { flex: 1; min-width: 0; }
 .tsi-name { font-size: 13px; font-weight: 700; color: var(--text); }
@@ -1886,7 +1890,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
   color: var(--g1);
   animation: triBounce 0.5s ease-in-out infinite alternate;
   z-index: 20;
-  text-shadow: 0 0 10px rgba(0,200,83,0.7);
+  text-shadow: 0 0 10px rgba(160,120,50,0.7);
   pointer-events: none;
 }
 @keyframes triBounce {
@@ -1941,7 +1945,7 @@ mark { background: rgba(0,230,118,0.2); color: var(--g1); border-radius: 3px; pa
 <header class="header">
   <div class="header-inner">
     <div class="logo" onclick="showPage('home')">
-      <div class="logo-icon" style="background:none;box-shadow:none;padding:0"><img src="/icons/icon-192.png" alt="Kuran-ı Kerim" style="width:44px;height:44px;border-radius:12px;object-fit:cover;box-shadow:0 0 16px rgba(0,200,83,0.5)"></div>
+      <div class="logo-icon" style="background:none;box-shadow:none;padding:0"><img src="/icons/icon-192.png" alt="Kuran-ı Kerim" style="width:44px;height:44px;border-radius:12px;object-fit:cover;box-shadow:0 0 16px rgba(160,120,50,0.5)"></div>
       <div>
         <div class="logo-text">القرآن الكريم</div>
         <div class="logo-sub">Kuran-ı Kerim</div>
@@ -6165,8 +6169,8 @@ function incrementTesbi(){
     // Hedef tamamlandı — kalıcı yeşil (sıfırlanana kadar)
     if(settings&&settings.hedefSes!==false) playBeep('hedef');
     if(btn) {
-      btn.style.background = 'linear-gradient(135deg,#00c853,#1b5e20)';
-      btn.style.boxShadow = '0 0 24px rgba(0,200,83,0.5)';
+      btn.style.background = 'linear-gradient(135deg,#b8922e,#7a5c1a)';
+      btn.style.boxShadow = '0 0 24px rgba(160,120,50,0.5)';
     }
     toast('🎉 ' + t.name + ' — ' + t.target + ' kez tamamlandı!');
   } else {
@@ -6273,7 +6277,7 @@ function renderDiniGunler(){
   function renderGroup(title, days) {
     const colors = {
       kandil:'border-color:rgba(255,214,0,0.5)',
-      bayram:'border-color:rgba(0,200,83,0.5)',
+      bayram:'border-color:rgba(160,120,50,0.5)',
       islam:'border-color:rgba(0,150,255,0.3)',
       ay:''
     };
@@ -7452,7 +7456,7 @@ function showKutDetay(ci, ii) {
         <div style="display:flex;gap:8px">
           <button onclick="addFromKutuphane(KUTUPHANE[${ci}].items[${ii}]);toast('Eklendi: ${z.name.replace(/'/g,"\\'")}');" style="
             flex:1;padding:10px;border-radius:12px;border:1px solid var(--g2);
-            background:rgba(0,200,83,0.08);color:var(--g2);font-size:13px;
+            background:rgba(160,120,50,0.08);color:var(--g2);font-size:13px;
             font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">
             ➕ Listeme Ekle
           </button>
@@ -8208,7 +8212,7 @@ function loadEzanSettings() {
     if(btn) {
       if(_ezanNotifGranted) {
         btn.textContent = '🔔 Bildirim Açık ✓';
-        btn.style.background = 'rgba(0,200,83,0.15)';
+        btn.style.background = 'rgba(160,120,50,0.15)';
         btn.style.borderColor = 'var(--g2)';
         btn.style.color = 'var(--g2)';
       } else if(Notification.permission === 'denied') {
@@ -8442,7 +8446,7 @@ function renderTesbiSel() {
 
         // Renk: tamamlandıysa yeşil, aktifse hafif yeşil, normal
         const borderColor = done ? 'var(--g2)' : isActive ? 'var(--g1)' : 'var(--border)';
-        const bgColor = done ? 'rgba(0,200,83,0.15)' : isActive ? 'rgba(0,200,83,0.08)' : 'var(--card)';
+        const bgColor = done ? 'rgba(160,120,50,0.15)' : isActive ? 'rgba(160,120,50,0.08)' : 'var(--card)';
         const countColor = done ? 'var(--g2)' : cnt > 0 ? 'var(--g1)' : 'var(--text4)';
 
         return `
@@ -8500,7 +8504,7 @@ function renderTesbiSel() {
 
           <!-- Düzenle -->
           <button onclick="event.stopPropagation();editZikir(${i})" style="
-            background:${done ? 'rgba(0,200,83,0.15)' : 'rgba(0,200,83,0.1)'};
+            background:${done ? 'rgba(160,120,50,0.15)' : 'rgba(160,120,50,0.1)'};
             border:none;border-radius:8px;
             width:28px;height:28px;cursor:pointer;font-size:13px;
             flex-shrink:0;display:flex;align-items:center;justify-content:center">
@@ -8779,8 +8783,8 @@ function updateTesbiUI() {
   const btn = document.getElementById('tesbiMainBtn');
   if(btn) {
     if(done) {
-      btn.style.background = 'linear-gradient(135deg,#00c853,#1b5e20)';
-      btn.style.boxShadow = '0 0 24px rgba(0,200,83,0.5)';
+      btn.style.background = 'linear-gradient(135deg,#b8922e,#7a5c1a)';
+      btn.style.boxShadow = '0 0 24px rgba(160,120,50,0.5)';
     } else {
       btn.style.background = '';
       btn.style.boxShadow = '';
@@ -9157,7 +9161,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
               <span class="color-label">📦 Kutular</span>
               <div class="color-swatches">
                 <div class="csw" style="background:#ffffff" onclick="applyThemeColor('light','card','#ffffff','#f5fbf5','')" title="Beyaz"></div>
-                <div class="csw" style="background:#2e7d32" onclick="applyThemeColor('light','card','#2e7d32','#388e3c','')" title="Koyu Yeşil"></div>
+                <div class="csw" style="background:#2a4a4e" onclick="applyThemeColor('light','card','#2a4a4e','#345a60','')" title="Koyu Teal"></div>
                 <div class="csw" style="background:#1565c0" onclick="applyThemeColor('light','card','#1565c0','#1976d2','')" title="Koyu Mavi"></div>
                 <div class="csw" style="background:#4a148c" onclick="applyThemeColor('light','card','#4a148c','#6a1b9a','')" title="Koyu Mor"></div>
                 <div class="csw" style="background:#b71c1c" onclick="applyThemeColor('light','card','#b71c1c','#c62828','')" title="Koyu Kırmızı"></div>
@@ -9170,14 +9174,14 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
             <div class="color-row">
               <span class="color-label">✨ Vurgu</span>
               <div class="color-swatches">
-                <div class="csw" style="background:#00c853" onclick="applyThemeColor('light','accent','#00c853','#00e676','')" title="Yeşil"></div>
+                <div class="csw" style="background:#2a4a4e" onclick="applyThemeColor('light','accent','#2a4a4e','#3a6468','')" title="Yeşil"></div>
                 <div class="csw" style="background:#2196f3" onclick="applyThemeColor('light','accent','#2196f3','#64b5f6','')" title="Mavi"></div>
                 <div class="csw" style="background:#9c27b0" onclick="applyThemeColor('light','accent','#9c27b0','#ce93d8','')" title="Mor"></div>
                 <div class="csw" style="background:#f44336" onclick="applyThemeColor('light','accent','#f44336','#ef9a9a','')" title="Kırmızı"></div>
                 <div class="csw" style="background:#ff9800" onclick="applyThemeColor('light','accent','#ff9800','#ffcc80','')" title="Turuncu"></div>
                 <div class="csw" style="background:#009688" onclick="applyThemeColor('light','accent','#009688','#80cbc4','')" title="Turkuaz"></div>
                 <div class="csw" style="background:#ffd600" onclick="applyThemeColor('light','accent','#ffd600','#fff176','')" title="Altın"></div>
-                <label class="csw csw-custom" title="Özel"><input type="color" value="#00c853" oninput="applyThemeColor('light','accent',this.value,this.value,'')">+</label>
+                <label class="csw csw-custom" title="Özel"><input type="color" value="#2a4a4e" oninput="applyThemeColor('light','accent',this.value,this.value,'')">+</label>
               </div>
             </div>
           </div>
@@ -9215,14 +9219,14 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
             <div class="color-row">
               <span class="color-label">✨ Vurgu</span>
               <div class="color-swatches">
-                <div class="csw" style="background:#00e676" onclick="applyThemeColor('dark','accent','#00c853','#00e676','')" title="Yeşil"></div>
+                <div class="csw" style="background:#c9a84c" onclick="applyThemeColor('dark','accent','#b8922e','#c9a84c','')" title="Yeşil"></div>
                 <div class="csw" style="background:#64b5f6" onclick="applyThemeColor('dark','accent','#2196f3','#64b5f6','')" title="Mavi"></div>
                 <div class="csw" style="background:#ce93d8" onclick="applyThemeColor('dark','accent','#9c27b0','#ce93d8','')" title="Mor"></div>
                 <div class="csw" style="background:#ef9a9a" onclick="applyThemeColor('dark','accent','#f44336','#ef9a9a','')" title="Kırmızı"></div>
                 <div class="csw" style="background:#ffcc80" onclick="applyThemeColor('dark','accent','#ff9800','#ffcc80','')" title="Turuncu"></div>
                 <div class="csw" style="background:#80cbc4" onclick="applyThemeColor('dark','accent','#009688','#80cbc4','')" title="Turkuaz"></div>
                 <div class="csw" style="background:#fff176" onclick="applyThemeColor('dark','accent','#ffd600','#fff176','')" title="Altın"></div>
-                <label class="csw csw-custom" title="Özel"><input type="color" value="#00e676" oninput="applyThemeColor('dark','accent',this.value,this.value,'')">+</label>
+                <label class="csw csw-custom" title="Özel"><input type="color" value="#c9a84c" oninput="applyThemeColor('dark','accent',this.value,this.value,'')">+</label>
               </div>
             </div>
           </div>
@@ -10090,151 +10094,151 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
       <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
         <rect width="21" height="21" fill="white"/>
         <!-- Finder TL -->
-        <rect x="0" y="0" width="7" height="7" fill="#1b5e20"/><rect x="1" y="1" width="5" height="5" fill="white"/><rect x="2" y="2" width="3" height="3" fill="#1b5e20"/>
+        <rect x="0" y="0" width="7" height="7" fill="#1e3638"/><rect x="1" y="1" width="5" height="5" fill="white"/><rect x="2" y="2" width="3" height="3" fill="#1e3638"/>
         <!-- Finder TR -->
-        <rect x="14" y="0" width="7" height="7" fill="#1b5e20"/><rect x="15" y="1" width="5" height="5" fill="white"/><rect x="16" y="2" width="3" height="3" fill="#1b5e20"/>
+        <rect x="14" y="0" width="7" height="7" fill="#1e3638"/><rect x="15" y="1" width="5" height="5" fill="white"/><rect x="16" y="2" width="3" height="3" fill="#1e3638"/>
         <!-- Finder BL -->
-        <rect x="0" y="14" width="7" height="7" fill="#1b5e20"/><rect x="1" y="15" width="5" height="5" fill="white"/><rect x="2" y="16" width="3" height="3" fill="#1b5e20"/>
+        <rect x="0" y="14" width="7" height="7" fill="#1e3638"/><rect x="1" y="15" width="5" height="5" fill="white"/><rect x="2" y="16" width="3" height="3" fill="#1e3638"/>
         <!-- Data modules -->
-        <rect x="7" y="0" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="0" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="0" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="1" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="1" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="1" width="1" height="1" fill="#1b5e20"/>
-        <rect x="7" y="2" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="2" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="2" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="2" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="3" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="3" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="3" width="1" height="1" fill="#1b5e20"/>
-        <rect x="7" y="4" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="4" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="4" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="5" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="5" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="5" width="1" height="1" fill="#1b5e20"/>
-        <rect x="7" y="6" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="6" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="6" width="1" height="1" fill="#1b5e20"/>
-        <rect x="0" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="2" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="4" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="6" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="7" width="1" height="1" fill="#1b5e20"/>
-        <rect x="1" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="3" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="5" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="7" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="15" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="17" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="19" y="8" width="1" height="1" fill="#1b5e20"/>
-        <rect x="0" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="2" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="4" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="6" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="9" width="1" height="1" fill="#1b5e20"/>
-        <rect x="1" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="3" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="7" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="15" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="17" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="19" y="10" width="1" height="1" fill="#1b5e20"/>
-        <rect x="0" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="2" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="4" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="6" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="11" width="1" height="1" fill="#1b5e20"/>
-        <rect x="1" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="5" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="7" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="15" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="17" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="19" y="12" width="1" height="1" fill="#1b5e20"/>
-        <rect x="0" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="2" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="4" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="6" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="13" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="13" width="1" height="1" fill="#1b5e20"/>
+        <rect x="7" y="0" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="0" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="0" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="1" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="1" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="1" width="1" height="1" fill="#1e3638"/>
+        <rect x="7" y="2" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="2" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="2" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="2" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="3" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="3" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="3" width="1" height="1" fill="#1e3638"/>
+        <rect x="7" y="4" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="4" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="4" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="5" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="5" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="5" width="1" height="1" fill="#1e3638"/>
+        <rect x="7" y="6" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="6" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="6" width="1" height="1" fill="#1e3638"/>
+        <rect x="0" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="2" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="4" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="6" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="7" width="1" height="1" fill="#1e3638"/>
+        <rect x="1" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="3" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="5" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="7" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="15" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="17" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="19" y="8" width="1" height="1" fill="#1e3638"/>
+        <rect x="0" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="2" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="4" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="6" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="9" width="1" height="1" fill="#1e3638"/>
+        <rect x="1" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="3" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="7" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="15" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="17" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="19" y="10" width="1" height="1" fill="#1e3638"/>
+        <rect x="0" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="2" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="4" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="6" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="11" width="1" height="1" fill="#1e3638"/>
+        <rect x="1" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="5" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="7" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="15" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="17" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="19" y="12" width="1" height="1" fill="#1e3638"/>
+        <rect x="0" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="2" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="4" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="6" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="13" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="13" width="1" height="1" fill="#1e3638"/>
         <!-- Bottom right data -->
-        <rect x="8" y="14" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="14" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="14" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="14" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="14" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="14" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="14" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="15" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="15" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="15" width="1" height="1" fill="#1b5e20"/>
-        <rect x="15" y="15" width="1" height="1" fill="#1b5e20"/>
-        <rect x="17" y="15" width="1" height="1" fill="#1b5e20"/>
-        <rect x="19" y="15" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="16" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="16" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="16" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="16" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="16" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="16" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="16" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="17" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="17" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="17" width="1" height="1" fill="#1b5e20"/>
-        <rect x="15" y="17" width="1" height="1" fill="#1b5e20"/>
-        <rect x="17" y="17" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="18" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="18" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="18" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="18" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="18" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="18" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="18" width="1" height="1" fill="#1b5e20"/>
-        <rect x="9" y="19" width="1" height="1" fill="#1b5e20"/>
-        <rect x="11" y="19" width="1" height="1" fill="#1b5e20"/>
-        <rect x="13" y="19" width="1" height="1" fill="#1b5e20"/>
-        <rect x="15" y="19" width="1" height="1" fill="#1b5e20"/>
-        <rect x="17" y="19" width="1" height="1" fill="#1b5e20"/>
-        <rect x="19" y="19" width="1" height="1" fill="#1b5e20"/>
-        <rect x="8" y="20" width="1" height="1" fill="#1b5e20"/>
-        <rect x="10" y="20" width="1" height="1" fill="#1b5e20"/>
-        <rect x="12" y="20" width="1" height="1" fill="#1b5e20"/>
-        <rect x="14" y="20" width="1" height="1" fill="#1b5e20"/>
-        <rect x="16" y="20" width="1" height="1" fill="#1b5e20"/>
-        <rect x="18" y="20" width="1" height="1" fill="#1b5e20"/>
-        <rect x="20" y="20" width="1" height="1" fill="#1b5e20"/>
+        <rect x="8" y="14" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="14" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="14" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="14" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="14" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="14" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="14" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="15" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="15" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="15" width="1" height="1" fill="#1e3638"/>
+        <rect x="15" y="15" width="1" height="1" fill="#1e3638"/>
+        <rect x="17" y="15" width="1" height="1" fill="#1e3638"/>
+        <rect x="19" y="15" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="16" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="16" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="16" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="16" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="16" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="16" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="16" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="17" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="17" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="17" width="1" height="1" fill="#1e3638"/>
+        <rect x="15" y="17" width="1" height="1" fill="#1e3638"/>
+        <rect x="17" y="17" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="18" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="18" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="18" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="18" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="18" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="18" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="18" width="1" height="1" fill="#1e3638"/>
+        <rect x="9" y="19" width="1" height="1" fill="#1e3638"/>
+        <rect x="11" y="19" width="1" height="1" fill="#1e3638"/>
+        <rect x="13" y="19" width="1" height="1" fill="#1e3638"/>
+        <rect x="15" y="19" width="1" height="1" fill="#1e3638"/>
+        <rect x="17" y="19" width="1" height="1" fill="#1e3638"/>
+        <rect x="19" y="19" width="1" height="1" fill="#1e3638"/>
+        <rect x="8" y="20" width="1" height="1" fill="#1e3638"/>
+        <rect x="10" y="20" width="1" height="1" fill="#1e3638"/>
+        <rect x="12" y="20" width="1" height="1" fill="#1e3638"/>
+        <rect x="14" y="20" width="1" height="1" fill="#1e3638"/>
+        <rect x="16" y="20" width="1" height="1" fill="#1e3638"/>
+        <rect x="18" y="20" width="1" height="1" fill="#1e3638"/>
+        <rect x="20" y="20" width="1" height="1" fill="#1e3638"/>
       </svg>
       <div class="aib-qr-label">Kamera ile tara<br><span style="color:#888;font-weight:400">kuran-kerim.bakiciersen.workers.dev</span></div>
     </div>
@@ -10340,10 +10344,10 @@ function showInstallBanner() {
   if(document.getElementById('_instBanner')) return;
   const b = document.createElement('div');
   b.id = '_instBanner';
-  b.style.cssText = 'position:fixed;bottom:76px;left:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#00c853,#1b5e20);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,200,83,0.4);font-family:Outfit,sans-serif;color:#fff;animation:_sUp 0.4s ease';
+  b.style.cssText = 'position:fixed;bottom:76px;left:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#b8922e,#7a5c1a);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(160,120,50,0.4);font-family:Outfit,sans-serif;color:#fff;animation:_sUp 0.4s ease';
   b.innerHTML = '<img src="/icons/icon-72.png" width="40" height="40" style="border-radius:10px;flex-shrink:0" onerror="this.style.display=\'none\'">' +
     '<div style="flex:1"><div style="font-weight:700;font-size:14px">Uygulamayı Kur</div><div style="font-size:11px;opacity:0.85">Ana ekrana ekle — offline çalışır</div></div>' +
-    '<button onclick="triggerInstall()" style="background:#fff;color:#1b5e20;border:none;border-radius:10px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:13px">Kur</button>' +
+    '<button onclick="triggerInstall()" style="background:#fff;color:#2a4a4e;border:none;border-radius:10px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:13px">Kur</button>' +
     '<button onclick="dismissInstall()" style="background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px">✕</button>';
   document.body.appendChild(b);
 }
@@ -10367,17 +10371,17 @@ function showQRModal() {
       <div style="background:#fff;border-radius:16px;padding:16px;display:inline-block;margin-bottom:14px">
         <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" style="width:180px;height:180px" shape-rendering="crispEdges">
           <rect width="21" height="21" fill="white"/>
-          <rect x="0" y="0" width="7" height="7" fill="#1b5e20"/><rect x="1" y="1" width="5" height="5" fill="white"/><rect x="2" y="2" width="3" height="3" fill="#1b5e20"/>
-          <rect x="14" y="0" width="7" height="7" fill="#1b5e20"/><rect x="15" y="1" width="5" height="5" fill="white"/><rect x="16" y="2" width="3" height="3" fill="#1b5e20"/>
-          <rect x="0" y="14" width="7" height="7" fill="#1b5e20"/><rect x="1" y="15" width="5" height="5" fill="white"/><rect x="2" y="16" width="3" height="3" fill="#1b5e20"/>
-          <rect x="7" y="0" width="1" height="1" fill="#1b5e20"/><rect x="9" y="0" width="1" height="1" fill="#1b5e20"/><rect x="11" y="0" width="1" height="1" fill="#1b5e20"/>
-          <rect x="8" y="1" width="1" height="1" fill="#1b5e20"/><rect x="10" y="1" width="1" height="1" fill="#1b5e20"/><rect x="12" y="1" width="1" height="1" fill="#1b5e20"/>
-          <rect x="7" y="2" width="1" height="1" fill="#1b5e20"/><rect x="9" y="2" width="1" height="1" fill="#1b5e20"/><rect x="11" y="2" width="1" height="1" fill="#1b5e20"/>
-          <rect x="8" y="3" width="1" height="1" fill="#1b5e20"/><rect x="10" y="3" width="1" height="1" fill="#1b5e20"/><rect x="12" y="3" width="1" height="1" fill="#1b5e20"/>
-          <rect x="7" y="4" width="1" height="1" fill="#1b5e20"/><rect x="9" y="4" width="1" height="1" fill="#1b5e20"/><rect x="11" y="4" width="1" height="1" fill="#1b5e20"/>
-          <rect x="8" y="5" width="1" height="1" fill="#1b5e20"/><rect x="10" y="5" width="1" height="1" fill="#1b5e20"/>
-          <rect x="7" y="6" width="1" height="1" fill="#1b5e20"/><rect x="9" y="6" width="1" height="1" fill="#1b5e20"/>
-          <rect x="0" y="7" width="1" height="1" fill="#1b5e20"/><rect x="2" y="7" width="1" height="1" fill="#1b5e20"/><rect x="4" y="7" width="1" height="1" fill="#1b5e20"/><rect x="6" y="7" width="1" height="1" fill="#1b5e20"/><rect x="8" y="7" width="1" height="1" fill="#1b5e20"/><rect x="10" y="7" width="1" height="1" fill="#1b5e20"/><rect x="12" y="7" width="1" height="1" fill="#1b5e20"/><rect x="14" y="7" width="1" height="1" fill="#1b5e20"/><rect x="16" y="7" width="1" height="1" fill="#1b5e20"/><rect x="18" y="7" width="1" height="1" fill="#1b5e20"/><rect x="20" y="7" width="1" height="1" fill="#1b5e20"/>
+          <rect x="0" y="0" width="7" height="7" fill="#1e3638"/><rect x="1" y="1" width="5" height="5" fill="white"/><rect x="2" y="2" width="3" height="3" fill="#1e3638"/>
+          <rect x="14" y="0" width="7" height="7" fill="#1e3638"/><rect x="15" y="1" width="5" height="5" fill="white"/><rect x="16" y="2" width="3" height="3" fill="#1e3638"/>
+          <rect x="0" y="14" width="7" height="7" fill="#1e3638"/><rect x="1" y="15" width="5" height="5" fill="white"/><rect x="2" y="16" width="3" height="3" fill="#1e3638"/>
+          <rect x="7" y="0" width="1" height="1" fill="#1e3638"/><rect x="9" y="0" width="1" height="1" fill="#1e3638"/><rect x="11" y="0" width="1" height="1" fill="#1e3638"/>
+          <rect x="8" y="1" width="1" height="1" fill="#1e3638"/><rect x="10" y="1" width="1" height="1" fill="#1e3638"/><rect x="12" y="1" width="1" height="1" fill="#1e3638"/>
+          <rect x="7" y="2" width="1" height="1" fill="#1e3638"/><rect x="9" y="2" width="1" height="1" fill="#1e3638"/><rect x="11" y="2" width="1" height="1" fill="#1e3638"/>
+          <rect x="8" y="3" width="1" height="1" fill="#1e3638"/><rect x="10" y="3" width="1" height="1" fill="#1e3638"/><rect x="12" y="3" width="1" height="1" fill="#1e3638"/>
+          <rect x="7" y="4" width="1" height="1" fill="#1e3638"/><rect x="9" y="4" width="1" height="1" fill="#1e3638"/><rect x="11" y="4" width="1" height="1" fill="#1e3638"/>
+          <rect x="8" y="5" width="1" height="1" fill="#1e3638"/><rect x="10" y="5" width="1" height="1" fill="#1e3638"/>
+          <rect x="7" y="6" width="1" height="1" fill="#1e3638"/><rect x="9" y="6" width="1" height="1" fill="#1e3638"/>
+          <rect x="0" y="7" width="1" height="1" fill="#1e3638"/><rect x="2" y="7" width="1" height="1" fill="#1e3638"/><rect x="4" y="7" width="1" height="1" fill="#1e3638"/><rect x="6" y="7" width="1" height="1" fill="#1e3638"/><rect x="8" y="7" width="1" height="1" fill="#1e3638"/><rect x="10" y="7" width="1" height="1" fill="#1e3638"/><rect x="12" y="7" width="1" height="1" fill="#1e3638"/><rect x="14" y="7" width="1" height="1" fill="#1e3638"/><rect x="16" y="7" width="1" height="1" fill="#1e3638"/><rect x="18" y="7" width="1" height="1" fill="#1e3638"/><rect x="20" y="7" width="1" height="1" fill="#1e3638"/>
         </svg>
       </div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:16px">kuran-kerim.bakiciersen.workers.dev</div>
