@@ -258,7 +258,7 @@
 [data-theme="light"] .nav-btn:hover { color: #2a4a4e !important; }
 [data-theme="light"] .sec-badge { background: rgba(42,74,78,0.08) !important; color: #2a4a4e !important; border-color: rgba(42,74,78,0.25) !important; }
 [data-theme="light"] .badge-m { background: rgba(42,74,78,0.08) !important; color: #2a4a4e !important; }
-[data-theme="light"] .ay-btn:hover, [data-theme="light"] .ay-btn.saved { color: #2a4a4e !important; border-color: #2a4a4e !important; }
+[data-theme="light"] .ay-btn:hover, [data-theme="light"] .ay-btn.saved { color: #fff !important; border-color: #e53935 !important; background: #e53935 !important; }
 [data-theme="light"] .ctrl-btn.on, [data-theme="light"] .ctrl-btn:hover { color: #2a4a4e !important; }
 [data-theme="light"] .play-btn { background: linear-gradient(135deg, #2a4a4e, #1e3638) !important; }
 [data-theme="light"] .ayah-card.active, [data-theme="light"] .ayah-card.playing { border-color: #2a4a4e !important; }
@@ -673,7 +673,13 @@ body::before {
   transition: all 0.2s;
 }
 .ay-btn:hover { border-color: var(--g1); color: var(--g1); background: rgba(180,148,60,0.07); }
-.ay-btn.saved { border-color: var(--g1); color: var(--g1); background: rgba(180,148,60,0.1); }
+.ay-btn.saved { 
+  border-color: #e53935 !important; 
+  color: #fff !important; 
+  background: #e53935 !important;
+  font-weight: 700;
+}
+.ay-btn.saved:hover { background: #c62828 !important; border-color: #c62828 !important; }
 
 /* ══════════════════════════════════════
    ESMAUL HUSNA
@@ -1859,8 +1865,40 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 [data-theme="light"] .dua-cat-btn.active { background: #1e3638; border-color: #c9a84c; }
 
 
-.dini-gecti { opacity: 0.55; }
+.dini-gecti { opacity: 0.45; filter: grayscale(0.4); }
 .dini-gecti h3 { color: var(--text3) !important; }
+
+/* Bugünkü dini gün */
+.dini-bugun {
+  border: 2px solid #c9a84c !important;
+  background: rgba(201,168,76,0.12) !important;
+  box-shadow: 0 0 16px rgba(201,168,76,0.25);
+}
+.dini-bugun h3 { color: var(--g1) !important; }
+
+/* Sıradaki dini gün — yanıp söner */
+.dini-siradaki {
+  border: 2px solid var(--g1) !important;
+  box-shadow: 0 0 0 rgba(201,168,76,0.4);
+  animation: diniPulse 1.6s ease-in-out infinite;
+}
+.dini-siradaki h3 { color: var(--g1) !important; }
+@keyframes diniPulse {
+  0%,100% { box-shadow: 0 0 6px rgba(201,168,76,0.3); }
+  50% { box-shadow: 0 0 22px rgba(201,168,76,0.75); border-color: #e8c97a !important; }
+}
+
+/* Kaldığım Yer — tam kırmızı ayet kartı */
+.ayah-card.bookmark-card {
+  border: 2px solid #e53935 !important;
+  background: rgba(229,57,53,0.07) !important;
+  box-shadow: 0 0 0 2px rgba(229,57,53,0.18), inset 0 0 0 1px rgba(229,57,53,0.12) !important;
+}
+.ayah-card.bookmark-card .ay-ar { color: var(--text) !important; }
+[data-theme="light"] .ayah-card.bookmark-card {
+  background: rgba(229,57,53,0.06) !important;
+  border-color: #c62828 !important;
+}
 
 
 /* ── SESLI EZAN ── */
@@ -2253,6 +2291,11 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
             <option value="ar.saudshuraym">Saud El-Şurayim 🇸🇦</option>
             <option value="ar.ibrahimakhbar">Ibrahim El-Ahdar 🇸🇦</option>
           </optgroup>
+          <optgroup label="🇹🇷 Türk Hafızlar">
+            <option value="tr.diyanet">Diyanet İşleri — Resmi 🇹🇷</option>
+            <option value="ar.muhammadayyoub">Muhammed Eyyüb 🇸🇦</option>
+            <option value="ar.parhizgar">Ali Parhizgar 🇮🇷</option>
+          </optgroup>
         </select>
         <button class="back-btn" onclick="showPage('home')">← Geri</button>
       </div>
@@ -2278,7 +2321,7 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
         <button class="speed-btn" onclick="setSpeed(1.5)">1.5x</button>
       </div>
     </div>
-    <audio id="aud" onended="nextAyah()"></audio>
+    <audio id="aud" onended="nextAyah()" oncanplay="this.playbackRate=playSpeed"></audio>
     <div class="ayah-list" id="ayahList">
       <div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
     </div>
@@ -2958,7 +3001,7 @@ const UI_TEXT = {
     ay_okunus: '🔤 Okunuş',
     ay_copy: '📋 Kopyala',
     ay_share: '📤 Paylaş',
-    ay_bookmark: '🔖 Yer İmi',
+    ay_bookmark: '📍 Kaldığım Yer',
     ay_save: '💚 Kaydet',
     ay_saved: '💚 Kaydedildi',
     ay_loading: 'Yükleniyor...',
@@ -5780,17 +5823,20 @@ function renderAyahs() {
         <div class="ay-tafsir show" id="tafsir${i}">${t.ay_loading||'Yükleniyor...'}</div>
       </div>
       <div class="ay-actions">
-        <button class="ay-btn" onclick="event.stopPropagation();playAyah(${i})">🔊</button>
+        <button class="ay-btn ay-play-btn" id="ayPlayBtn${i}" onclick="event.stopPropagation();toggleAyahPlay(${i})">▶ Dinle</button>
+        <button class="ay-btn ay-stop-btn" id="ayStopBtn${i}" onclick="event.stopPropagation();stopAyahPlay(${i})" style="display:none;border-color:rgba(239,83,80,0.5);color:#ef5350">⏹ Dur</button>
         <button class="ay-btn" id="tafsirBtn${i}" onclick="event.stopPropagation();loadTafsir(${i})">${TAFSIR_LABELS[lang]||'📖 Meal'}</button>
         <button class="ay-btn" onclick="event.stopPropagation();loadOkunus(${i})">${t.ay_okunus||'🔤 Okunuş'}</button>
         <button class="ay-btn" onclick="event.stopPropagation();copyAyah(${i})">${t.ay_copy||'📋 Kopyala'}</button>
         <button class="ay-btn" onclick="event.stopPropagation();shareAyah(${i})">${t.ay_share||'📤 Paylaş'}</button>
-        <button class="ay-btn" onclick="event.stopPropagation();setBookmark(surahData.n,${i})">${t.ay_bookmark||'🔖 Yer İmi'}</button>
+        <button class="ay-btn" onclick="event.stopPropagation();setBookmark(surahData.n,${i})">${t.ay_bookmark||'📍 Kaldığım Yer'}</button>
         <button class="ay-btn ${isFav(surahData.n,a.numberInSurah)?'saved':''}" id="fb${i}" onclick="event.stopPropagation();toggleFav(${i})">
-          ${isFav(surahData.n,a.numberInSurah)?(t.ay_saved||'💚 Kaydedildi'):(t.ay_save||'💚 Kaydet')}
+          ${isFav(surahData.n,a.numberInSurah)?'❤️ Kaydedildi':'💚 Kaydet'}
         </button>
       </div>
     </div>`).join('');
+  // Bookmark highlight uygula
+  setTimeout(applyBookmarkHighlight, 50);
 }
 
 function selectAyah(i) {
@@ -5800,17 +5846,31 @@ function selectAyah(i) {
 }
 
 function playAyah(i) {
+  // Önceki ayetin butonlarını sıfırla
+  if(curAyah !== i) {
+    const prevPlay = document.getElementById('ayPlayBtn'+curAyah);
+    const prevStop = document.getElementById('ayStopBtn'+curAyah);
+    if(prevPlay) { prevPlay.textContent='▶ Dinle'; prevPlay.style.display=''; prevPlay.classList.remove('paused'); }
+    if(prevStop) prevStop.style.display='none';
+  }
   curAyah = i;
   const aud = document.getElementById('aud');
   aud.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${ayahs[i].number}.mp3`;
+  aud.playbackRate = playSpeed;
   aud.play().catch(()=>{});
   playing = true;
+  // Üst player güncelle
   document.getElementById('playBtn').textContent = '⏸';
   document.getElementById('pTrack').textContent = `${surahData.name} — ${ayahs[i].numberInSurah}. Ayet`;
   document.querySelectorAll('.ayah-card').forEach(c=>c.classList.remove('playing','active'));
   const el = document.getElementById(`ac${i}`);
   el?.classList.add('playing','active');
   if(autoScroll) el?.scrollIntoView({behavior:'smooth',block:'center'});
+  // Ayet butonlarını güncelle
+  const playBtn = document.getElementById('ayPlayBtn'+i);
+  const stopBtn = document.getElementById('ayStopBtn'+i);
+  if(playBtn) { playBtn.textContent='⏸ Durdur'; playBtn.style.display=''; }
+  if(stopBtn) stopBtn.style.display='inline-flex';
   // Yeşil üçgen takip
   document.querySelectorAll('.play-triangle').forEach(t=>t.remove());
   const _pc = document.getElementById('ac'+i);
@@ -5820,6 +5880,45 @@ function playAyah(i) {
     _pt.className='play-triangle'; _pt.textContent='▶';
     _pc.insertBefore(_pt,_pc.firstChild);
   }
+}
+
+// Ayet bazlı play/pause toggle
+function toggleAyahPlay(i) {
+  const aud = document.getElementById('aud');
+  const playBtn = document.getElementById('ayPlayBtn'+i);
+  if(curAyah === i && playing && aud && !aud.paused) {
+    // Çalıyorsa durdur
+    aud.pause(); playing = false;
+    document.getElementById('playBtn').textContent = '▶';
+    if(playBtn) playBtn.textContent = '▶ Devam';
+    toast('⏸ Duraklatıldı');
+  } else if(curAyah === i && playing && aud && aud.paused) {
+    // Duraklatılmışsa devam et
+    aud.playbackRate = playSpeed;
+    aud.play().catch(()=>{});
+    playing = true;
+    document.getElementById('playBtn').textContent = '⏸';
+    if(playBtn) playBtn.textContent = '⏸ Durdur';
+    toast('▶ Devam ediyor');
+  } else {
+    // Farklı ayet — baştan çal
+    playAyah(i);
+  }
+}
+
+// Ayet bazlı tam durdur
+function stopAyahPlay(i) {
+  const aud = document.getElementById('aud');
+  if(aud) { aud.pause(); aud.currentTime=0; }
+  playing = false;
+  document.getElementById('playBtn').textContent = '▶';
+  document.querySelectorAll('.ayah-card').forEach(c=>c.classList.remove('playing','active'));
+  document.querySelectorAll('.play-triangle').forEach(t=>t.remove());
+  const playBtn = document.getElementById('ayPlayBtn'+i);
+  const stopBtn = document.getElementById('ayStopBtn'+i);
+  if(playBtn) { playBtn.textContent='▶ Dinle'; }
+  if(stopBtn) stopBtn.style.display='none';
+  toast('⏹ Durduruldu');
 }
 function togglePlay() {
   const aud = document.getElementById('aud');
@@ -5837,7 +5936,19 @@ function togglePlay() {
     else { aud.play(); playing=true; if(btn) btn.innerHTML='⏸'; }
   }
 }
-function nextAyah(){if(curAyah+1<ayahs.length)playAyah(curAyah+1);else{playing=false;document.getElementById('playBtn').textContent='▶';}}
+function nextAyah() {
+  // Biten ayetin butonlarını sıfırla
+  const prevPlay = document.getElementById('ayPlayBtn'+curAyah);
+  const prevStop = document.getElementById('ayStopBtn'+curAyah);
+  if(prevPlay) prevPlay.textContent='▶ Dinle';
+  if(prevStop) prevStop.style.display='none';
+  if(curAyah+1 < ayahs.length) {
+    playAyah(curAyah+1);
+  } else {
+    playing=false;
+    document.getElementById('playBtn').textContent='▶';
+  }
+}
 function changeReciter(v){reciter=v;document.getElementById('pReciter').textContent=document.getElementById('reciterSel').options[document.getElementById('reciterSel').selectedIndex].text;if(playing)playAyah(curAyah);}
 
 async function loadTafsir(i, forceLang) {
@@ -6489,84 +6600,128 @@ function renderDiniGunler(){
   const el=document.getElementById('diniList');
   if(!el)return;
 
-  // KAYNAK: Diyanet İşleri Başkanlığı Resmi Takvimi
-  // https://vakithesaplama.diyanet.gov.tr
+  // ── TARİH PARSE YARDIMCISI ──
+  const AYLAR = {
+    'Oca':0,'Şub':1,'Mar':2,'Nis':3,'May':4,'Haz':5,
+    'Tem':6,'Ağu':7,'Eyl':8,'Eki':9,'Kas':10,'Ara':11
+  };
+  function parseDate(str) {
+    const parts = str.trim().split(' ');
+    return new Date(parseInt(parts[2]), AYLAR[parts[1]], parseInt(parts[0]));
+  }
 
+  // KAYNAK: Diyanet İşleri Başkanlığı Resmi Takvimi
   const days2026 = [
-    // GEÇMIŞ (Bilgi amaçlı gösteriliyor)
-    {d:"25 Ara 2025",m:"",name:"Regaib Kandili",desc:"Recep ayının ilk Cuma gecesi",icon:"✨",type:"kandil",gecti:true},
-    {d:"15 Oca 2026",m:"",name:"Miraç Kandili",desc:"Hz. Muhammed'in Mescid-i Aksa'ya ve göklere yükselişi — Recep 27",icon:"🌟",type:"kandil",gecti:true},
-    {d:"20 Oca 2026",m:"",name:"Şaban Ayı Başlangıcı",desc:"Hicri Şaban ayının ilk günü",icon:"🌙",type:"ay",gecti:true},
-    {d:"2 Şub 2026",m:"",name:"Berat Kandili",desc:"Şaban ayının 15. gecesi — günahların bağışlandığı mübarek gece",icon:"✨",type:"kandil",gecti:true},
-    {d:"19 Şub 2026",m:"",name:"Ramazan Ayı Başlangıcı",desc:"Hicri 1447 Ramazan ayının ilk günü — oruç başlangıcı",icon:"🌙",type:"kandil",gecti:true},
-    {d:"16 Mar 2026",m:"",name:"Kadir Gecesi",desc:"Ramazanın 27. gecesi — bin aydan hayırlı mübarek gece",icon:"⭐",type:"kandil",gecti:true},
-    {d:"19 Mar 2026",m:"",name:"Ramazan Bayramı Arifesi",desc:"Ramazan Bayramı'nın arifesi",icon:"🤲",type:"bayram",gecti:true},
-    {d:"20 Mar 2026",m:"",name:"Ramazan Bayramı 1. Gün",desc:"Şeker Bayramı — 1 Şevval 1447",icon:"🎊",type:"bayram",gecti:true},
-    {d:"21 Mar 2026",m:"",name:"Ramazan Bayramı 2. Gün",desc:"Şeker Bayramı — 2 Şevval 1447",icon:"🎊",type:"bayram",gecti:true},
-    {d:"22 Mar 2026",m:"",name:"Ramazan Bayramı 3. Gün",desc:"Şeker Bayramı — 3 Şevval 1447",icon:"🎊",type:"bayram",gecti:true},
-    {d:"26 May 2026",m:"",name:"Kurban Bayramı Arifesi",desc:"Arefe Günü — 9 Zilhicce 1447 (Hacılar Arafat'ta)",icon:"🤲",type:"bayram"},
-    {d:"27 May 2026",m:"",name:"Kurban Bayramı 1. Gün",desc:"10 Zilhicce 1447",icon:"🐑",type:"bayram"},
-    {d:"28 May 2026",m:"",name:"Kurban Bayramı 2. Gün",desc:"11 Zilhicce 1447",icon:"🐑",type:"bayram"},
-    {d:"29 May 2026",m:"",name:"Kurban Bayramı 3. Gün",desc:"12 Zilhicce 1447",icon:"🐑",type:"bayram"},
-    {d:"30 May 2026",m:"",name:"Kurban Bayramı 4. Gün",desc:"13 Zilhicce 1447",icon:"🐑",type:"bayram"},
-    {d:"16 Haz 2026",m:"",name:"Hicri Yılbaşı",desc:"1 Muharrem 1448 — İslam yeni yılı başlangıcı",icon:"🌙",type:"ay"},
-    {d:"25 Haz 2026",m:"",name:"Aşure Günü",desc:"Muharremin 10. günü — Hz. Nuh'un gemisinin karaya oturduğu gün",icon:"🤲",type:"islam"},
-    {d:"24 Ağu 2026",m:"",name:"Mevlid Kandili",desc:"Hz. Muhammed'in (s.a.v.) doğum günü — 12 Rebiülevvel 1448",icon:"🌟",type:"kandil"},
-    {d:"10 Ara 2026",m:"",name:"Üç Aylar Başlangıcı (2027)",desc:"Recep ayı başlangıcı — 1 Recep 1448",icon:"🌙",type:"ay"},
+    {d:"25 Ara 2025",name:"Regaib Kandili",desc:"Recep ayının ilk Cuma gecesi",icon:"✨",type:"kandil"},
+    {d:"15 Oca 2026",name:"Miraç Kandili",desc:"Hz. Muhammed'in Mescid-i Aksa'ya ve göklere yükselişi — Recep 27",icon:"🌟",type:"kandil"},
+    {d:"20 Oca 2026",name:"Şaban Ayı Başlangıcı",desc:"Hicri Şaban ayının ilk günü",icon:"🌙",type:"ay"},
+    {d:"2 Şub 2026",name:"Berat Kandili",desc:"Şaban ayının 15. gecesi — günahların bağışlandığı mübarek gece",icon:"✨",type:"kandil"},
+    {d:"19 Şub 2026",name:"Ramazan Ayı Başlangıcı",desc:"Hicri 1447 Ramazan ayının ilk günü — oruç başlangıcı",icon:"🌙",type:"kandil"},
+    {d:"16 Mar 2026",name:"Kadir Gecesi",desc:"Ramazanın 27. gecesi — bin aydan hayırlı mübarek gece",icon:"⭐",type:"kandil"},
+    {d:"19 Mar 2026",name:"Ramazan Bayramı Arifesi",desc:"Ramazan Bayramı'nın arifesi",icon:"🤲",type:"bayram"},
+    {d:"20 Mar 2026",name:"Ramazan Bayramı 1. Gün",desc:"Şeker Bayramı — 1 Şevval 1447",icon:"🎊",type:"bayram"},
+    {d:"21 Mar 2026",name:"Ramazan Bayramı 2. Gün",desc:"Şeker Bayramı — 2 Şevval 1447",icon:"🎊",type:"bayram"},
+    {d:"22 Mar 2026",name:"Ramazan Bayramı 3. Gün",desc:"Şeker Bayramı — 3 Şevval 1447",icon:"🎊",type:"bayram"},
+    {d:"26 May 2026",name:"Kurban Bayramı Arifesi",desc:"Arefe Günü — 9 Zilhicce 1447 (Hacılar Arafat'ta)",icon:"🤲",type:"bayram"},
+    {d:"27 May 2026",name:"Kurban Bayramı 1. Gün",desc:"10 Zilhicce 1447",icon:"🐑",type:"bayram"},
+    {d:"28 May 2026",name:"Kurban Bayramı 2. Gün",desc:"11 Zilhicce 1447",icon:"🐑",type:"bayram"},
+    {d:"29 May 2026",name:"Kurban Bayramı 3. Gün",desc:"12 Zilhicce 1447",icon:"🐑",type:"bayram"},
+    {d:"30 May 2026",name:"Kurban Bayramı 4. Gün",desc:"13 Zilhicce 1447",icon:"🐑",type:"bayram"},
+    {d:"16 Haz 2026",name:"Hicri Yılbaşı",desc:"1 Muharrem 1448 — İslam yeni yılı başlangıcı",icon:"🌙",type:"ay"},
+    {d:"25 Haz 2026",name:"Aşure Günü",desc:"Muharremin 10. günü — Hz. Nuh'un gemisinin karaya oturduğu gün",icon:"🤲",type:"islam"},
+    {d:"24 Ağu 2026",name:"Mevlid Kandili",desc:"Hz. Muhammed'in (s.a.v.) doğum günü — 12 Rebiülevvel 1448",icon:"🌟",type:"kandil"},
+    {d:"10 Ara 2026",name:"Üç Aylar Başlangıcı",desc:"Recep ayı başlangıcı — 1 Recep 1448",icon:"🌙",type:"ay"},
   ];
 
+  // 2027 — Diyanet takvimi baz alınarak düzeltildi
   const days2027 = [
-    {d:"14 Oca 2027",m:"",name:"Regaib Kandili",desc:"Recep ayının ilk Cuma gecesi",icon:"✨",type:"kandil"},
-    {d:"4 Şub 2027",m:"",name:"Miraç Kandili",desc:"Hz. Muhammed'in miraca yükselişi — Recep 27",icon:"🌟",type:"kandil"},
-    {d:"8 Şub 2027",m:"",name:"Ramazan Ayı Başlangıcı",desc:"Hicri 1448 Ramazan ayının ilk günü",icon:"🌙",type:"kandil"},
-    {d:"21 Şub 2027",m:"",name:"Berat Kandili",desc:"Şaban ayının 15. gecesi",icon:"✨",type:"kandil"},
-    {d:"5 Mar 2027",m:"",name:"Kadir Gecesi",desc:"Ramazanın 27. gecesi",icon:"⭐",type:"kandil"},
-    {d:"8 Mar 2027",m:"",name:"Ramazan Bayramı Arifesi",desc:"Ramazan Bayramı'nın arifesi",icon:"🤲",type:"bayram"},
-    {d:"9 Mar 2027",m:"",name:"Ramazan Bayramı 1. Gün",desc:"1 Şevval 1448",icon:"🎊",type:"bayram"},
-    {d:"10 Mar 2027",m:"",name:"Ramazan Bayramı 2. Gün",desc:"2 Şevval 1448",icon:"🎊",type:"bayram"},
-    {d:"11 Mar 2027",m:"",name:"Ramazan Bayramı 3. Gün",desc:"3 Şevval 1448",icon:"🎊",type:"bayram"},
-    {d:"15 May 2027",m:"",name:"Kurban Bayramı Arifesi",desc:"Arefe Günü — 9 Zilhicce 1448",icon:"🤲",type:"bayram"},
-    {d:"16 May 2027",m:"",name:"Kurban Bayramı 1. Gün",desc:"10 Zilhicce 1448",icon:"🐑",type:"bayram"},
-    {d:"17 May 2027",m:"",name:"Kurban Bayramı 2. Gün",desc:"11 Zilhicce 1448",icon:"🐑",type:"bayram"},
-    {d:"18 May 2027",m:"",name:"Kurban Bayramı 3. Gün",desc:"12 Zilhicce 1448",icon:"🐑",type:"bayram"},
-    {d:"19 May 2027",m:"",name:"Kurban Bayramı 4. Gün",desc:"13 Zilhicce 1448",icon:"🐑",type:"bayram"},
-    {d:"6 Haz 2027",m:"",name:"Hicri Yılbaşı",desc:"1 Muharrem 1449 — İslam yeni yılı",icon:"🌙",type:"ay"},
-    {d:"15 Haz 2027",m:"",name:"Aşure Günü",desc:"Muharremin 10. günü",icon:"🤲",type:"islam"},
-    {d:"15 Ağu 2027",m:"",name:"Mevlid Kandili",desc:"Hz. Muhammed'in (s.a.v.) doğum günü — 12 Rebiülevvel 1449",icon:"🌟",type:"kandil"},
-    {d:"24 Ara 2027",m:"",name:"Miraç Kandili (2028)",desc:"1449 Recep — Üç Aylar başlangıcı",icon:"🌙",type:"ay"},
+    {d:"14 Oca 2027",name:"Regaib Kandili",desc:"Recep ayının ilk Cuma gecesi — 1 Recep 1448",icon:"✨",type:"kandil"},
+    {d:"4 Şub 2027",name:"Miraç Kandili",desc:"Hz. Muhammed'in miraca yükselişi — 27 Recep 1448",icon:"🌟",type:"kandil"},
+    {d:"9 Şub 2027",name:"Şaban Ayı Başlangıcı",desc:"Hicri Şaban 1448 ayının ilk günü",icon:"🌙",type:"ay"},
+    {d:"23 Şub 2027",name:"Berat Kandili",desc:"Şaban ayının 15. gecesi — 15 Şaban 1448",icon:"✨",type:"kandil"},
+    {d:"10 Mar 2027",name:"Ramazan Ayı Başlangıcı",desc:"Hicri 1448 Ramazan ayının ilk günü — oruç başlangıcı",icon:"🌙",type:"kandil"},
+    {d:"5 Nis 2027",name:"Kadir Gecesi",desc:"Ramazanın 27. gecesi — 27 Ramazan 1448",icon:"⭐",type:"kandil"},
+    {d:"8 Nis 2027",name:"Ramazan Bayramı Arifesi",desc:"Ramazan Bayramı'nın arifesi — 29 Ramazan 1448",icon:"🤲",type:"bayram"},
+    {d:"9 Nis 2027",name:"Ramazan Bayramı 1. Gün",desc:"Şeker Bayramı — 1 Şevval 1448",icon:"🎊",type:"bayram"},
+    {d:"10 Nis 2027",name:"Ramazan Bayramı 2. Gün",desc:"Şeker Bayramı — 2 Şevval 1448",icon:"🎊",type:"bayram"},
+    {d:"11 Nis 2027",name:"Ramazan Bayramı 3. Gün",desc:"Şeker Bayramı — 3 Şevval 1448",icon:"🎊",type:"bayram"},
+    {d:"15 Haz 2027",name:"Kurban Bayramı Arifesi",desc:"Arefe Günü — 9 Zilhicce 1448 (Hacılar Arafat'ta)",icon:"🤲",type:"bayram"},
+    {d:"16 Haz 2027",name:"Kurban Bayramı 1. Gün",desc:"10 Zilhicce 1448",icon:"🐑",type:"bayram"},
+    {d:"17 Haz 2027",name:"Kurban Bayramı 2. Gün",desc:"11 Zilhicce 1448",icon:"🐑",type:"bayram"},
+    {d:"18 Haz 2027",name:"Kurban Bayramı 3. Gün",desc:"12 Zilhicce 1448",icon:"🐑",type:"bayram"},
+    {d:"19 Haz 2027",name:"Kurban Bayramı 4. Gün",desc:"13 Zilhicce 1448",icon:"🐑",type:"bayram"},
+    {d:"6 Tem 2027",name:"Hicri Yılbaşı",desc:"1 Muharrem 1449 — İslam yeni yılı başlangıcı",icon:"🌙",type:"ay"},
+    {d:"15 Tem 2027",name:"Aşure Günü",desc:"Muharremin 10. günü — 10 Muharrem 1449",icon:"🤲",type:"islam"},
+    {d:"14 Ağu 2027",name:"Mevlid Kandili",desc:"Hz. Muhammed'in (s.a.v.) doğum günü — 12 Rebiülevvel 1449",icon:"🌟",type:"kandil"},
+    {d:"30 Ara 2027",name:"Üç Aylar Başlangıcı (2028)",desc:"Recep ayı başlangıcı — 1 Recep 1449",icon:"🌙",type:"ay"},
   ];
 
   const t = UI_TEXT[lang] || UI_TEXT['tr'];
 
-  function renderGroup(title, days) {
-    const colors = {
-      kandil:'border-color:rgba(255,214,0,0.5)',
-      bayram:'border-color:rgba(160,120,50,0.5)',
-      islam:'border-color:rgba(0,150,255,0.3)',
-      ay:''
-    };
+  // Bugünün tarihi (saat sıfırlanmış)
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  // Tüm günleri birleştir, sıradakini bul
+  const allDays = [...days2026, ...days2027];
+  let siradakiIdx = -1;
+  let siradakiGroup = null; // '2026' veya '2027'
+  for(let i=0; i<allDays.length; i++){
+    const dt = parseDate(allDays[i].d);
+    if(dt >= today){
+      siradakiIdx = i;
+      siradakiGroup = allDays[i].d.includes('2027') ? '2027' : '2026';
+      break;
+    }
+  }
+
+  const colors = {
+    kandil:'border-color:rgba(255,214,0,0.4)',
+    bayram:'border-color:rgba(160,120,50,0.4)',
+    islam:'border-color:rgba(0,150,255,0.25)',
+    ay:''
+  };
+
+  function renderGroup(title, days, yil) {
     const gectiLabel = t.dini_gecti || 'geçti';
-    const items = days.map(d=>`
-      <div class="dini-card ${d.gecti?'dini-gecti':''}" style="${colors[d.type]||''}">
+    const items = days.map((d,idx)=>{
+      const dt = parseDate(d.d);
+      const isToday = dt.getTime() === today.getTime();
+      const isPast  = dt < today;
+      // Sıradaki: tüm listede ilk gelecek gün
+      const globalIdx = yil==='2026' ? idx : days2026.length+idx;
+      const isNext  = globalIdx === siradakiIdx;
+
+      let extraClass = '';
+      if(isPast) extraClass = 'dini-gecti';
+      else if(isToday) extraClass = 'dini-bugun';
+      else if(isNext) extraClass = 'dini-siradaki';
+
+      const nextLabel = isNext ? ' <span style="font-size:11px;background:var(--g2);color:#fff;padding:2px 7px;border-radius:20px;vertical-align:middle">► Sıradaki</span>' : '';
+      const gectiSpan = isPast ? ` <span style="font-size:11px;color:var(--text4);font-weight:400">(${gectiLabel})</span>` : '';
+
+      return `
+      <div class="dini-card ${extraClass}" style="${colors[d.type]||''}">
         <div class="dini-date-box">
           <div class="dini-day" style="font-size:13px;font-weight:900">${d.d.split(' ')[0]}</div>
           <div class="dini-month">${d.d.split(' ').slice(1).join(' ')}</div>
         </div>
         <div class="dini-info">
-          <h3>${d.name} ${d.gecti?`<span style="font-size:11px;color:var(--text4);font-weight:500">(${gectiLabel})</span>`:''}</h3>
+          <h3>${d.name}${nextLabel}${gectiSpan}</h3>
           <p>${d.desc}</p>
         </div>
         <div class="dini-badge">${d.icon}</div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     return `<div class="sec-head" style="margin-top:20px"><h2 style="font-size:16px">${title}</h2></div>${items}`;
   }
 
-  el.innerHTML = 
+  el.innerHTML =
     `<div class="info-card" style="margin-bottom:16px;padding:12px 16px">
       <p style="font-size:12px">${t.dini_kaynak||'📋 <b>Kaynak:</b> Diyanet İşleri Başkanlığı Resmi Takvimi. Hicri takvim ay başları hilale göre 1-2 gün değişebilir.'}</p>
     </div>` +
-    renderGroup(t.dini_grup_2026||'📅 2026 Dini Günleri', days2026) +
-    renderGroup(t.dini_grup_2027||'📅 2027 Dini Günleri', days2027);
+    renderGroup(t.dini_grup_2026||'📅 2026 Dini Günleri', days2026, '2026') +
+    renderGroup(t.dini_grup_2027||'📅 2027 Dini Günleri', days2027, '2027');
 }
 
 
@@ -6644,20 +6799,44 @@ async function loadOkunus(i) {
 
 // ── YER İMİ ──
 function setBookmark(surah, ayahIdx) {
+  // Aynı ayete tekrar basılınca kaldır
+  if(bookmarkSurah === surah && bookmarkAyah === ayahIdx) {
+    bookmarkSurah = 0; bookmarkAyah = 0;
+    localStorage.removeItem('bookmarkSurah');
+    localStorage.removeItem('bookmarkAyah');
+    document.querySelectorAll('.ayah-card.bookmark-card').forEach(c=>c.classList.remove('bookmark-card'));
+    buildSurahGrid(buildSurahs());
+    toast('📍 Kaldığım yer kaldırıldı');
+    return;
+  }
   bookmarkSurah = surah;
   bookmarkAyah = ayahIdx;
   localStorage.setItem('bookmarkSurah', String(surah));
   localStorage.setItem('bookmarkAyah', String(ayahIdx));
   buildSurahGrid(buildSurahs());
-  toast('🔖 Yer imi kaydedildi! — ' + (surahData?surahData.name:'') + ' ' + (ayahs[ayahIdx]?ayahs[ayahIdx].numberInSurah:'') + '. Ayet');
+  applyBookmarkHighlight();
+  toast('📍 Kaldığım yer kaydedildi! — ' + (surahData?surahData.name:'') + ' ' + (ayahs[ayahIdx]?ayahs[ayahIdx].numberInSurah:'') + '. Ayet');
 }
+
+// Bookmark olan ayet kartını kırmızıya boya
+function applyBookmarkHighlight() {
+  document.querySelectorAll('.ayah-card.bookmark-card').forEach(c=>c.classList.remove('bookmark-card'));
+  if(bookmarkSurah && surahData && surahData.n === bookmarkSurah) {
+    const el = document.getElementById('ac'+bookmarkAyah);
+    if(el) el.classList.add('bookmark-card');
+  }
+}
+
 function goToBookmark() {
-  if(!bookmarkSurah){ toast('Yer imi yok'); return; }
+  if(!bookmarkSurah){ toast('📍 Kaldığım yer ayarlanmamış'); return; }
   openSurah(bookmarkSurah).then(()=>{
     setTimeout(()=>{
       const el=document.getElementById('ac'+bookmarkAyah);
-      el&&el.scrollIntoView({behavior:'smooth',block:'center'});
-      el&&el.classList.add('active');
+      if(el){
+        el.scrollIntoView({behavior:'smooth',block:'center'});
+        el.classList.add('active');
+        applyBookmarkHighlight();
+      }
     },1500);
   });
 }
@@ -9645,6 +9824,8 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
           <option value="ar.hanirifai">Er-Rıfai</option>
           <option value="ar.saudshuraym">El-Şurayim</option>
           <option value="ar.ibrahimakhbar">El-Ahdar</option>
+          <option value="tr.diyanet">🇹🇷 Diyanet</option>
+          <option value="ar.muhammadayyoub">🇹🇷 M.Eyyüb</option>
         </select>
       </div>
     </div>
