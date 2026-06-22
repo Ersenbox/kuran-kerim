@@ -3,8 +3,8 @@
 // Cache version güncellendi → eski cache temizlenir
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'kuran-v35';
-const CACHE_VERSION = '2026-06-06-v35';
+const CACHE_NAME = 'kuran-v36';
+const CACHE_VERSION = '2026-06-22-v36';
 
 // Cache'lenecek dosyalar
 const CACHE_FILES = [
@@ -20,11 +20,8 @@ const CACHE_FILES = [
   '/icons/icon-384.png',
   '/icons/icon-512.png',
   // Ezan dosyaları — offline çalışması için cache'le
-  '/public/audio/azan1.mp3',
-  '/public/audio/azan2.mp3',
-  '/public/audio/azan3.mp3',
-  '/public/audio/azan4.mp3',
-  '/public/audio/azan5.mp3',
+  '/public/audio/sabah.mp3',
+  '/public/audio/ezan.mp3',
 ];
 
 // ── INSTALL: Yeni cache kur ──

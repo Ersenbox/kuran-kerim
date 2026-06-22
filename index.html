@@ -8608,18 +8608,10 @@ function startEzanInterval() {
   }, 30000);
 }
 
-// Offline ezan çal (CDN çalışmazsa)
+// playOfflineEzan — yerel MP3 sistemi zaten offline çalışır, geriye dönük uyumluluk için
 function playOfflineEzan() {
-  try {
-    const audio = document.getElementById('ezanAudio');
-    if(audio) {
-      // Offline fallback: İlk yerel ezan dosyasını çal
-      audio.src = '/public/audio/azan1.mp3';
-      audio.play().catch(()=>{});
-      return true;
-    }
-  } catch(e) {}
-  return false;
+  playEzanVakit('ogle'); // genel ezan
+  return true;
 }
 
 function saveEzanSettings(changedVakit) {
@@ -8637,23 +8629,22 @@ function saveEzanSettings(changedVakit) {
     notif_yatsi:  document.getElementById('notif-yatsi')?.value  || '0',
   };
   try { localStorage.setItem('ezanSettings', JSON.stringify(s)); } catch(e) {}
-  // Ezan seçimi değişince kısa önizleme çal (3 sn)
-  if(changedVakit) {
-    const selEl = document.getElementById('ezan-' + changedVakit);
-    const n = selEl ? parseInt(selEl.value) : 0;
-    if(n > 0) {
-      const audio = document.getElementById('ezanAudio');
-      const src = EZAN_URLS[n] || EZAN_URLS[1];
-      if(audio) {
-        audio.src = src;
-        audio.volume = parseFloat(s.vol) || 0.8;
-        audio.load();
-        audio.play().then(() => {
-          toast('🔊 Önizleme: Ezan ' + n + ' çalıyor (5 sn)...');
-          setTimeout(() => { try { audio.pause(); audio.currentTime=0; } catch(e){} }, 5000);
-        }).catch(e => {
-          console.warn('Önizleme başarısız:', e);
-          toast('⚠️ Önizleme çalınamadı — ▶ Çal butonunu dene');
+  // Ezan seçimi değişince kısa önizleme çal (5 sn)
+  if (changedVakit) {
+    var selEl2 = document.getElementById('ezan-' + changedVakit);
+    var n2 = selEl2 ? parseInt(selEl2.value) : 0;
+    if (n2 > 0) {
+      var audio2 = document.getElementById('ezanAudio');
+      if (audio2) {
+        stopEzanSilent();
+        audio2.src = _getEzanSrc(changedVakit);
+        audio2.volume = parseFloat(s.vol) || 0.8;
+        audio2.load();
+        audio2.play().then(function() {
+          toast('🔊 Önizleme: ' + changedVakit + ' ezanı çalıyor (5 sn)...');
+          setTimeout(function() { try { audio2.pause(); audio2.currentTime = 0; } catch(e) {} }, 5000);
+        }).catch(function(e) {
+          toast('⚠️ Önizleme çalınamadı');
         });
       }
     }
@@ -8696,109 +8687,64 @@ function loadEzanSettings() {
   }
 }
 
-// Her vakit için ayrı ezan çal
-// ── EZAN CDN KAYNAKLARI ──
-// islamic.network açık CDN — ezan sesleri (MP3, CORS izinli)
-const EZAN_CDNS = [
-  // Mekke ezanları — islamic.network
-  n => `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${n}.mp3`,
-  // Fallback: everyayah CDN
-  n => `https://everyayah.com/data/Alafasy_128kbps/${String(n).padStart(3,'0')}.mp3`,
-];
+// ── EZAN SES SİSTEMİ — Yerel MP3 (CDN bağımsız) ──
+// sabah.mp3  → Sabah (Fajr) ezanı
+// ezan.mp3   → Öğle, İkindi, Akşam, Yatsı ezanı
+var EZAN_SRC_SABAH = '/public/audio/sabah.mp3';
+var EZAN_SRC_GENEL = '/public/audio/ezan.mp3';
 
-// ── EZAN SESLERİ — Gerçek Ezan MP3 CDN ──
-// islamcan.com — ücretsiz, CORS izinli, gerçek ezan sesleri
-const EZAN_URLS = {
-  1:  'https://www.islamcan.com/audio/adhan/azan1.mp3',
-  2:  'https://www.islamcan.com/audio/adhan/azan2.mp3',
-  3:  'https://www.islamcan.com/audio/adhan/azan3.mp3',
-  4:  'https://www.islamcan.com/audio/adhan/azan4.mp3',
-  5:  'https://www.islamcan.com/audio/adhan/azan5.mp3',
-  6:  'https://www.islamcan.com/audio/adhan/azan6.mp3',
-  7:  'https://www.islamcan.com/audio/adhan/azan7.mp3',
-  8:  'https://www.islamcan.com/audio/adhan/azan8.mp3',
-  9:  'https://www.islamcan.com/audio/adhan/azan9.mp3',
-  10: 'https://www.islamcan.com/audio/adhan/azan10.mp3',
-  11: 'https://www.islamcan.com/audio/adhan/azan11.mp3',
-  12: 'https://www.islamcan.com/audio/adhan/azan12.mp3',
-  13: 'https://www.islamcan.com/audio/adhan/azan1.mp3',
-  14: 'https://www.islamcan.com/audio/adhan/azan2.mp3',
-  15: 'https://www.islamcan.com/audio/adhan/azan3.mp3',
-  16: 'https://www.islamcan.com/audio/adhan/azan4.mp3',
-  17: 'https://www.islamcan.com/audio/adhan/azan5.mp3',
-  18: 'https://www.islamcan.com/audio/adhan/azan6.mp3',
-  19: 'https://www.islamcan.com/audio/adhan/azan7.mp3',
-  20: 'https://www.islamcan.com/audio/adhan/azan8.mp3',
-  21: 'https://www.islamcan.com/audio/adhan/azan9.mp3',
-};
-
-// Fallback CDN listesi — sırayla denenecek
-const EZAN_FALLBACKS = [
-  n => `https://www.islamcan.com/audio/adhan/azan${Math.min(n,12)}.mp3`,
-  () => 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // test
-];
-
-async function playEzanVakit(vakit) {
-  const audio = document.getElementById('ezanAudio');
-  if(!audio) return;
-  const selCheck = document.getElementById('ezan-' + vakit);
-  if(selCheck && parseInt(selCheck.value) === 0) return;
-
-  document.querySelectorAll('.ezan-btn').forEach(b => b.classList.remove('playing'));
-
-  const selEl = document.getElementById('ezan-' + vakit);
-  const n = selEl ? (parseInt(selEl.value) || 1) : 1;
-  const volEl = document.getElementById('ezanVolume');
-  audio.volume = volEl ? (parseFloat(volEl.value) || 0.8) : 0.8;
-
-  const vakit_tr = {sabah:'Sabah', ogle:'Öğle', ikindi:'İkindi', aksam:'Akşam', yatsi:'Yatsı'};
-
-  // Denenecek URL listesi — islamcan → islamsound → fallback
-  const num = Math.min(n, 12);
-  const urlsToTry = [
-    EZAN_URLS[n] || EZAN_URLS[1],
-    `https://www.islamcan.com/audio/adhan/azan${num}.mp3`,
-    `https://audio.islamweb.net/audio/index.php?audioid=${90000 + num}`,
-    'https://www.islamcan.com/audio/adhan/azan1.mp3',
-  ].filter((v,i,a) => a.indexOf(v)===i); // deduplicate
-
-  let played = false;
-  for(const src of urlsToTry) {
-    try {
-      audio.src = src;
-      audio.load();
-      await new Promise((res, rej) => {
-        const onOk = () => { audio.removeEventListener('canplaythrough', onOk); audio.removeEventListener('loadeddata', onOk); audio.removeEventListener('error', onErr); res(); };
-        const onErr = () => { audio.removeEventListener('canplaythrough', onOk); audio.removeEventListener('loadeddata', onOk); audio.removeEventListener('error', onErr); rej(new Error('load error')); };
-        audio.addEventListener('canplaythrough', onOk, {once:true});
-        audio.addEventListener('loadeddata', onOk, {once:true});
-        audio.addEventListener('error', onErr, {once:true});
-        setTimeout(() => rej(new Error('timeout')), 8000);
-      });
-      await audio.play();
-      toast('🔊 ' + (vakit_tr[vakit]||vakit) + ' Ezanı çalıyor...');
-      played = true;
-      break;
-    } catch(e) {
-      console.warn('Ezan CDN başarısız:', src, e.message);
-      continue;
-    }
-  }
-
-  if(!played) {
-    toast('❌ Ezan çalınamadı — internet bağlantısını kontrol et');
-    console.error('Tüm ezan CDN\'leri başarısız');
-  }
+function _getEzanSrc(vakit) {
+  return vakit === 'sabah' ? EZAN_SRC_SABAH : EZAN_SRC_GENEL;
 }
 
-// Eski playEzan de çalışsın (geriye dönük)
+function playEzanVakit(vakit) {
+  // Mevcut sesi tamamen durdur — aynı anda 2 ses çalmasın
+  stopEzanSilent();
+
+  var selCheck = document.getElementById('ezan-' + vakit);
+  if (selCheck && parseInt(selCheck.value) === 0) return; // Kapalı
+
+  var audio = document.getElementById('ezanAudio');
+  if (!audio) return;
+
+  var volEl = document.getElementById('ezanVolume');
+  audio.volume = volEl ? (parseFloat(volEl.value) || 0.8) : 0.8;
+
+  var src = _getEzanSrc(vakit);
+  audio.src = src;
+  audio.load();
+
+  var vakit_tr = {sabah:'Sabah', ogle:'Öğle', ikindi:'İkindi', aksam:'Akşam', yatsi:'Yatsı'};
+
+  audio.play().then(function() {
+    toast('🔊 ' + (vakit_tr[vakit] || vakit) + ' Ezanı çalıyor...');
+    document.querySelectorAll('.ezan-btn').forEach(function(b) { b.classList.remove('playing'); });
+    var btn = document.querySelector('.ezan-btn[onclick*="' + vakit + '"]');
+    if (btn) btn.classList.add('playing');
+  }).catch(function(e) {
+    toast('⚠️ Ezan çalınamadı: ' + e.message);
+    console.warn('Ezan oynatma hatası:', e);
+  });
+}
+
+// Geriye dönük uyumluluk
 function playEzan(vakit) { playEzanVakit(vakit); }
 
+// Sessiz durdurma (yeni ezan başlamadan önce içten çağrılır)
+function stopEzanSilent() {
+  var audio = document.getElementById('ezanAudio');
+  if (audio) {
+    try { audio.pause(); } catch(e) {}
+    audio.removeAttribute('src');
+    try { audio.load(); } catch(e) {}
+    audio.currentTime = 0;
+  }
+  document.querySelectorAll('.ezan-btn').forEach(function(b) { b.classList.remove('playing'); });
+}
+
 function stopEzan() {
-  const audio = document.getElementById('ezanAudio');
-  if(audio) { audio.pause(); audio.currentTime = 0; }
-  document.querySelectorAll('.ezan-btn').forEach(b => b.classList.remove('playing'));
-  toast('⏹ Durduruldu');
+  stopEzanSilent();
+  toast('⏹ Ezan durduruldu');
 }
 
 // ── AYLIK İMSAKİYE ──
