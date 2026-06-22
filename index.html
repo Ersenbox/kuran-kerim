@@ -2948,15 +2948,11 @@ window.onload = () => {
     var pmEl = document.getElementById('prayerMethod');
     if (pmEl) {
       var saved = localStorage.getItem('prayerMethod') || '13';
-      if (['13','20','3'].indexOf(saved) === -1) { saved = '13'; localStorage.setItem('prayerMethod', '13'); }
+      if (['13','3','12'].indexOf(saved) === -1) { saved = '13'; localStorage.setItem('prayerMethod','13'); }
       pmEl.value = saved;
     }
   }, 120);
 
-  // Açılışta eski cache sil — her zaman taze API fetch
-  try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e) {}
-  var _ntIds = ['nt-imsak','nt-gunes','nt-ogle','nt-ikindi','nt-aksam','nt-yatsi'];
-  for(var _ni=0; _ni<_ntIds.length; _ni++) { var _elnt=document.getElementById(_ntIds[_ni]); if(_elnt) _elnt.textContent='...'; }
   // Açılışta eski cache sil — her zaman taze API fetch
   try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e) {}
   var _ntIds = ['nt-imsak','nt-gunes','nt-ogle','nt-ikindi','nt-aksam','nt-yatsi'];
@@ -6860,7 +6856,7 @@ async function loadNamazForCoords(lat, lng) {
     document.getElementById('nextNamazBox').style.display = 'block';
     startCountdown(t);
     scheduleAllEzan(t);
-    var methodNames = {'1':'Egyptian','2':'ISNA','3':'Muslim World League','4':'Ümmü\'l-Kurâ','5':'Karachi','13':'Diyanet','20':'ISNA Europe'};
+    var methodNames = {'3':'Muslim World League','12':'IGMG/Avrupa','13':'Diyanet'};
     toast('✅ ' + city + ' vakitleri yüklendi — ' + (methodNames[method]||method));
   } catch(e) {
     var locElErr = document.getElementById('locInfo');
@@ -6986,55 +6982,56 @@ function calcKibleAngle(lat, lng) {
 }
 
 function startCompassTracking() {
-  var accEl = document.getElementById('compassAccuracy');
   if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+
+    // iOS 13+ — izin gerekiyor
     DeviceOrientationEvent.requestPermission().then(function(perm) {
       if(perm === 'granted') {
         window.addEventListener('deviceorientation', handleOrientation, true);
-        if(accEl) { accEl.style.display='block'; accEl.textContent='📱 iOS pusula aktif — Telefonu döndür'; }
+        var acc = document.getElementById('compassAccuracy');
+        if(acc) { acc.style.display='block'; acc.textContent='📱 iOS pusula aktif — Telefonu döndür'; }
       } else {
-        if(accEl) { accEl.style.display='block'; accEl.textContent='⚠️ Pusula izni verilmedi. Kıble: ' + Math.round(kibleAngle) + '°'; }
+        var acc2 = document.getElementById('compassAccuracy');
+        if(acc2) { acc2.style.display='block'; acc2.textContent='⚠️ Pusula izni verilmedi. Kıble açısı: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
       }
     }).catch(function() {
       window.addEventListener('deviceorientation', handleOrientation, true);
     });
-  } else {
-    // Android: önce deviceorientationabsolute dene (manyetik kuzey referanslı — Chrome 91+)
-    var gotAbsolute = false;
-    if('ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', function(e) {
-        if(!gotAbsolute && e.alpha !== null) {
-          gotAbsolute = true;
-          if(accEl) { accEl.style.display='block'; accEl.textContent='📱 Pusula aktif (Hassas) — Telefonu döndür'; }
-        }
-        handleOrientation(e);
-      }, true);
-    }
-    // Fallback: standard deviceorientation
-    window.addEventListener('deviceorientation', function(e) {
-      if(!gotAbsolute) handleOrientation(e);
-    }, true);
-    setTimeout(function() {
-      if(accEl && accEl.style.display !== 'block') {
-        accEl.style.display='block';
-        accEl.textContent='📱 Pusula aktif — Telefonu döndür';
+  } else if(window.DeviceOrientationEvent) {
+    // Android veya izin gerektirmeyen cihaz
+    window.addEventListener('deviceorientation', handleOrientation, true);
+    var sensorTest = false;
+    function testHandler(e) {
+      if(e.alpha !== null && e.alpha !== undefined) {
+        sensorTest = true;
+        window.removeEventListener('deviceorientation', testHandler);
+        var acc = document.getElementById('compassAccuracy');
+        if(acc) { acc.style.display='block'; acc.textContent='📱 Pusula aktif — Telefonu döndür'; }
       }
-    }, 1500);
+    }
+    window.addEventListener('deviceorientation', testHandler, {once:false});
+    setTimeout(function() {
+      window.removeEventListener('deviceorientation', testHandler);
+      if(!sensorTest) {
+        var acc = document.getElementById('compassAccuracy');
+        if(acc) { acc.style.display='block'; acc.textContent='⚠️ Bu cihazda/tarayıcıda pusula sensörü yok. Kıble açısı: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
+      }
+    }, 2000);
+  } else {
+    var acc = document.getElementById('compassAccuracy');
+    if(acc) { acc.style.display='block'; acc.textContent='⚠️ Pusula desteklenmiyor. Kıble yönü: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
   }
 }
 
 function handleOrientation(e) {
   var heading = null;
   if(e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+    // iOS Safari — doğrudan kullan
     heading = e.webkitCompassHeading;
-  } else if(e.absolute === true && e.alpha !== null && e.alpha !== undefined) {
-    // deviceorientationabsolute — manyetik kuzey
-    heading = (360 - e.alpha) % 360;
   } else if(e.alpha !== null && e.alpha !== undefined) {
+    // Android Chrome
     heading = (360 - e.alpha) % 360;
   }
-  if(heading === null) return;
+  if(heading === null) return; // Sensor verisi yok
   compassHeading = heading;
   updatePusula(heading);
 }
@@ -10779,8 +10776,8 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
           <label style="font-size:12px;color:var(--text3)">📍 Hesaplama Kaynağı:</label>
           <select id="prayerMethod" onchange="savePrayerMethod()" style="width:100%;padding:8px;margin-top:6px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text)">
             <option value="13" selected>🇹🇷 Diyanet İşleri — Türkiye (Önerilen)</option>
-            <option value="20">🇩🇪 ISNA Europe / IGMG — Almanya</option>
             <option value="3">🌍 Muslim World League — Avrupa/Dünya</option>
+            <option value="12">🇩🇪 IGMG/Avrupa İslam Birliği — Almanya</option>
           </select>
         </div>
         
@@ -10810,7 +10807,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌅 Sabah</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-sabah" onchange="saveEzanSettings('sabah')"><option value="0">🔇 Kapalı</option><option value="S1" selected>🌅 Sabah Ezanı (Özel)</option><option value="1">🎵 Klasik Ezan</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-sabah" onchange="saveEzanSettings('sabah')"><option value="0">🔇 Kapalı</option><option value="S1">🌅 Sabah Özel 1 (Sabah.mp3)</option><option value="S2">🌅 Sabah Özel 2 (Hicaz)</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-sabah" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -10821,7 +10818,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">☀️ Öğle</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-ogle" onchange="saveEzanSettings('ogle')"><option value="0">🔇 Kapalı</option><option value="1" selected>🎵 Klasik Ezan</option><option value="2">✨ Güzel Sesli Ezan</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-ogle" onchange="saveEzanSettings('ogle')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-ogle" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -10832,7 +10829,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌤️ İkindi</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-ikindi" onchange="saveEzanSettings('ikindi')"><option value="0">🔇 Kapalı</option><option value="1" selected>🎵 Klasik Ezan</option><option value="2">✨ Güzel Sesli Ezan</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-ikindi" onchange="saveEzanSettings('ikindi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-ikindi" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -10843,7 +10840,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌆 Akşam</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-aksam" onchange="saveEzanSettings('aksam')"><option value="0">🔇 Kapalı</option><option value="1" selected>🎵 Klasik Ezan</option><option value="2">✨ Güzel Sesli Ezan</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-aksam" onchange="saveEzanSettings('aksam')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-aksam" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -10854,7 +10851,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌙 Yatsı</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-yatsi" onchange="saveEzanSettings('yatsi')"><option value="0">🔇 Kapalı</option><option value="1" selected>🎵 Klasik Ezan</option><option value="2">✨ Güzel Sesli Ezan</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-yatsi" onchange="saveEzanSettings('yatsi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
           <select id="notif-yatsi" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
