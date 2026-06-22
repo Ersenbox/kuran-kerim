@@ -3192,7 +3192,7 @@ const UI_TEXT = {
     reciter_diger: '🌟 Diğer Hafızlar',
     ayet_label: 'ayet',
     medeni: 'Medeni',
-    mekki: 'Mekki',
+    mekki: 'Mekke',
     ezber_label: '⭐Ezber',
 
     // Meal kaynakları + Uygulama Hakkında
@@ -5848,7 +5848,7 @@ function buildSurahGrid(list) {
       + '<div class="s-ar">'+s.ar+'</div>'
       + '<div class="s-name">'+s.name+'</div>'
       + '<div class="s-meta">'+s.ayah+' ayet'
-      + ' <span class="badge '+(s.type?'badge-md':'badge-m')+'">'+(s.type?'Medeni':'Mekki')+'</span>'
+      + ' <span class="badge '+(s.type?'badge-md':'badge-m')+'">'+(s.type?'Medeni':'Mekke')+'</span>'
       + (durStr ? ' <span style="font-size:10px;color:var(--g1);font-weight:700">⏱'+durStr+'</span>' : '')
       + (ez?'<span style="font-size:11px;color:#ffd600">⭐Ezber</span>':'')
       + (isBm?'<span style="font-size:11px;color:#e53935">🔖</span>':'')
@@ -6015,7 +6015,7 @@ async function openSurah(n) {
   showPage('reader');
   document.getElementById('rTitle').textContent = `${surahData.ar} — ${surahData.name}`;
   var sureDur = getSurahDurationSec(n-1);
-  document.getElementById('rSub').textContent = `${n}. Sure • ${surahData.ayah} Ayet • ${surahData.type?'Medeni':'Mekki'}` + (sureDur ? ' • ⏱' + formatDuration(sureDur) : '');
+  document.getElementById('rSub').textContent = `${n}. Sure • ${surahData.ayah} Ayet • ${surahData.type?'Medeni':'Mekke'}` + (sureDur ? ' • ⏱' + formatDuration(sureDur) : '');
   document.getElementById('pTrack').textContent = `${surahData.name} Suresi`;
   // Cüz banner
   var cuzBanner = document.getElementById('cuzBanner');
@@ -6278,7 +6278,7 @@ function changeReciter(v){
   if(surahData) {
     var dur = getSurahDurationSec(surahData.n-1);
     var rSub = document.getElementById('rSub');
-    if(rSub) rSub.textContent = surahData.n + '. Sure • ' + surahData.ayah + ' Ayet • ' + (surahData.type?'Medeni':'Mekki') + (dur ? ' • ⏱' + formatDuration(dur) : '');
+    if(rSub) rSub.textContent = surahData.n + '. Sure • ' + surahData.ayah + ' Ayet • ' + (surahData.type?'Medeni':'Mekke') + (dur ? ' • ⏱' + formatDuration(dur) : '');
   }
 }
 
@@ -7483,7 +7483,7 @@ function showSureHakkinda(n) {
       </div>
       <div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center">
         <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase">Nüzul</div>
-        <div style="font-size:16px;font-weight:800;color:var(--text)">${(s.type||SURAH_TYPE[n-1])?'Medeni':'Mekki'}</div>
+        <div style="font-size:16px;font-weight:800;color:var(--text)">${(s.type||SURAH_TYPE[n-1])?'Medeni':'Mekke'}</div>
       </div>
       <div style="background:var(--bg3);border-radius:10px;padding:12px;text-align:center">
         <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase">Sayfa</div>
@@ -9108,7 +9108,7 @@ function setSpeed(s) {
   if(surahData) {
     var dur = getSurahDurationSec(surahData.n-1);
     var rSub = document.getElementById('rSub');
-    if(rSub) rSub.textContent = surahData.n + '. Sure • ' + surahData.ayah + ' Ayet • ' + (surahData.type?'Medeni':'Mekki') + (dur ? ' • ⏱' + formatDuration(dur) : '');
+    if(rSub) rSub.textContent = surahData.n + '. Sure • ' + surahData.ayah + ' Ayet • ' + (surahData.type?'Medeni':'Mekke') + (dur ? ' • ⏱' + formatDuration(dur) : '');
   }
 }
 
