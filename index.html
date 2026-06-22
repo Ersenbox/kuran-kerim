@@ -2836,13 +2836,12 @@ let hizliSureler = JSON.parse(localStorage.getItem('hizliSureler')||'[1,36,55,67
 // INIT
 
 function savePrayerMethod() {
-  const method = document.getElementById('prayerMethod')?.value || '13';
+  var pmEl = document.getElementById('prayerMethod');
+  var method = (pmEl ? pmEl.value : '') || '13';
   localStorage.setItem('prayerMethod', method);
-  // Method değişince eski vakitler geçersiz — temizle
   try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e){}
-  // Kayıtlı konum varsa anında yeniden hesapla
-  const lat = parseFloat(localStorage.getItem('savedLat'));
-  const lng = parseFloat(localStorage.getItem('savedLng'));
+  var lat = parseFloat(localStorage.getItem('savedLat'));
+  var lng = parseFloat(localStorage.getItem('savedLng'));
   if(lat && lng) {
     toast('🔄 Hesaplama kaynağı değiştirildi, vakitler yeniden yükleniyor...');
     loadNamazForCoords(lat, lng);
@@ -6809,54 +6808,55 @@ async function loadNamazForCoords(lat, lng) {
     var method = localStorage.getItem('prayerMethod') || '13';
     // Timezone otomatik tespit
     var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
-    // Bugünün tarihi DD-MM-YYYY formatında (API için zorunlu — tarihsiz endpoint bazen yanlış gün döndürür)
+    // Bugünün tarihi DD-MM-YYYY formatında
     var now = new Date();
     var dd = String(now.getDate()).padStart(2,'0');
     var mm2 = String(now.getMonth()+1).padStart(2,'0');
     var yyyy = now.getFullYear();
     var todayStr = dd + '-' + mm2 + '-' + yyyy;
-    // /v1/timings/:date endpoint — tarih ile kesin doğru hesaplama
+    // Aladhan API — method=13 (Diyanet), school=1 (Hanafi)
     var url = 'https://api.aladhan.com/v1/timings/' + todayStr
       + '?latitude=' + lat
       + '&longitude=' + lng
       + '&method=' + method
-      + '&timezonestring=' + encodeURIComponent(tz)
-      + '&school=1';
-    const r = await fetch(url);
+      + '&school=1'
+      + '&timezonestring=' + encodeURIComponent(tz);
+    var r = await fetch(url);
     if(!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
-    if(!j.data || !j.data.timings) throw new Error('API boş veri döndürdü: ' + JSON.stringify(j));
-    const t = j.data.timings;
-    const meta = j.data.meta;
-    // City: önce kaydedilmiş şehir adı, sonra timezone'un son parçası
-    const savedCityName = localStorage.getItem('savedCity') || '';
-    const tzCity = meta.timezone ? meta.timezone.split('/').pop().replace(/_/g,' ') : '';
-    const city = savedCityName || tzCity || 'Konum';
+    var j = await r.json();
+    if(!j.data || !j.data.timings) throw new Error('API boş veri: ' + JSON.stringify(j));
+    var t = j.data.timings;
+    var meta = j.data.meta;
+    // Şehir adı
+    var savedCityName = localStorage.getItem('savedCity') || '';
+    var tzCity = meta.timezone ? meta.timezone.split('/').pop().replace(/_/g,' ') : '';
+    var city = savedCityName || tzCity || 'Konum';
     savedCity = city;
-    try { localStorage.setItem('savedCity', city); } catch(e){}
-    // Yeni API verisi geldi — eski cacheleri temizle (method değişiminde stale veri kalmasın)
-    try { localStorage.removeItem('savedPrayerTimes'); } catch(e){}
-    try { localStorage.setItem('savedPrayerTimes', JSON.stringify(t)); } catch(e){}
-    try { localStorage.setItem('prayerTimesDate', now.toDateString()); } catch(e){}
-    const locEl = document.getElementById('locInfo');
-    const cityEl = document.getElementById('namazCity');
+    try { localStorage.setItem('savedCity', city); } catch(e2){}
+    // Cache güncelle
+    try { localStorage.removeItem('savedPrayerTimes'); } catch(e2){}
+    try { localStorage.setItem('savedPrayerTimes', JSON.stringify(t)); } catch(e2){}
+    try { localStorage.setItem('prayerTimesDate', now.toDateString()); } catch(e2){}
+    // UI güncelle
+    var locEl = document.getElementById('locInfo');
+    var cityEl = document.getElementById('namazCity');
     if(locEl) locEl.textContent = '📍 ' + city;
     if(cityEl) cityEl.textContent = city;
-    const clean = (v) => v ? v.replace(/ \(.*?\)/g,'').trim() : '--:--';
-    document.getElementById('nt-imsak').textContent  = clean(t.Imsak);
-    document.getElementById('nt-gunes').textContent  = clean(t.Sunrise);
-    document.getElementById('nt-ogle').textContent   = clean(t.Dhuhr);
-    document.getElementById('nt-ikindi').textContent = clean(t.Asr);
-    document.getElementById('nt-aksam').textContent  = clean(t.Maghrib);
-    document.getElementById('nt-yatsi').textContent  = clean(t.Isha);
+    function cleanT(v) { return v ? v.replace(/ \(.*?\)/g,'').trim() : '--:--'; }
+    document.getElementById('nt-imsak').textContent  = cleanT(t.Imsak);
+    document.getElementById('nt-gunes').textContent  = cleanT(t.Sunrise);
+    document.getElementById('nt-ogle').textContent   = cleanT(t.Dhuhr);
+    document.getElementById('nt-ikindi').textContent = cleanT(t.Asr);
+    document.getElementById('nt-aksam').textContent  = cleanT(t.Maghrib);
+    document.getElementById('nt-yatsi').textContent  = cleanT(t.Isha);
     document.getElementById('nextNamazBox').style.display = 'block';
     startCountdown(t);
     scheduleAllEzan(t);
-    const methodNames = {'1':'Egyptian','2':'ISNA','3':'Muslim World League','4':'Ümmü\'l-Kurâ','5':'Karachi','13':'Diyanet','20':'ISNA Europe'};
+    var methodNames = {'1':'Egyptian','2':'ISNA','3':'Muslim World League','4':'Ümmü\'l-Kurâ','5':'Karachi','13':'Diyanet','20':'ISNA Europe'};
     toast('✅ ' + city + ' vakitleri yüklendi — ' + (methodNames[method]||method));
   } catch(e) {
-    const locEl = document.getElementById('locInfo');
-    if(locEl) locEl.textContent = '❌ Yüklenemedi: ' + e.message;
+    var locElErr = document.getElementById('locInfo');
+    if(locElErr) locElErr.textContent = '❌ Yüklenemedi: ' + e.message;
     console.error('Namaz yükleme hatası:', e);
   }
 }
@@ -6879,35 +6879,31 @@ function loadSavedLocation() {
 }
 
 function startCountdown(times) {
-  const names = ['İmsak','Güneş','Öğle','İkindi','Akşam','Yatsı'];
-  const keys  = ['Imsak','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
-  // Suffix temizle: "02:23 (EET)" → "02:23"
-  const cleanTime = (v) => v ? v.replace(/ \(.*?\)/g,'').trim() : '00:00';
-  // Dakika cinsinden parse
-  const toMins = (v) => { const [h,m] = cleanTime(v).split(':').map(Number); return h*60+(m||0); };
-  let _cdTimer = null;
+  var names = ['İmsak','Güneş','Öğle','İkindi','Akşam','Yatsı'];
+  var keys  = ['Imsak','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+  function cleanTime(v) { return v ? v.replace(/ \(.*?\)/g,'').trim() : '00:00'; }
+  function toMins(v) { var parts = cleanTime(v).split(':').map(Number); return parts[0]*60+(parts[1]||0); }
+  var _cdTimer = null;
   function update() {
-    const now = new Date();
-    const nowMins = now.getHours()*60 + now.getMinutes();
-    let next = -1;
-    for(let i=0; i<keys.length; i++){
+    var now = new Date();
+    var nowMins = now.getHours()*60 + now.getMinutes();
+    var next = -1;
+    for(var i=0; i<keys.length; i++){
       if(toMins(times[keys[i]]) > nowMins){ next=i; break; }
     }
-    // Gece yarısı geçtiyse (tüm vakitler geçmişse) → İmsak (ertesi gün)
     if(next < 0) next = 0;
     document.getElementById('nextNamazName').textContent = names[next];
-    const targetMins = toMins(times[keys[next]]);
-    const tH = Math.floor(targetMins/60), tM = targetMins%60;
-    const target = new Date(); target.setHours(tH, tM, 0, 0);
-    let diff = target - now;
-    // Eğer geçmişse ertesi gün olarak hesapla
+    var targetMins = toMins(times[keys[next]]);
+    var tH = Math.floor(targetMins/60), tM = targetMins%60;
+    var target = new Date(); target.setHours(tH, tM, 0, 0);
+    var diff = target - now;
     if(diff < 0) diff += 24*3600*1000;
-    const hh = Math.floor(diff/3600000);
-    const mm = Math.floor((diff%3600000)/60000);
-    const ss = Math.floor((diff%60000)/1000);
+    var hh = Math.floor(diff/3600000);
+    var mm = Math.floor((diff%3600000)/60000);
+    var ss = Math.floor((diff%60000)/1000);
     document.getElementById('nextCountdown').textContent =
       String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
-    document.querySelectorAll('.namaz-card').forEach((c,i) => {
+    document.querySelectorAll('.namaz-card').forEach(function(c,i) {
       c.classList.toggle('active-namaz', i===next);
     });
   }
@@ -6917,9 +6913,9 @@ function startCountdown(times) {
 }
 
 // ── KIBLE PUSULASI ──
-let kibleAngle = 0;
-let compassHeading = 0;
-let kibleActive = false;
+var kibleAngle = 0;
+var compassHeading = 0;
+var kibleActive = false;
 
 function getDir(a){
   if(a<22.5||a>=337.5)return'Kuzey';
@@ -6936,43 +6932,43 @@ function startKible() {
   if(!navigator.geolocation){ alert('Konum desteklenmiyor'); return; }
   
   const statusEl = document.getElementById('kibleStatus');
-  const infoEl = document.getElementById('kibleInfo');
+  var infoEl = document.getElementById('kibleInfo');
   statusEl.textContent = '📍 Konum alınıyor...';
   statusEl.className = 'kible-status kible-wait';
   
   // Önce kaydedilmiş konum varsa kullan
-  const savedLat2 = parseFloat(localStorage.getItem('savedLat'));
-  const savedLng2 = parseFloat(localStorage.getItem('savedLng'));
+  var savedLat2 = parseFloat(localStorage.getItem('savedLat'));
+  var savedLng2 = parseFloat(localStorage.getItem('savedLng'));
   
   if(savedLat2 && savedLng2) {
     calcKibleAngle(savedLat2, savedLng2);
   }
   
-  navigator.geolocation.getCurrentPosition(pos => {
+  navigator.geolocation.getCurrentPosition(function(pos) {
     calcKibleAngle(pos.coords.latitude, pos.coords.longitude);
-  }, () => {
+  }, function() {
     if(!savedLat2) statusEl.textContent = '❌ Konum izni reddedildi';
   }, {enableHighAccuracy: true, timeout: 10000});
 }
 
 function calcKibleAngle(lat, lng) {
-  const kaabaLat = 21.4225, kaabaLng = 39.8262;
-  const dLng = (kaabaLng - lng) * Math.PI / 180;
-  const lat1 = lat * Math.PI / 180;
-  const lat2 = kaabaLat * Math.PI / 180;
-  const y = Math.sin(dLng) * Math.cos(lat2);
-  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  var kaabaLat = 21.4225, kaabaLng = 39.8262;
+  var dLng = (kaabaLng - lng) * Math.PI / 180;
+  var lat1 = lat * Math.PI / 180;
+  var lat2 = kaabaLat * Math.PI / 180;
+  var y = Math.sin(dLng) * Math.cos(lat2);
+  var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
   kibleAngle = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   kibleActive = true;
   try { localStorage.setItem('savedKibleAngle', kibleAngle.toFixed(4)); } catch(e) {}
   
-  // UI güncelle
+  // UI güncelle — kibleDeg başlangıçta kibleAngle'ı göster, sonra updatePusula relAngle'a geçer
   document.getElementById('kibleDeg').style.display = 'block';
   document.getElementById('kibleDeg').textContent = Math.round(kibleAngle) + '°';
-  document.getElementById('kibleInfo').textContent = 'Kıble: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')';
+  document.getElementById('kibleInfo').textContent = 'Kıble: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ') — Berlin\'den Mekke';
   document.getElementById('kibleNeedle').style.display = 'block';
   document.getElementById('kibleStatus').className = 'kible-status kible-ok';
-  document.getElementById('kibleStatus').textContent = '✅ Kıble bulundu — ' + getDir(kibleAngle);
+  document.getElementById('kibleStatus').textContent = '✅ Kıble bulundu — Altın oku takip et';
   
   // İlk konuma göre oku ayarla
   updatePusula(compassHeading);
@@ -6984,53 +6980,51 @@ function calcKibleAngle(lat, lng) {
 function startCompassTracking() {
   if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     // iOS 13+ — izin gerekiyor
-    DeviceOrientationEvent.requestPermission().then(perm => {
+    DeviceOrientationEvent.requestPermission().then(function(perm) {
       if(perm === 'granted') {
         window.addEventListener('deviceorientation', handleOrientation, true);
-        const acc = document.getElementById('compassAccuracy');
+        var acc = document.getElementById('compassAccuracy');
         if(acc) { acc.style.display='block'; acc.textContent='📱 iOS pusula aktif — Telefonu döndür'; }
       } else {
-        const acc = document.getElementById('compassAccuracy');
-        if(acc) { acc.style.display='block'; acc.textContent='⚠️ Pusula izni verilmedi. Kıble açısı: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
+        var acc2 = document.getElementById('compassAccuracy');
+        if(acc2) { acc2.style.display='block'; acc2.textContent='⚠️ Pusula izni verilmedi. Kıble açısı: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
       }
-    }).catch(() => {
+    }).catch(function() {
       window.addEventListener('deviceorientation', handleOrientation, true);
     });
   } else if(window.DeviceOrientationEvent) {
     // Android veya izin gerektirmeyen cihaz
     window.addEventListener('deviceorientation', handleOrientation, true);
-    // Test: sensor gerçekten veri gönderiyor mu?
-    let sensorTest = false;
-    const testHandler = (e) => {
+    var sensorTest = false;
+    function testHandler(e) {
       if(e.alpha !== null && e.alpha !== undefined) {
         sensorTest = true;
         window.removeEventListener('deviceorientation', testHandler);
-        const acc = document.getElementById('compassAccuracy');
+        var acc = document.getElementById('compassAccuracy');
         if(acc) { acc.style.display='block'; acc.textContent='📱 Pusula aktif — Telefonu döndür'; }
       }
-    };
+    }
     window.addEventListener('deviceorientation', testHandler, {once:false});
-    setTimeout(() => {
+    setTimeout(function() {
       window.removeEventListener('deviceorientation', testHandler);
       if(!sensorTest) {
-        const acc = document.getElementById('compassAccuracy');
+        var acc = document.getElementById('compassAccuracy');
         if(acc) { acc.style.display='block'; acc.textContent='⚠️ Bu cihazda/tarayıcıda pusula sensörü yok. Kıble açısı: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
       }
     }, 2000);
   } else {
-    const acc = document.getElementById('compassAccuracy');
+    var acc = document.getElementById('compassAccuracy');
     if(acc) { acc.style.display='block'; acc.textContent='⚠️ Pusula desteklenmiyor. Kıble yönü: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
   }
 }
 
 function handleOrientation(e) {
-  let heading = null;
+  var heading = null;
   if(e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
-    // iOS Safari — manyetik kuzeyden saat yönü derece, doğrudan kullan
+    // iOS Safari — doğrudan kullan
     heading = e.webkitCompassHeading;
   } else if(e.alpha !== null && e.alpha !== undefined) {
-    // Android Chrome — alpha: cihazın Z ekseni etrafındaki dönüşü
-    // Ekran yukarıya bakıyorken doğru çeviri:
+    // Android Chrome
     heading = (360 - e.alpha) % 360;
   }
   if(heading === null) return; // Sensor verisi yok
@@ -7040,31 +7034,39 @@ function handleOrientation(e) {
 
 function updatePusula(heading) {
   // Pusula çemberi ters döner — harfler sabit görünsün
-  const ring = document.getElementById('compassRing');
+  var ring = document.getElementById('compassRing');
   if(ring) ring.style.transform = 'rotate(' + (-heading) + 'deg)';
 
   // Kuzey oku SABIT kalmalı — transform YOK
-  // (northNeedle body'de sabit duruyor, dönmemeli)
-  const northEl = document.getElementById('northNeedle');
+  var northEl = document.getElementById('northNeedle');
   if(northEl) northEl.style.transform = 'none';
 
   // Kıble oku: kibleAngle mutlak — cihaz heading'i çıkar
   if(kibleActive) {
-    const relAngle = (kibleAngle - heading + 360) % 360;
-    const needleEl = document.getElementById('kibleNeedle');
+    var relAngle = (kibleAngle - heading + 360) % 360;
+    var needleEl = document.getElementById('kibleNeedle');
     if(needleEl) needleEl.style.transform = 'rotate(' + relAngle + 'deg)';
 
+    // Derece göstergesi: cihaz dönerken KALAN AÇI değişmeli
+    var degEl = document.getElementById('kibleDeg');
+    if(degEl) {
+      degEl.style.display = 'block';
+      degEl.textContent = Math.round(relAngle) + '°';
+    }
+
     // ±10° tolerans
-    const diff = Math.min(relAngle, 360 - relAngle);
-    const isNear = diff < 10;
-    const statusEl = document.getElementById('kibleStatus');
+    var diff = Math.min(relAngle, 360 - relAngle);
+    var isNear = diff < 10;
+    var statusEl = document.getElementById('kibleStatus');
     if(statusEl) {
       if(isNear) {
         statusEl.className = 'kible-status kible-ok';
         statusEl.textContent = '🕋 KİBLE YÖNÜ! Yüzünü bu yöne dön!';
       } else {
+        // Sağa mı sola mı dönmeli?
+        var yon = (relAngle <= 180) ? '↩️ Sola dön' : '↪️ Sağa dön';
         statusEl.className = 'kible-status kible-wait';
-        statusEl.textContent = '✅ Kıble: ' + Math.round(kibleAngle) + '° — Altın oku takip et';
+        statusEl.textContent = yon + ' — Kıble: ' + Math.round(kibleAngle) + '° | Kalan: ' + Math.round(diff) + '°';
       }
     }
   }
@@ -7079,16 +7081,7 @@ const TESBI_LIST = [
   {name:'Estağfirullah',ar:'أَسْتَغْفِرُ اللَّهَ',target:100},
   {name:'Salavat',ar:'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',target:100}
 ];
-let curTesbi=0, tesbiCounts=JSON.parse(localStorage.getItem('tesbiCounts')||'[0,0,0,0,0,0]');
-
-function selectTesbi(i,el){
-  curTesbi=i;
-  document.querySelectorAll('.tesbi-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  updateTesbiUI();
-}
-
-
+var curTesbi=0, tesbiCounts=JSON.parse(localStorage.getItem('tesbiCounts')||'[0,0,0,0,0,0]');
 
 function incrementTesbi(){
   tesbiCounts[curTesbi]++;
@@ -7166,16 +7159,6 @@ function resetAllTesbi(){
   if(btn){btn.style.background='';btn.style.boxShadow='';}
   updateTesbiUI();
   renderTesbiSel();
-}
-
-function renderTesbiStats(){
-  const el=document.getElementById('tesbiStats');
-  if(!el)return;
-  el.innerHTML=TESBI_LIST.map((t,i)=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
-      <span style="font-size:13px;font-weight:700;color:var(--text2)">${t.name}</span>
-      <span style="font-size:16px;font-weight:900;color:var(--g1)">${tesbiCounts[i]}</span>
-    </div>`).join('');
 }
 
 // ── DİNİ GÜNLER ──
