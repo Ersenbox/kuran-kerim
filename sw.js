@@ -1,10 +1,10 @@
 // ══════════════════════════════════════════
-// KURAN-I KERİM PWA — Service Worker v39
+// KURAN-I KERİM PWA — Service Worker v40
 // Cache version güncellendi → eski cache temizlenir
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'kuran-v39';
-const CACHE_VERSION = '2026-06-22-v39';
+const CACHE_NAME = 'kuran-v40';
+const CACHE_VERSION = '2026-06-22-v40';
 
 // Cache'lenecek dosyalar
 const CACHE_FILES = [
@@ -47,13 +47,13 @@ const CACHE_FILES = [
 
 // ── INSTALL: Yeni cache kur ──
 self.addEventListener('install', event => {
-  console.log('[SW v39] Installing...');
+  console.log('[SW v40] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // Promise.allSettled: tek MP3 hata verse de diğerleri cache'lenir
       return Promise.allSettled(
         CACHE_FILES.map(url => cache.add(url).catch(err => {
-          console.warn('[SW v39] Cache skip:', url, err.message);
+          console.warn('[SW v40] Cache skip:', url, err.message);
         }))
       );
     })
@@ -64,19 +64,19 @@ self.addEventListener('install', event => {
 
 // ── ACTIVATE: ESKİ CACHE'LERİ TEMİZLE ──
 self.addEventListener('activate', event => {
-  console.log('[SW v39] Activating — clearing old caches...');
+  console.log('[SW v40] Activating — clearing old caches...');
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys
           .filter(key => key !== CACHE_NAME)
           .map(key => {
-            console.log('[SW v39] Deleting old cache:', key);
+            console.log('[SW v40] Deleting old cache:', key);
             return caches.delete(key);
           })
       );
     }).then(() => {
-      console.log('[SW v39] Old caches cleared');
+      console.log('[SW v40] Old caches cleared');
       // Tüm açık sekmeleri hemen güncelle
       return self.clients.claim();
     })
@@ -142,6 +142,6 @@ self.addEventListener('message', event => {
     caches.keys().then(keys => {
       keys.forEach(key => caches.delete(key));
     });
-    console.log('[SW v39] All caches cleared by message');
+    console.log('[SW v40] All caches cleared by message');
   }
 });
