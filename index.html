@@ -2948,11 +2948,15 @@ window.onload = () => {
     var pmEl = document.getElementById('prayerMethod');
     if (pmEl) {
       var saved = localStorage.getItem('prayerMethod') || '13';
-      if (['1','3','4','5','13','20'].indexOf(saved) === -1) saved = '13';
+      if (['13','20','3'].indexOf(saved) === -1) { saved = '13'; localStorage.setItem('prayerMethod', '13'); }
       pmEl.value = saved;
     }
   }, 120);
 
+  // Açılışta eski cache sil — her zaman taze API fetch
+  try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e) {}
+  var _ntIds = ['nt-imsak','nt-gunes','nt-ogle','nt-ikindi','nt-aksam','nt-yatsi'];
+  for(var _ni=0; _ni<_ntIds.length; _ni++) { var _elnt=document.getElementById(_ntIds[_ni]); if(_elnt) _elnt.textContent='...'; }
   // Açılışta eski cache sil — her zaman taze API fetch
   try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e) {}
   var _ntIds = ['nt-imsak','nt-gunes','nt-ogle','nt-ikindi','nt-aksam','nt-yatsi'];
@@ -6982,56 +6986,55 @@ function calcKibleAngle(lat, lng) {
 }
 
 function startCompassTracking() {
+  var accEl = document.getElementById('compassAccuracy');
   if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+ — izin gerekiyor
+    // iOS 13+
     DeviceOrientationEvent.requestPermission().then(function(perm) {
       if(perm === 'granted') {
         window.addEventListener('deviceorientation', handleOrientation, true);
-        var acc = document.getElementById('compassAccuracy');
-        if(acc) { acc.style.display='block'; acc.textContent='📱 iOS pusula aktif — Telefonu döndür'; }
+        if(accEl) { accEl.style.display='block'; accEl.textContent='📱 iOS pusula aktif — Telefonu döndür'; }
       } else {
-        var acc2 = document.getElementById('compassAccuracy');
-        if(acc2) { acc2.style.display='block'; acc2.textContent='⚠️ Pusula izni verilmedi. Kıble açısı: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
+        if(accEl) { accEl.style.display='block'; accEl.textContent='⚠️ Pusula izni verilmedi. Kıble: ' + Math.round(kibleAngle) + '°'; }
       }
     }).catch(function() {
       window.addEventListener('deviceorientation', handleOrientation, true);
     });
-  } else if(window.DeviceOrientationEvent) {
-    // Android veya izin gerektirmeyen cihaz
-    window.addEventListener('deviceorientation', handleOrientation, true);
-    var sensorTest = false;
-    function testHandler(e) {
-      if(e.alpha !== null && e.alpha !== undefined) {
-        sensorTest = true;
-        window.removeEventListener('deviceorientation', testHandler);
-        var acc = document.getElementById('compassAccuracy');
-        if(acc) { acc.style.display='block'; acc.textContent='📱 Pusula aktif — Telefonu döndür'; }
-      }
-    }
-    window.addEventListener('deviceorientation', testHandler, {once:false});
-    setTimeout(function() {
-      window.removeEventListener('deviceorientation', testHandler);
-      if(!sensorTest) {
-        var acc = document.getElementById('compassAccuracy');
-        if(acc) { acc.style.display='block'; acc.textContent='⚠️ Bu cihazda/tarayıcıda pusula sensörü yok. Kıble açısı: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
-      }
-    }, 2000);
   } else {
-    var acc = document.getElementById('compassAccuracy');
-    if(acc) { acc.style.display='block'; acc.textContent='⚠️ Pusula desteklenmiyor. Kıble yönü: ' + Math.round(kibleAngle) + '° (' + getDir(kibleAngle) + ')'; }
+    // Android: önce deviceorientationabsolute dene (manyetik kuzey referanslı — Chrome 91+)
+    var gotAbsolute = false;
+    if('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', function(e) {
+        if(!gotAbsolute && e.alpha !== null) {
+          gotAbsolute = true;
+          if(accEl) { accEl.style.display='block'; accEl.textContent='📱 Pusula aktif (Hassas) — Telefonu döndür'; }
+        }
+        handleOrientation(e);
+      }, true);
+    }
+    // Fallback: standard deviceorientation
+    window.addEventListener('deviceorientation', function(e) {
+      if(!gotAbsolute) handleOrientation(e);
+    }, true);
+    setTimeout(function() {
+      if(accEl && accEl.style.display !== 'block') {
+        accEl.style.display='block';
+        accEl.textContent='📱 Pusula aktif — Telefonu döndür';
+      }
+    }, 1500);
   }
 }
 
 function handleOrientation(e) {
   var heading = null;
   if(e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
-    // iOS Safari — doğrudan kullan
     heading = e.webkitCompassHeading;
+  } else if(e.absolute === true && e.alpha !== null && e.alpha !== undefined) {
+    // deviceorientationabsolute — manyetik kuzey
+    heading = (360 - e.alpha) % 360;
   } else if(e.alpha !== null && e.alpha !== undefined) {
-    // Android Chrome
     heading = (360 - e.alpha) % 360;
   }
-  if(heading === null) return; // Sensor verisi yok
+  if(heading === null) return;
   compassHeading = heading;
   updatePusula(heading);
 }
@@ -10775,12 +10778,9 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
         <div style="padding:16px;border-bottom:1px solid var(--border)">
           <label style="font-size:12px;color:var(--text3)">📍 Hesaplama Kaynağı:</label>
           <select id="prayerMethod" onchange="savePrayerMethod()" style="width:100%;padding:8px;margin-top:6px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text)">
-            <option value="3">🌍 Muslim World League — Avrupa/Dünya (Önerilen)</option>
-            <option value="13">🇹🇷 Diyanet İşleri — Türkiye</option>
+            <option value="13" selected>🇹🇷 Diyanet İşleri — Türkiye (Önerilen)</option>
             <option value="20">🇩🇪 ISNA Europe / IGMG — Almanya</option>
-            <option value="4">🕋 Ümmü'l-Kurâ — Mekke (Standart)</option>
-            <option value="1">🇪🇬 Egyptian — Mısır Genel İdaresi</option>
-            <option value="5">📐 Karachi — Hanefî Hesap</option>
+            <option value="3">🌍 Muslim World League — Avrupa/Dünya</option>
           </select>
         </div>
         
