@@ -2953,6 +2953,10 @@ window.onload = () => {
     }
   }, 120);
 
+  // Açılışta eski cache sil — her zaman taze API fetch
+  try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e) {}
+  var _ntIds = ['nt-imsak','nt-gunes','nt-ogle','nt-ikindi','nt-aksam','nt-yatsi'];
+  for(var _ni=0; _ni<_ntIds.length; _ni++) { var _elnt=document.getElementById(_ntIds[_ni]); if(_elnt) _elnt.textContent='...'; }
   // Kayıtlı konumu yükle — namaz vakitleri ve ezan zamanlayıcıları
   setTimeout(loadSavedLocation, 250);
 
