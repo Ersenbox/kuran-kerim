@@ -1078,7 +1078,6 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
   display: none;
   padding: 10px;
   gap: 6px;
-  display: none;
   flex-wrap: wrap;
 }
 .juz-card.open .juz-surahs { display: flex; }
@@ -1699,6 +1698,18 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 .surah-card.bookmarked { border-color: #e53935 !important; border-width: 2px !important; box-shadow: 0 0 16px rgba(229,57,53,0.45) !important; background: linear-gradient(135deg,rgba(229,57,53,0.18),rgba(183,28,28,0.12)) !important; }
 .juz-card.juz-bookmarked { border: 2px solid #e53935 !important; box-shadow: 0 0 14px rgba(229,57,53,0.4) !important; background: linear-gradient(135deg,rgba(229,57,53,0.12),rgba(183,28,28,0.08)) !important; }
 .juz-surah-pill.juz-pill-bookmark { background: #e53935 !important; color: #fff !important; border-color: #e53935 !important; font-weight: 800 !important; }
+.ozel-sure-card {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ozel-sure-card:hover, .ozel-sure-card:active { border-color: var(--g1); background: rgba(160,120,50,0.08); transform: translateY(-2px); }
+.ozel-sure-name { font-size: 14px; font-weight: 800; color: var(--g1); margin-top: 6px; }
+.ozel-sure-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .smenu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .smenu-btn {
   background: var(--bg3);
@@ -2277,6 +2288,15 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
       <button class="vt-btn active" id="vt-sure" onclick="setView('sure')">📖 Sureler</button>
       <button class="vt-btn" id="vt-juz" onclick="setView('juz')">📚 30 Cüz</button>
     </div>
+    <!-- Filtreler — sadece Sureler modunda görünür -->
+    <div id="surahFilterBar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 6px">
+      <button id="fTumu" onclick="setSurahFilter('tumu')" style="padding:6px 14px;border-radius:10px;border:2px solid var(--g1);background:var(--g1);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Tümü</button>
+      <button id="fMekke" onclick="setSurahFilter('mekke')" style="padding:6px 14px;border-radius:10px;border:2px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Mekke</button>
+      <button id="fMedine" onclick="setSurahFilter('medine')" style="padding:6px 14px;border-radius:10px;border:2px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Medine</button>
+      <select id="fCuz" onchange="setSurahCuzFilter(this.value)" style="padding:6px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">
+        <option value="0">Tüm Cüzler</option>
+      </select>
+    </div>
     <div class="surah-grid" id="surahGrid">
       <div class="loading" style="grid-column:1/-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
     </div>
@@ -2290,6 +2310,11 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
       <div>
         <div class="r-title" id="rTitle">—</div>
         <div class="r-sub" id="rSub">—</div>
+        <!-- Cüz modu banner -->
+        <div id="cuzBanner" style="display:none;margin-top:6px;padding:6px 10px;background:linear-gradient(135deg,rgba(160,120,50,0.15),rgba(160,120,50,0.08));border-radius:10px;border-left:3px solid var(--g1)">
+          <div id="cuzBannerTitle" style="font-size:12px;font-weight:800;color:var(--g1)"></div>
+          <div id="cuzBannerSurahs" style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.6"></div>
+        </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <select class="reciter-sel" id="reciterSel" onchange="changeReciter(this.value)">
@@ -2900,7 +2925,7 @@ window.onload = () => {
   localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
 
   renderGunlukKart(); scheduleGunlukUpdate();
-  buildSurahGrid(buildSurahs()); buildEsma(); updateFavCount(); setupSearch(); renderTesbiSel(); updateTesbiUI(); renderDiniGunler();
+  buildSurahGrid(buildSurahs()); buildEsma(); updateFavCount(); setupSearch(); renderTesbiSel(); updateTesbiUI(); renderDiniGunler(); setTimeout(initSurahFilters, 300);
 
   // Kayıtlı dil ve kıraat seçimini UI'ya yansıt
   const langSel = document.getElementById('langSel');
@@ -2934,6 +2959,11 @@ window.onload = () => {
 
   // Dakika bazlı ezan kontrolü başlat (mobil arka plan güvenli)
   startEzanInterval();
+  // Kayıtlı vakitleri varsa scheduleAllEzan'ı hemen çalıştır
+  setTimeout(function() {
+    var saved = localStorage.getItem('savedPrayerTimes');
+    if(saved) { try { scheduleAllEzan(JSON.parse(saved)); } catch(e) {} }
+  }, 500);
 };
 
 function buildSurahs() {
@@ -5745,6 +5775,53 @@ function changeLang(l) {
 
 // ── SURAH GRID ──
 const SURAH_PAGES = [1,2,50,77,106,128,151,177,187,208,221,235,249,255,262,267,282,293,305,312,320,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,477,483,489,496,499,503,507,511,515,518,520,523,526,528,531,534,537,541,543,545,549,551,554,556,558,560,562,564,566,568,570,572,574,575,577,578,580,582,583,585,586,587,587,589,590,592,594,595,596,597,598,599,600,601,601,602,602,603,603,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604,604];
+
+// ── SURE SÜRELERİ — Mishary Alafasy baz (saniye) ──
+// Kaynak: gerçek tilawet sürelerine dayalı tahmin (ayet başına ortalama)
+const SURAH_DURATION_SEC = [
+  56,2288,1600,1408,960,1320,1648,600,1032,872,984,888,344,416,792,1024,888,880,784,1080,896,624,944,512,616,1816,744,704,552,480,272,240,584,432,360,664,1456,704,600,680,432,424,712,472,296,280,304,232,144,360,480,392,496,440,624,768,232,176,192,104,112,88,88,144,96,96,240,416,416,352,224,224,160,448,320,248,400,320,368,336,232,152,288,200,176,136,152,208,240,160,120,168,88,64,64,152,40,64,64,88,88,64,24,72,40,32,56,24,48,24,40,32,40,48
+];
+
+// Reciter hız çarpanları (1x = Alafasy baz)
+var RECITER_SPEED_FACTOR = {
+  'ar.alafasy': 1.0,
+  'ar.abdurrahmaansudais': 0.95,
+  'ar.ahmedajamy': 1.05,
+  'ar.hanirifai': 0.9,
+  'ar.husary': 1.1,
+  'ar.ibrahimakhbar': 1.0,
+  'ar.mahermuaiqly': 0.92,
+  'ar.minshawi': 1.15,
+  'ar.muhammadayyoub': 1.0,
+  'ar.muhammadjibreel': 0.95,
+  'ar.saoodshuraym': 0.9
+};
+
+function getSurahDurationSec(surahIdx) {
+  // surahIdx = 0-based
+  var base = SURAH_DURATION_SEC[surahIdx] || (AYAH_COUNT[surahIdx] * 8);
+  var speedMult = 1 / (playSpeed || 1);
+  var reciterFactor = RECITER_SPEED_FACTOR[reciter] || 1.0;
+  return Math.round(base * speedMult * reciterFactor);
+}
+
+function formatDuration(totalSec) {
+  var m = Math.floor(totalSec / 60);
+  var s = totalSec % 60;
+  if(m === 0) return s + 'sn';
+  if(s === 0) return m + 'dk';
+  return m + 'dk ' + s + 'sn';
+}
+
+function getJuzDurationSec(juzNum) {
+  var jd = JUZ_SURAH[String(juzNum)];
+  if(!jd) return 0;
+  var unique = [];
+  jd.surahs.forEach(function(sn){ if(unique.indexOf(sn)<0) unique.push(sn); });
+  var total = 0;
+  unique.forEach(function(sn){ total += getSurahDurationSec(sn-1); });
+  return total;
+}
 function isEzberlendi(n){return ezberList.includes(n);}
 function toggleEzberlendi(n){
   if(isEzberlendi(n)) ezberList=ezberList.filter(x=>x!==n);
@@ -5755,28 +5832,27 @@ function toggleEzberlendi(n){
 }
 
 function buildSurahGrid(list) {
-  const g = document.getElementById('surahGrid');
+  var g = document.getElementById('surahGrid');
   if(!list.length){g.innerHTML='<div class="loading" style="grid-column:1/-1">Bulunamadı</div>';return;}
-  g.innerHTML = list.map(s=>{
-    const ez = isEzberlendi(s.n);
-    const isBm = bookmarkSurah===s.n;
-    return `
-    <div class="surah-card ${ez?'ezberlendi':''} ${isBm?'bookmarked':''}"
-      onclick="openSurah(${s.n})"
-      oncontextmenu="event.preventDefault();surahMenu(${s.n},event)"
-      ontouchstart="startLongPress(${s.n})" ontouchend="clearLongPress()">
-      <div class="s-num">${s.n}</div>
-      <div class="s-info">
-        <div class="s-ar">${s.ar}</div>
-        <div class="s-name">${s.name}</div>
-        <div class="s-meta">${s.ayah} ayet
-          <span class="badge ${s.type?'badge-md':'badge-m'}">${s.type?'Medeni':'Mekki'}</span>
-          <span style="font-size:10px;color:var(--text4)">S.${SURAH_PAGES[s.n-1]||''}</span>
-          ${ez?'<span style="font-size:11px;color:#ffd600">⭐Ezber</span>':''}
-          ${isBm?'<span style="font-size:11px;color:var(--g1)">🔖</span>':''}
-        </div>
-      </div>
-    </div>`;
+  g.innerHTML = list.map(function(s){
+    var ez = isEzberlendi(s.n);
+    var isBm = bookmarkSurah===s.n;
+    var dur = getSurahDurationSec(s.n-1);
+    var durStr = dur > 0 ? formatDuration(dur) : '';
+    return '<div class="surah-card ' + (ez?'ezberlendi':'') + ' ' + (isBm?'bookmarked':'') + '"'
+      + ' onclick="openSurah('+s.n+')"'
+      + ' oncontextmenu="event.preventDefault();surahMenu('+s.n+',event)"'
+      + ' ontouchstart="startLongPress('+s.n+')" ontouchend="clearLongPress()">'
+      + '<div class="s-num">'+s.n+'</div>'
+      + '<div class="s-info">'
+      + '<div class="s-ar">'+s.ar+'</div>'
+      + '<div class="s-name">'+s.name+'</div>'
+      + '<div class="s-meta">'+s.ayah+' ayet'
+      + ' <span class="badge '+(s.type?'badge-md':'badge-m')+'">'+(s.type?'Medeni':'Mekki')+'</span>'
+      + (durStr ? ' <span style="font-size:10px;color:var(--g1);font-weight:700">⏱'+durStr+'</span>' : '')
+      + (ez?'<span style="font-size:11px;color:#ffd600">⭐Ezber</span>':'')
+      + (isBm?'<span style="font-size:11px;color:#e53935">🔖</span>':'')
+      + '</div></div></div>';
   }).join('');
 }
 
@@ -5938,8 +6014,25 @@ async function openSurah(n) {
   document.getElementById('playBtn').textContent = '▶';
   showPage('reader');
   document.getElementById('rTitle').textContent = `${surahData.ar} — ${surahData.name}`;
-  document.getElementById('rSub').textContent = `${n}. Sure • ${surahData.ayah} Ayet • ${surahData.type?'Medeni':'Mekki'}`;
+  var sureDur = getSurahDurationSec(n-1);
+  document.getElementById('rSub').textContent = `${n}. Sure • ${surahData.ayah} Ayet • ${surahData.type?'Medeni':'Mekki'}` + (sureDur ? ' • ⏱' + formatDuration(sureDur) : '');
   document.getElementById('pTrack').textContent = `${surahData.name} Suresi`;
+  // Cüz banner
+  var cuzBanner = document.getElementById('cuzBanner');
+  if(cuzMode && cuzSurahList.length > 0 && cuzBanner) {
+    var jd = JUZ_SURAH[String(cuzJuzNum)];
+    var jname = jd ? (jd.name[lang] || jd.name.tr) : (cuzJuzNum + '. Cüz');
+    var juzTotalDur = getJuzDurationSec(cuzJuzNum);
+    cuzBanner.style.display = '';
+    document.getElementById('cuzBannerTitle').innerHTML = jname
+      + ' — ' + (cuzSurahIdx+1) + '/' + cuzSurahList.length + '. sure'
+      + (juzTotalDur ? ' · <span style="color:var(--g1)">⏱Toplam: ' + formatDuration(juzTotalDur) + '</span>' : '');
+    document.getElementById('cuzBannerSurahs').textContent = cuzSurahList.map(function(sn,i) {
+      return (i===cuzSurahIdx ? '▶ ' : '') + sn + '. ' + (SURAH_NAMES[lang][sn-1]||SURAH_NAMES.tr[sn-1]);
+    }).join(' · ');
+  } else if(cuzBanner) {
+    cuzBanner.style.display = 'none';
+  }
   document.getElementById('ayahList').innerHTML = '<div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
 
   const k = `${n}_${lang}`;
@@ -6118,6 +6211,28 @@ function openSurahInCuz(surahNum, juzNum) {
     if(cuzSurahIdx < 0) cuzSurahIdx = 0;
   }
   openSurah(surahNum);
+  // Reader'da cüz banner'ı güncelle
+  setTimeout(function() {
+    var banner = document.getElementById('cuzBanner');
+    var bannerTitle = document.getElementById('cuzBannerTitle');
+    var bannerSurahs = document.getElementById('cuzBannerSurahs');
+    if(!banner) return;
+    var jd2 = JUZ_SURAH[String(juzNum)];
+    if(!jd2) { banner.style.display='none'; return; }
+    var jname = (jd2.name && (jd2.name[lang] || jd2.name.tr)) || (juzNum + '. Cüz');
+    var totalSec = getJuzDurationSec(parseInt(juzNum));
+    var durStr = totalSec > 0 ? ' · ⏱' + formatDuration(totalSec) : '';
+    if(bannerTitle) bannerTitle.textContent = '📚 ' + jname + durStr + ' · ' + (cuzSurahIdx+1) + '/' + cuzSurahList.length + '. sure';
+    if(bannerSurahs) {
+      bannerSurahs.innerHTML = cuzSurahList.map(function(sn) {
+        var isActive = sn === surahNum;
+        return '<span style="display:inline-block;margin:1px 2px;padding:2px 7px;border-radius:8px;font-size:10px;'
+          + (isActive ? 'background:var(--g1);color:#fff;font-weight:800' : 'background:var(--bg3);color:var(--text3)')
+          + '">' + sn + '. ' + (SURAH_NAMES[lang][sn-1]||SURAH_NAMES.tr[sn-1]) + '</span>';
+      }).join('');
+    }
+    banner.style.display = '';
+  }, 200);
 }
 
 function nextAyah() {
@@ -6154,7 +6269,18 @@ function nextAyah() {
     }
   }
 }
-function changeReciter(v){reciter=v;document.getElementById('pReciter').textContent=document.getElementById('reciterSel').options[document.getElementById('reciterSel').selectedIndex].text;if(playing)playAyah(curAyah);}
+function changeReciter(v){
+  reciter=v;
+  var sel = document.getElementById('reciterSel');
+  document.getElementById('pReciter').textContent = sel ? sel.options[sel.selectedIndex].text : v;
+  if(playing) playAyah(curAyah);
+  // Süreleri güncelle
+  if(surahData) {
+    var dur = getSurahDurationSec(surahData.n-1);
+    var rSub = document.getElementById('rSub');
+    if(rSub) rSub.textContent = surahData.n + '. Sure • ' + surahData.ayah + ' Ayet • ' + (surahData.type?'Medeni':'Mekki') + (dur ? ' • ⏱' + formatDuration(dur) : '');
+  }
+}
 
 async function loadTafsir(i, forceLang) {
   const wrap = document.getElementById(`tafsirWrap${i}`);
@@ -6558,18 +6684,70 @@ const JUZ_SURAH = {
 
 // ── VIEW TOGGLE ──
 let currentView = 'sure';
+var surahTypeFilter = 'tumu'; // tumu | mekke | medine
+var surahCuzFilter = 0; // 0 = hepsi
+
+function initSurahFilters() {
+  var sel = document.getElementById('fCuz');
+  if(!sel) return;
+  sel.innerHTML = '<option value="0">Tüm Cüzler</option>';
+  Object.entries(JUZ_SURAH).forEach(function(e) {
+    var jn = e[0], jd = e[1];
+    var jname = (jd.name && (jd.name[lang] || jd.name.tr)) || (jn + '. Cüz');
+    var opt = document.createElement('option');
+    opt.value = jn;
+    opt.textContent = jname;
+    sel.appendChild(opt);
+  });
+}
+
+function setSurahFilter(type) {
+  surahTypeFilter = type;
+  ['tumu','mekke','medine'].forEach(function(t) {
+    var btn = document.getElementById('f' + t.charAt(0).toUpperCase() + t.slice(1));
+    if(!btn) return;
+    if(t === type) { btn.style.background='var(--g1)'; btn.style.color='#fff'; btn.style.borderColor='var(--g1)'; }
+    else { btn.style.background='var(--card)'; btn.style.color='var(--text)'; btn.style.borderColor='var(--border2)'; }
+  });
+  applyAllSurahFilters();
+}
+
+function setSurahCuzFilter(val) {
+  surahCuzFilter = parseInt(val) || 0;
+  applyAllSurahFilters();
+}
+
+function applyAllSurahFilters() {
+  var list = buildSurahs();
+  // Mekke/Medine filtresi
+  if(surahTypeFilter === 'mekke') list = list.filter(function(s){ return s.type === 0; });
+  else if(surahTypeFilter === 'medine') list = list.filter(function(s){ return s.type === 1; });
+  // Cüz filtresi
+  if(surahCuzFilter > 0) {
+    var jd = JUZ_SURAH[String(surahCuzFilter)];
+    if(jd) {
+      var cuzSns = jd.surahs;
+      list = list.filter(function(s){ return cuzSns.indexOf(s.n) >= 0; });
+    }
+  }
+  buildSurahGrid(list);
+}
+
 function setView(v) {
   currentView = v;
   document.getElementById('vt-sure').classList.toggle('active', v==='sure');
   document.getElementById('vt-juz').classList.toggle('active', v==='juz');
+  var filterBar = document.getElementById('surahFilterBar');
   if(v==='sure') {
     document.getElementById('gridTitle').textContent = '114 Sure';
     document.getElementById('gridBadge').textContent = 'TÜM SURELER';
-    buildSurahGrid(buildSurahs());
+    if(filterBar) filterBar.style.display = 'flex';
+    applyAllSurahFilters();
     document.getElementById('surahGrid').className = 'surah-grid';
   } else {
     document.getElementById('gridTitle').textContent = '30 Cüz';
     document.getElementById('gridBadge').textContent = 'CÜZ SEÇ';
+    if(filterBar) filterBar.style.display = 'none';
     buildJuzGrid();
     document.getElementById('surahGrid').className = 'juz-grid';
   }
@@ -6584,14 +6762,22 @@ function buildJuzGrid() {
     jd.surahs.forEach(function(sn){ if(uniqueSurahs.indexOf(sn)<0) uniqueSurahs.push(sn); });
     var jname = jd.name[lang] || jd.name.tr;
     var isBookmarkedJuz = (parseInt(jn) === bookmarkJuz);
+    var juzDur = getJuzDurationSec(parseInt(jn));
+    var juzDurStr = juzDur > 0 ? formatDuration(juzDur) : '';
     var pills = uniqueSurahs.map(function(sn) {
       var isBmSurah = isBookmarkedJuz && (sn === parseInt(localStorage.getItem('bookmarkSurah')||'0'));
-      return '<span class="juz-surah-pill' + (isBmSurah ? ' juz-pill-bookmark' : '') + '" onclick="openSurahInCuz(' + sn + ',' + jn + ')">' + sn + '. ' + (SURAH_NAMES[lang][sn-1]||SURAH_NAMES.tr[sn-1]) + '</span>';
+      var sDur = getSurahDurationSec(sn-1);
+      var sDurStr = sDur > 0 ? ' <span style="font-size:9px;color:var(--text4)">⏱'+formatDuration(sDur)+'</span>' : '';
+      return '<span class="juz-surah-pill' + (isBmSurah ? ' juz-pill-bookmark' : '') + '" onclick="openSurahInCuz(' + sn + ',' + jn + ')">' + sn + '. ' + (SURAH_NAMES[lang][sn-1]||SURAH_NAMES.tr[sn-1]) + sDurStr + '</span>';
     }).join('');
     return '<div class="juz-card' + (isBookmarkedJuz ? ' juz-bookmarked' : '') + '" id="juz' + jn + '">'
       + '<div class="juz-header" onclick="toggleJuz(' + jn + ')">'
       + '<div><div class="juz-num">' + jname + '</div>'
-      + '<div class="juz-name-ar" style="font-size:11px;margin-top:2px;color:var(--text3)">' + uniqueSurahs.length + ' sure' + (isBookmarkedJuz ? ' 🔖' : '') + '</div></div>'
+      + '<div class="juz-name-ar" style="font-size:11px;margin-top:2px;color:var(--text3)">'
+      + uniqueSurahs.length + ' sure'
+      + (juzDurStr ? ' · <span style="color:var(--g1);font-weight:700">⏱' + juzDurStr + '</span>' : '')
+      + (isBookmarkedJuz ? ' 🔖' : '')
+      + '</div></div>'
       + '<span class="juz-toggle">▼</span>'
       + '</div>'
       + '<div class="juz-surahs">' + pills + '</div>'
@@ -8906,12 +9092,24 @@ function shareDua(i, cat) {
 let playSpeed = 1.0;
 function setSpeed(s) {
   playSpeed = s;
-  const aud = document.getElementById('aud');
+  var aud = document.getElementById('aud');
   if(aud) aud.playbackRate = s;
-  document.querySelectorAll('.speed-btn').forEach(b => {
+  document.querySelectorAll('.speed-btn').forEach(function(b) {
     b.classList.toggle('active', parseFloat(b.textContent) === s);
   });
   toast('⏱ Hız: ' + s + 'x');
+  // Sure ve cüz sürelerini güncelle
+  if(typeof buildSurahGrid === 'function' && document.getElementById('surahGrid')) {
+    var curView = document.querySelector('.vt-btn.active');
+    if(curView && curView.id === 'vt-juz') buildJuzGrid();
+    else buildSurahGrid(buildSurahs());
+  }
+  // Reader başlığındaki süreyi güncelle
+  if(surahData) {
+    var dur = getSurahDurationSec(surahData.n-1);
+    var rSub = document.getElementById('rSub');
+    if(rSub) rSub.textContent = surahData.n + '. Sure • ' + surahData.ayah + ' Ayet • ' + (surahData.type?'Medeni':'Mekki') + (dur ? ' • ⏱' + formatDuration(dur) : '');
+  }
 }
 
 
@@ -8968,7 +9166,10 @@ function scheduleAllEzan(timings) {
 
     const vakitDate = new Date(now);
     vakitDate.setHours(hh, mm, 0, 0);
-    if(vakitDate <= now) continue; // Geçmiş vakit
+    if(vakitDate <= now) {
+      // Geçmiş vakit — ertesi gün için hesapla (atla, interval zaten halleder)
+      continue;
+    }
 
     // Bildirim offset ayarını al
     const offsetEl = document.getElementById('notif-' + vakit);
@@ -9005,40 +9206,63 @@ function scheduleAllEzan(timings) {
 // ── Dakika bazlı ezan kontrolü — mobil arka plan için güvenli ──
 let _ezanLastPlayed = {};
 function startEzanInterval() {
-  setInterval(() => {
-    const saved = localStorage.getItem('savedPrayerTimes');
+  function checkEzan() {
+    var saved = localStorage.getItem('savedPrayerTimes');
     if(!saved) return;
-    let timings;
+    var timings;
     try { timings = JSON.parse(saved); } catch(e) { return; }
-    const now = new Date();
-    const vakitMap = {
+    var now = new Date();
+    var vakitMap = {
       sabah: timings.Fajr || timings.Imsak,
       ogle: timings.Dhuhr,
       ikindi: timings.Asr,
       aksam: timings.Maghrib,
       yatsi: timings.Isha
     };
-    const vakitTR2 = {sabah:'🌅 Sabah',ogle:'☀️ Öğle',ikindi:'🌤️ İkindi',aksam:'🌆 Akşam',yatsi:'🌙 Yatsı'};
-    for(const [vakit, timeStr] of Object.entries(vakitMap)) {
+    var vakitTR2 = {sabah:'🌅 Sabah',ogle:'☀️ Öğle',ikindi:'🌤️ İkindi',aksam:'🌆 Akşam',yatsi:'🌙 Yatsı'};
+    var entries = Object.keys(vakitMap);
+    for(var vi=0; vi<entries.length; vi++) {
+      var vakit = entries[vi];
+      var timeStr = vakitMap[vakit];
       if(!timeStr) continue;
-      const clean = timeStr.replace(/ \(.*?\)/g,'').trim();
-      const [hh, mm] = clean.split(':').map(Number);
+      var clean = timeStr.replace(/ \(.*?\)/g,'').trim();
+      var parts = clean.split(':').map(Number);
+      var hh = parts[0], mm = parts[1];
       if(isNaN(hh)||isNaN(mm)) continue;
-      const key = vakit + '_' + hh + ':' + mm;
+      var key = vakit + '_' + hh + ':' + mm;
       if(now.getHours() === hh && now.getMinutes() === mm) {
         if(_ezanLastPlayed[key]) continue;
         _ezanLastPlayed[key] = true;
-        const selEl = document.getElementById('ezan-' + vakit);
-        const n = selEl ? parseInt(selEl.value) || 1 : 1;
-        if(n > 0) playEzanVakit(vakit); // n===0 ise playEzanVakit içinde zaten return eder
+        // Ezan value ne olursa olsun çal (forcePlay=true)
+        playEzanVakit(vakit, true);
         if(_ezanNotifGranted && 'Notification' in window && Notification.permission === 'granted') {
-          try { new Notification('🕌 ' + (vakitTR2[vakit]||vakit) + ' vakti geldi!', { body: 'Kuran-ı Kerim', icon: '/icons/icon-192.png', tag: 'ezan-'+vakit }); } catch(e) {}
+          try { new Notification('🕌 ' + (vakitTR2[vakit]||vakit) + ' vakti geldi!', {
+            body: 'Kuran-ı Kerim — Ezan vakti',
+            icon: '/icons/icon-192.png',
+            tag: 'ezan-'+vakit,
+            requireInteraction: true
+          }); } catch(e) {}
         }
+        toast('🕌 ' + (vakitTR2[vakit]||vakit) + ' vakti geldi!');
       } else {
         delete _ezanLastPlayed[key];
       }
     }
-  }, 30000);
+  }
+  // Her 10 saniyede bir kontrol (30s yerine — daha güvenilir)
+  setInterval(checkEzan, 10000);
+  // Sayfa görünür olunca tekrar kontrol et (arka plandan döndükten sonra)
+  document.addEventListener('visibilitychange', function() {
+    if(!document.hidden) {
+      // Sayfa tekrar görünür olunca vakitleri yenile + ezan kontrolü
+      checkEzan();
+      // scheduleAllEzan'ı da yenile (setTimeout'lar kaymış olabilir)
+      var saved = localStorage.getItem('savedPrayerTimes');
+      if(saved) {
+        try { scheduleAllEzan(JSON.parse(saved)); } catch(e) {}
+      }
+    }
+  });
 }
 
 // playOfflineEzan — yerel MP3 sistemi zaten offline çalışır, geriye dönük uyumluluk için
@@ -10951,46 +11175,99 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 <!-- HIZLI ERİŞİM -->
 <div class="page" id="page-hizli">
   <div class="main" style="padding-top:16px">
-    <div class="sec-head"><h2>Surelere Hızlı Erişim</h2><span class="sec-badge">POPÜLER</span></div>
-    <p class="sec-desc">En çok okunan ve önemli sureler</p>
+    <div class="sec-head"><h2>⭐ Özel Sureler &amp; Tavsiyeler</h2><span class="sec-badge">ÖZEL</span></div>
+    <p class="sec-desc">Çok bilinen sureler, namaz sureleri ve günlük tavsiyeler</p>
 
-    <div class="sec-head" style="margin-top:20px"><h2 style="font-size:14px">⭐ Her Gün Okunan Sureler</h2></div>
-    <div class="quick-grid">
-      <div class="quick-btn" onclick="openSurah(1)"><span class="quick-ar">الفاتحة</span>Fatiha</div>
-      <div class="quick-btn" onclick="openSurah(2)"><span class="quick-ar">البقرة</span>Bakara</div>
-      <div class="quick-btn" onclick="openSurah(36)"><span class="quick-ar">يس</span>Yasin</div>
-      <div class="quick-btn" onclick="openSurah(55)"><span class="quick-ar">الرحمن</span>Rahman</div>
-      <div class="quick-btn" onclick="openSurah(56)"><span class="quick-ar">الواقعة</span>Vakia</div>
-      <div class="quick-btn" onclick="openSurah(67)"><span class="quick-ar">الملك</span>Mülk</div>
-      <div class="quick-btn" onclick="openSurah(112)"><span class="quick-ar">الإخلاص</span>İhlas</div>
-      <div class="quick-btn" onclick="openSurah(113)"><span class="quick-ar">الفلق</span>Felak</div>
-      <div class="quick-btn" onclick="openSurah(114)"><span class="quick-ar">الناس</span>Nas</div>
-      <div class="quick-btn" onclick="openSurah(18)"><span class="quick-ar">الكهف</span>Kehf (Cuma)</div>
+    <!-- ÇOK BİLİNEN SURELER -->
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:16px;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:var(--g1);margin-bottom:12px">⭐ Çok Bilinen Sureler</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="ozel-sure-card" onclick="openSurah(1)"><div style="font-size:24px">📖</div><div class="ozel-sure-name">Fatiha</div><div class="ozel-sure-desc">Her namazda okunan</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(36)"><div style="font-size:24px">💚</div><div class="ozel-sure-name">Yasin</div><div class="ozel-sure-desc">Kur'an'ın kalbi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(18)"><div style="font-size:24px">🛡️</div><div class="ozel-sure-name">Kehf</div><div class="ozel-sure-desc">Cuma günü okunur</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(55)"><div style="font-size:24px">❤️</div><div class="ozel-sure-name">Rahman</div><div class="ozel-sure-desc">En güzel sure</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(67)"><div style="font-size:24px">🌙</div><div class="ozel-sure-name">Mülk</div><div class="ozel-sure-desc">Kabir azabından korur</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(2)"><div style="font-size:24px">💡</div><div class="ozel-sure-name">Bakara</div><div class="ozel-sure-desc">En uzun sure</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(112)"><div style="font-size:24px">☝️</div><div class="ozel-sure-name">İhlas</div><div class="ozel-sure-desc">Kur'an'ın üçte biri</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(113)"><div style="font-size:24px">🌅</div><div class="ozel-sure-name">Felak</div><div class="ozel-sure-desc">Sabah duası</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(114)"><div style="font-size:24px">🛡️</div><div class="ozel-sure-name">Nas</div><div class="ozel-sure-desc">Koruma duası</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(48)"><div style="font-size:24px">🏆</div><div class="ozel-sure-name">Fetih</div><div class="ozel-sure-desc">Zafer suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(56)"><div style="font-size:24px">⭐</div><div class="ozel-sure-name">Vakıa</div><div class="ozel-sure-desc">Üç grup insanın suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(78)"><div style="font-size:24px">📣</div><div class="ozel-sure-name">Nebe</div><div class="ozel-sure-desc">Büyük haber</div></div>
+      </div>
     </div>
 
-    <div class="sec-head" style="margin-top:28px"><h2 style="font-size:14px">🕌 Namaz Sureleri</h2></div>
-    <div class="quick-grid">
-      <div class="quick-btn" onclick="openSurah(1)"><span class="quick-ar">الفاتحة</span>Fatiha</div>
-      <div class="quick-btn" onclick="openSurah(108)"><span class="quick-ar">الكوثر</span>Kevser</div>
-      <div class="quick-btn" onclick="openSurah(112)"><span class="quick-ar">الإخلاص</span>İhlas</div>
-      <div class="quick-btn" onclick="openSurah(109)"><span class="quick-ar">الكافرون</span>Kafirun</div>
-      <div class="quick-btn" onclick="openSurah(110)"><span class="quick-ar">النصر</span>Nasr</div>
-      <div class="quick-btn" onclick="openSurah(103)"><span class="quick-ar">العصر</span>Asr</div>
+    <!-- NAMAZ SUReLERİ KISA -->
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:16px;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:var(--g1);margin-bottom:12px">🕌 Namaz Sureleri (Kısa)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="ozel-sure-card" onclick="openSurah(105)"><div style="font-size:24px">🐘</div><div class="ozel-sure-name">Fil</div><div class="ozel-sure-desc">Fil suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(106)"><div style="font-size:24px">🕋</div><div class="ozel-sure-name">Kureyş</div><div class="ozel-sure-desc">Kureyş suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(107)"><div style="font-size:24px">🤲</div><div class="ozel-sure-name">Maun</div><div class="ozel-sure-desc">Maun suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(108)"><div style="font-size:24px">🌊</div><div class="ozel-sure-name">Kevser</div><div class="ozel-sure-desc">Kevser suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(109)"><div style="font-size:24px">🤚</div><div class="ozel-sure-name">Kafirun</div><div class="ozel-sure-desc">Kafirun suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(110)"><div style="font-size:24px">🏆</div><div class="ozel-sure-name">Nasr</div><div class="ozel-sure-desc">Nasr suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(111)"><div style="font-size:24px">🔥</div><div class="ozel-sure-name">Tebbet</div><div class="ozel-sure-desc">Tebbet suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(112)"><div style="font-size:24px">☝️</div><div class="ozel-sure-name">İhlas</div><div class="ozel-sure-desc">İhlas suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(113)"><div style="font-size:24px">🌅</div><div class="ozel-sure-name">Felak</div><div class="ozel-sure-desc">Felak suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(114)"><div style="font-size:24px">👥</div><div class="ozel-sure-name">Nas</div><div class="ozel-sure-desc">Nas suresi</div></div>
+      </div>
     </div>
 
-    <div class="sec-head" style="margin-top:28px"><h2 style="font-size:14px">💚 Şifa ve Koruma</h2></div>
-    <div class="quick-grid">
-      <div class="quick-btn" onclick="openSurah(1)"><span class="quick-ar">الفاتحة</span>Fatiha (Şifa)</div>
-      <div class="quick-btn" onclick="openSurah(2)"><span class="quick-ar">البقرة</span>Ayetel Kürsi</div>
-      <div class="quick-btn" onclick="openSurah(113)"><span class="quick-ar">الفلق</span>Felak (Korunma)</div>
-      <div class="quick-btn" onclick="openSurah(114)"><span class="quick-ar">الناس</span>Nas (Korunma)</div>
+    <!-- GÜNLÜK & HAFTALIK TAVSİYELER -->
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:16px;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:var(--g1);margin-bottom:12px">📅 Günlük &amp; Haftalık Tavsiyeler</div>
+
+      <div style="background:var(--bg2);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:4px">🌄 Her Sabah</div>
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">Sabah Zikri Sureleri</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">Fatiha, İhlas, Felak ve Nas surelerini sabah 3'er kez okumak, gün boyunca kötülüklerden korunmayı sağlar. (Hz. Peygamber s.a.v. hadisi)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button onclick="openSurah(1)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 Fatiha</button>
+          <button onclick="openSurah(112)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 İhlas</button>
+          <button onclick="openSurah(113)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 Felak</button>
+          <button onclick="openSurah(114)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 Nas</button>
+        </div>
+      </div>
+
+      <div style="background:var(--bg2);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:4px">🌆 Her Akşam</div>
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">Akşam Zikri</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">Bakara Suresi'nin son 2 ayetini (285-286) akşam okumak, gece boyunca yeterlidir. 'Kim bunları bir gecede okursa ona yeterliler.' (Buhari)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button onclick="openSurah(2)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 Bakara</button>
+        </div>
+      </div>
+
+      <div style="background:var(--bg2);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:4px">🌙 Her Gece Uyumadan</div>
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">Mülk Suresi</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">Mülk Suresi'ni her gece uyumadan önce okumak, kabir azabından korur. 'Sahibini kurtarana kadar şefaat eder.' (Tirmizi)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button onclick="openSurah(67)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 Mülk</button>
+        </div>
+      </div>
+
+      <div style="background:var(--bg2);border-radius:12px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:4px">📅 Her Cuma</div>
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:6px">Kehf Suresi</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px">Kehf Suresi'ni Cuma günü okuyan için iki Cuma arası nur verilir ve Deccal'ın fitnesinden korunur. (Müslim)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button onclick="openSurah(18)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 Kehf</button>
+          <button onclick="openSurah(62)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px;font-weight:700;cursor:pointer">📖 Cuma</button>
+        </div>
+      </div>
     </div>
 
-    <div class="sec-head" style="margin-top:28px"><h2 style="font-size:14px">📿 Tesbih ve Zikir Ayetleri</h2></div>
-    <div class="info-card">
-      <h3>Ayetel Kürsi — Bakara 255</h3>
-      <div class="ar-text">اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ</div>
-      <p>"Allah — kendisinden başka ilah olmayan, daima diri, her şeyi ayakta tutan." — Her namazın ardından okunması tavsiye edilir.</p>
+    <!-- ŞİFA VE KORUMA -->
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:16px;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:var(--g1);margin-bottom:12px">💚 Şifa &amp; Koruma Sureleri</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="ozel-sure-card" onclick="openSurah(1)"><div style="font-size:24px">💊</div><div class="ozel-sure-name">Fatiha</div><div class="ozel-sure-desc">Şifa suresi</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(2)"><div style="font-size:24px">🛡️</div><div class="ozel-sure-name">Ayetel Kürsi</div><div class="ozel-sure-desc">Koruma ayeti</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(113)"><div style="font-size:24px">🌅</div><div class="ozel-sure-name">Felak</div><div class="ozel-sure-desc">Şer'den korunma</div></div>
+        <div class="ozel-sure-card" onclick="openSurah(114)"><div style="font-size:24px">👤</div><div class="ozel-sure-name">Nas</div><div class="ozel-sure-desc">Vesveseden korunma</div></div>
+      </div>
     </div>
   </div>
 </div>
