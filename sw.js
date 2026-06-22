@@ -1,10 +1,10 @@
 // ══════════════════════════════════════════
-// KURAN-I KERİM PWA — Service Worker v34
+// KURAN-I KERİM PWA — Service Worker v38
 // Cache version güncellendi → eski cache temizlenir
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'kuran-v36';
-const CACHE_VERSION = '2026-06-22-v36';
+const CACHE_NAME = 'kuran-v38';
+const CACHE_VERSION = '2026-06-22-v38';
 
 // Cache'lenecek dosyalar
 const CACHE_FILES = [
@@ -22,16 +22,40 @@ const CACHE_FILES = [
   // Ezan dosyaları — offline çalışması için cache'le
   '/public/audio/sabah.mp3',
   '/public/audio/ezan.mp3',
+  '/public/audio/azan1.mp3',
+  '/public/audio/azan2.mp3',
+  '/public/audio/azan3.mp3',
+  '/public/audio/azan4.mp3',
+  '/public/audio/azan5.mp3',
+  '/public/audio/azan6.mp3',
+  '/public/audio/azan7.mp3',
+  '/public/audio/azan8.mp3',
+  '/public/audio/azan9.mp3',
+  '/public/audio/azan10.mp3',
+  '/public/audio/azan11.mp3',
+  '/public/audio/azan12.mp3',
+  '/public/audio/azan13.mp3',
+  '/public/audio/azan14.mp3',
+  '/public/audio/azan15.mp3',
+  '/public/audio/azan16.mp3',
+  '/public/audio/azan17.mp3',
+  '/public/audio/azan18.mp3',
+  '/public/audio/azan19.mp3',
+  '/public/audio/azan20.mp3',
+  '/public/audio/azan21.mp3',
 ];
 
 // ── INSTALL: Yeni cache kur ──
 self.addEventListener('install', event => {
-  console.log('[SW v35] Installing...');
+  console.log('[SW v38] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(CACHE_FILES).catch(err => {
-        console.warn('[SW v35] Cache addAll partial fail:', err);
-      });
+      // Promise.allSettled: tek MP3 hata verse de diğerleri cache'lenir
+      return Promise.allSettled(
+        CACHE_FILES.map(url => cache.add(url).catch(err => {
+          console.warn('[SW v38] Cache skip:', url, err.message);
+        }))
+      );
     })
   );
   // Hemen aktive et — bekleme yok
@@ -40,19 +64,19 @@ self.addEventListener('install', event => {
 
 // ── ACTIVATE: ESKİ CACHE'LERİ TEMİZLE ──
 self.addEventListener('activate', event => {
-  console.log('[SW v35] Activating — clearing old caches...');
+  console.log('[SW v38] Activating — clearing old caches...');
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys
           .filter(key => key !== CACHE_NAME)
           .map(key => {
-            console.log('[SW v35] Deleting old cache:', key);
+            console.log('[SW v38] Deleting old cache:', key);
             return caches.delete(key);
           })
       );
     }).then(() => {
-      console.log('[SW v35] Old caches cleared');
+      console.log('[SW v38] Old caches cleared');
       // Tüm açık sekmeleri hemen güncelle
       return self.clients.claim();
     })
@@ -118,6 +142,6 @@ self.addEventListener('message', event => {
     caches.keys().then(keys => {
       keys.forEach(key => caches.delete(key));
     });
-    console.log('[SW v35] All caches cleared by message');
+    console.log('[SW v38] All caches cleared by message');
   }
 });

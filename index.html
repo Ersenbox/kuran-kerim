@@ -1926,30 +1926,47 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 .ezan-btn.playing { background: var(--g2); color: #fff; border-color: var(--g2); }
 .ezan-stop { border-color: rgba(239,83,80,0.4); color: rgba(239,83,80,0.8); }
 .ezan-stop:hover { background: rgba(239,83,80,0.1); border-color: #ef5350; color: #ef5350; }
+/* Ezan vakit satırı — mobil responsive */
+.ezan-vakit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.ezan-vakit-label { font-size:12px; font-weight:700; min-width:70px; }
+.ezan-vakit-select { flex:1; min-width:120px; font-size:12px; }
+.ezan-notif-select { font-size:11px; padding:3px; border-radius:6px; border:1px solid var(--border2); background:var(--bg2); color:var(--text); cursor:pointer; min-width:80px; }
+.ezan-cal-btn { flex-shrink:0; padding:6px 12px; font-size:12px; font-weight:700; background:var(--g2); color:#fff; border:none; border-radius:20px; cursor:pointer; font-family:'Outfit',sans-serif; white-space:nowrap; }
+.ezan-cal-btn:active { opacity:0.8; transform:scale(0.96); }
 
 /* ── İMSAKİYE TABLO ── */
 .imsakiye-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 11px;
   font-family: 'Outfit', sans-serif;
+  min-width: 420px;
 }
 .imsakiye-table th {
   background: var(--g2);
   color: #fff;
-  padding: 8px 6px;
+  padding: 7px 4px;
   text-align: center;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 10px;
   position: sticky;
   top: 0;
+  white-space: nowrap;
 }
 .imsakiye-table td {
-  padding: 6px 5px;
+  padding: 5px 4px;
   text-align: center;
   border-bottom: 1px solid var(--border);
   color: var(--text2);
-  font-size: 11px;
+  font-size: 10px;
 }
 .imsakiye-table tr:hover td { background: var(--bg3); }
 .imsakiye-table tr.today-row td {
@@ -2732,8 +2749,10 @@ let hizliSureler = JSON.parse(localStorage.getItem('hizliSureler')||'[1,36,55,67
 // INIT
 
 function savePrayerMethod() {
-  const method = document.getElementById('prayerMethod')?.value || '3';
+  const method = document.getElementById('prayerMethod')?.value || '13';
   localStorage.setItem('prayerMethod', method);
+  // Method değişince eski vakitler geçersiz — temizle
+  try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e){}
   // Kayıtlı konum varsa anında yeniden hesapla
   const lat = parseFloat(localStorage.getItem('savedLat'));
   const lng = parseFloat(localStorage.getItem('savedLng'));
@@ -2758,7 +2777,7 @@ function savePrayerTimes(times) {
 
 
 function loadPrayerTimes() {
-  const method = localStorage.getItem('prayerMethod') || '3';
+  const method = localStorage.getItem('prayerMethod') || '13';
   const lat = parseFloat(localStorage.getItem('savedLat')) || 52.52;
   const lng = parseFloat(localStorage.getItem('savedLng')) || 13.405;
   // loadNamazForCoords zaten tüm doğru parametrelerle yapıyor
@@ -2819,7 +2838,7 @@ window.onload = () => {
   localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
 
   renderGunlukKart(); scheduleGunlukUpdate();
-  buildSurahGrid(buildSurahs()); buildEsma(); updateFavCount(); setupSearch(); renderTesbiSel(); updateTesbiUI(); renderDiniGunler(); loadEzanSettings();
+  buildSurahGrid(buildSurahs()); buildEsma(); updateFavCount(); setupSearch(); renderTesbiSel(); updateTesbiUI(); renderDiniGunler();
 
   // Kayıtlı dil ve kıraat seçimini UI'ya yansıt
   const langSel = document.getElementById('langSel');
@@ -2838,8 +2857,18 @@ window.onload = () => {
   // Kayıtlı ezan ayarlarını yükle (DOM hazır olduktan sonra)
   setTimeout(loadEzanSettings, 100);
 
+  // Kayıtlı hesaplama metodunu select'e yansıt
+  setTimeout(function() {
+    var pmEl = document.getElementById('prayerMethod');
+    if (pmEl) {
+      var saved = localStorage.getItem('prayerMethod') || '13';
+      if (['1','3','4','5','13','20'].indexOf(saved) === -1) saved = '13';
+      pmEl.value = saved;
+    }
+  }, 120);
+
   // Kayıtlı konumu yükle — namaz vakitleri ve ezan zamanlayıcıları
-  setTimeout(loadSavedLocation, 200);
+  setTimeout(loadSavedLocation, 250);
 
   // Dakika bazlı ezan kontrolü başlat (mobil arka plan güvenli)
   startEzanInterval();
@@ -6257,16 +6286,21 @@ async function getNamazTimes() {
 
 async function loadNamazForCoords(lat, lng) {
   try {
-    const method = localStorage.getItem('prayerMethod') || '3';
+    var method = localStorage.getItem('prayerMethod') || '13';
     // Timezone otomatik tespit
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
-    // Doğru endpoint: /v1/timings (tarihsiz = bugün, timezone ile)
-    const url = 'https://api.aladhan.com/v1/timings'
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
+    // Bugünün tarihi DD-MM-YYYY formatında (API için zorunlu — tarihsiz endpoint bazen yanlış gün döndürür)
+    var now = new Date();
+    var dd = String(now.getDate()).padStart(2,'0');
+    var mm2 = String(now.getMonth()+1).padStart(2,'0');
+    var yyyy = now.getFullYear();
+    var todayStr = dd + '-' + mm2 + '-' + yyyy;
+    // /v1/timings/:date endpoint — tarih ile kesin doğru hesaplama
+    var url = 'https://api.aladhan.com/v1/timings/' + todayStr
       + '?latitude=' + lat
       + '&longitude=' + lng
       + '&method=' + method
       + '&timezonestring=' + encodeURIComponent(tz)
-      + '&latitudeAdjustmentMethod=1'
       + '&school=1';
     const r = await fetch(url);
     if(!r.ok) throw new Error('HTTP ' + r.status);
@@ -6274,10 +6308,16 @@ async function loadNamazForCoords(lat, lng) {
     if(!j.data || !j.data.timings) throw new Error('API boş veri döndürdü: ' + JSON.stringify(j));
     const t = j.data.timings;
     const meta = j.data.meta;
-    const city = meta.timezone ? (meta.timezone.split('/').pop() || meta.timezone) : (localStorage.getItem('savedCity') || 'Konum');
+    // City: önce kaydedilmiş şehir adı, sonra timezone'un son parçası
+    const savedCityName = localStorage.getItem('savedCity') || '';
+    const tzCity = meta.timezone ? meta.timezone.split('/').pop().replace(/_/g,' ') : '';
+    const city = savedCityName || tzCity || 'Konum';
     savedCity = city;
     try { localStorage.setItem('savedCity', city); } catch(e){}
+    // Yeni API verisi geldi — eski cacheleri temizle (method değişiminde stale veri kalmasın)
+    try { localStorage.removeItem('savedPrayerTimes'); } catch(e){}
     try { localStorage.setItem('savedPrayerTimes', JSON.stringify(t)); } catch(e){}
+    try { localStorage.setItem('prayerTimesDate', now.toDateString()); } catch(e){}
     const locEl = document.getElementById('locInfo');
     const cityEl = document.getElementById('namazCity');
     if(locEl) locEl.textContent = '📍 ' + city;
@@ -8096,13 +8136,13 @@ function initAyarlar() {
   // Kaydedilmiş hesaplama yöntemini select'e yansıt
   const pmEl = document.getElementById('prayerMethod');
   if(pmEl) { 
-    const saved = localStorage.getItem('prayerMethod') || '3';
+    const saved = localStorage.getItem('prayerMethod') || '13';
     pmEl.value = saved;
     // Eğer eski yanlış değerler kaydedilmişse düzelt
-    const validMethods = ['1','3','5','13','20'];
+    const validMethods = ['1','3','4','5','13','20'];
     if(!validMethods.includes(saved)) {
-      localStorage.setItem('prayerMethod', '3');
-      pmEl.value = '3';
+      localStorage.setItem('prayerMethod', '13');
+      pmEl.value = '13';
     }
   }
 }
@@ -8637,14 +8677,21 @@ function saveEzanSettings(changedVakit) {
       var audio2 = document.getElementById('ezanAudio');
       if (audio2) {
         stopEzanSilent();
-        audio2.src = _getEzanSrc(changedVakit);
+        // Sabah + 1 (Klasik) → sabah.mp3; diğerleri → azan{n}.mp3
+        var prevSrc;
+        if (changedVakit === 'sabah' && n2 === 1) {
+          prevSrc = '/public/audio/sabah.mp3';
+        } else {
+          prevSrc = '/public/audio/azan' + Math.max(1, Math.min(21, n2)) + '.mp3';
+        }
+        audio2.src = prevSrc;
         audio2.volume = parseFloat(s.vol) || 0.8;
         audio2.load();
         audio2.play().then(function() {
-          toast('🔊 Önizleme: ' + changedVakit + ' ezanı çalıyor (5 sn)...');
+          toast('🔊 Önizleme çalıyor (5 sn)...');
           setTimeout(function() { try { audio2.pause(); audio2.currentTime = 0; } catch(e) {} }, 5000);
         }).catch(function(e) {
-          toast('⚠️ Önizleme çalınamadı');
+          toast('⚠️ Önizleme çalınamadı: ' + e.message);
         });
       }
     }
@@ -8701,8 +8748,9 @@ function playEzanVakit(vakit) {
   // Mevcut sesi tamamen durdur — aynı anda 2 ses çalmasın
   stopEzanSilent();
 
-  var selCheck = document.getElementById('ezan-' + vakit);
-  if (selCheck && parseInt(selCheck.value) === 0) return; // Kapalı
+  var selEl = document.getElementById('ezan-' + vakit);
+  var ezanNum = selEl ? parseInt(selEl.value) : 1;
+  if (ezanNum === 0) return; // Kapalı
 
   var audio = document.getElementById('ezanAudio');
   if (!audio) return;
@@ -8710,7 +8758,14 @@ function playEzanVakit(vakit) {
   var volEl = document.getElementById('ezanVolume');
   audio.volume = volEl ? (parseFloat(volEl.value) || 0.8) : 0.8;
 
-  var src = _getEzanSrc(vakit);
+  // Sabah için azan11 (sabah.mp3 = azan11.mp3), diğerleri seçilen numara
+  // Eğer vakit sabah ve seçilen 1 (Klasik) ise azan11 kullan (özel sabah ezanı)
+  var src;
+  if (vakit === 'sabah' && ezanNum === 1) {
+    src = '/public/audio/sabah.mp3'; // azan11_SABAH.mp3
+  } else {
+    src = '/public/audio/azan' + Math.max(1, Math.min(21, ezanNum)) + '.mp3';
+  }
   audio.src = src;
   audio.load();
 
@@ -8773,9 +8828,9 @@ async function fetchMonthlyTimes(lat, lng, container) {
     const year = now.getFullYear();
     const today = now.getDate();
     
-    const method = localStorage.getItem("prayerMethod") || "3";
+    const method = localStorage.getItem("prayerMethod") || "13";
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
-    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}&method=${method}&timezonestring=${encodeURIComponent(tz)}&latitudeAdjustmentMethod=1&school=1`);
+    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}&method=${method}&timezonestring=${encodeURIComponent(tz)}&school=1`);
     const j = await r.json();
     
     if(!j.data) throw new Error('Veri yok');
@@ -8790,6 +8845,7 @@ async function fetchMonthlyTimes(lat, lng, container) {
       return `<tr class="${isToday?'today-row':''}">
         <td><b>${d}</b></td>
         <td>${clean(t.Imsak)}</td>
+        <td>${clean(t.Fajr)}</td>
         <td>${clean(t.Sunrise)}</td>
         <td>${clean(t.Dhuhr)}</td>
         <td>${clean(t.Asr)}</td>
@@ -8802,13 +8858,17 @@ async function fetchMonthlyTimes(lat, lng, container) {
       <div style="font-size:13px;font-weight:700;color:var(--g1);margin-bottom:8px;text-align:center">
         ${monthNames[month-1]} ${year} — ${savedCity||'Bulunduğun Konum'}
       </div>
+      <div style="overflow-x:auto">
       <table class="imsakiye-table">
         <thead><tr>
-          <th>Gün</th><th>İmsak</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th>Akşam</th><th>Yatsı</th>
+          <th>Gün</th><th>İmsak</th><th>Sabah</th><th>Güneş</th><th>Öğle</th><th>İkindi</th><th>Akşam</th><th>Yatsı</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      <div style="font-size:11px;color:var(--text4);text-align:center;margin-top:8px">Bugün sarı renkle işaretli ✦ Kaynak: aladhan.com</div>
+      </div>
+      <div style="font-size:11px;color:var(--text4);text-align:center;margin-top:8px">
+        Bugün sarı renkle işaretli ✦ Kaynak: AlAdhan API — Diyanet İşleri yöntemi (Method 13, Hanefi)
+      </div>
     `;
     
     // Bugünün satırına kaydır
@@ -10129,66 +10189,66 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
       <!-- 5 VAKİT İÇİN AYRI EZAN SEÇİCİ -->
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
 
-        <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
-          <span style="font-size:12px;font-weight:700">🌅 Sabah</span>
-          <select class="reciter-sel" id="ezan-sabah" style="font-size:12px" onchange="saveEzanSettings('sabah')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
-          <select id="notif-sabah" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
+        <div class="ezan-vakit-row">
+          <span class="ezan-vakit-label">🌅 Sabah</span>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-sabah" onchange="saveEzanSettings('sabah')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select id="notif-sabah" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('sabah')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select>
+          <button class="ezan-cal-btn" onclick="playEzanVakit('sabah')">▶ Çal</button>
         </div>
 
-        <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
-          <span style="font-size:12px;font-weight:700">☀️ Öğle</span>
-          <select class="reciter-sel" id="ezan-ogle" style="font-size:12px" onchange="saveEzanSettings('ogle')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
-          <select id="notif-ogle" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
+        <div class="ezan-vakit-row">
+          <span class="ezan-vakit-label">☀️ Öğle</span>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-ogle" onchange="saveEzanSettings('ogle')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select id="notif-ogle" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('ogle')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select>
+          <button class="ezan-cal-btn" onclick="playEzanVakit('ogle')">▶ Çal</button>
         </div>
 
-        <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
-          <span style="font-size:12px;font-weight:700">🌤️ İkindi</span>
-          <select class="reciter-sel" id="ezan-ikindi" style="font-size:12px" onchange="saveEzanSettings('ikindi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
-          <select id="notif-ikindi" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
+        <div class="ezan-vakit-row">
+          <span class="ezan-vakit-label">🌤️ İkindi</span>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-ikindi" onchange="saveEzanSettings('ikindi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select id="notif-ikindi" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('ikindi')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select>
+          <button class="ezan-cal-btn" onclick="playEzanVakit('ikindi')">▶ Çal</button>
         </div>
 
-        <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
-          <span style="font-size:12px;font-weight:700">🌆 Akşam</span>
-          <select class="reciter-sel" id="ezan-aksam" style="font-size:12px" onchange="saveEzanSettings('aksam')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
-          <select id="notif-aksam" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
+        <div class="ezan-vakit-row">
+          <span class="ezan-vakit-label">🌆 Akşam</span>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-aksam" onchange="saveEzanSettings('aksam')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select id="notif-aksam" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('aksam')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select>
+          <button class="ezan-cal-btn" onclick="playEzanVakit('aksam')">▶ Çal</button>
         </div>
 
-        <div style="display:grid;grid-template-columns:80px 1fr 100px 72px;align-items:center;gap:6px;background:var(--bg3);border-radius:10px;padding:8px 10px">
-          <span style="font-size:12px;font-weight:700">🌙 Yatsı</span>
-          <select class="reciter-sel" id="ezan-yatsi" style="font-size:12px" onchange="saveEzanSettings('yatsi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
-          <select id="notif-yatsi" style="font-size:11px;padding:3px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
+        <div class="ezan-vakit-row">
+          <span class="ezan-vakit-label">🌙 Yatsı</span>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-yatsi" onchange="saveEzanSettings('yatsi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select id="notif-yatsi" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
 <option value="15">15 dk önce</option>
-<option value="30">30 dk önce</option></select><button class="ezan-btn" onclick="playEzanVakit('yatsi')" style="padding:4px 6px;font-size:11px">▶ Çal</button>
+<option value="30">30 dk önce</option></select>
+          <button class="ezan-cal-btn" onclick="playEzanVakit('yatsi')">▶ Çal</button>
         </div>
 
       </div>
 
       <!-- BİLDİRİM İZİN BUTONU -->
       <div style="margin-bottom:10px">
-        <button id="notifPermBtn" onclick="requestEzanNotif().then(ok=>{loadEzanSettings();if(ok)toast('🔔 Bildirim izni verildi — Vakitler otomatik bildirilecek');else toast('❌ Bildirim izni reddedildi')})" style="
-          width:100%;padding:10px;border-radius:12px;
-          border:1px solid var(--border2);background:var(--bg2);
-          color:var(--text);font-size:13px;font-weight:700;
-          cursor:pointer;font-family:Outfit,sans-serif;
-          display:flex;align-items:center;justify-content:center;gap:8px">
+        <button id="notifPermBtn" onclick="requestEzanNotif().then(ok=>{loadEzanSettings();if(ok)toast('🔔 Bildirim izni verildi — Vakitler otomatik bildirilecek');else toast('❌ Bildirim izni reddedildi')})" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">
           🔔 Bildirim İzni Ver (Otomatik Ezan)
         </button>
         <div style="font-size:11px;color:var(--text4);margin-top:4px;text-align:center">
