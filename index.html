@@ -5849,7 +5849,7 @@ function buildSurahGrid(list) {
     var dur = getSurahDurationSec(s.n-1);
     var durStr = dur > 0 ? formatDuration(dur) : '';
     return '<div class="surah-card ' + (ez?'ezberlendi':'') + ' ' + (isBm?'bookmarked':'') + '"'
-      + ' onclick="openSurah('+s.n+')"'
+      + ' onclick="openSurahIfNotLongPress('+s.n+')"'
       + ' oncontextmenu="event.preventDefault();surahMenu('+s.n+',event)"'
       + ' ontouchstart="startLongPress('+s.n+')" ontouchend="clearLongPress()">'
       + '<div class="s-num">'+s.n+'</div>'
@@ -5865,10 +5865,24 @@ function buildSurahGrid(list) {
   }).join('');
 }
 
-// Uzun basış
-let lpTimer = null;
-function startLongPress(n){ lpTimer=setTimeout(()=>surahMenuMobile(n),600); }
-function clearLongPress(){ if(lpTimer){clearTimeout(lpTimer);lpTimer=null;} }
+// Uzun basış — menü sadece 650ms basışta açılır, tek tıkta sure açılır
+var lpTimer = null;
+var _lpFired = false;
+function startLongPress(n){
+  _lpFired = false;
+  lpTimer = setTimeout(function(){
+    _lpFired = true;
+    lpTimer = null;
+    surahMenuMobile(n);
+  }, 650);
+}
+function clearLongPress(){
+  if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; }
+}
+function openSurahIfNotLongPress(n){
+  if(_lpFired){ _lpFired = false; return; }
+  openSurah(n);
+}
 
 function surahMenu(n,e){
   e && e.preventDefault();
@@ -7351,10 +7365,25 @@ function copyAyah(i) {
 
 // ── PAYLAŞ ──
 function shareAyah(i) {
-  const a = ayahs[i];
-  const text = a.text + '\n\n' + a.trans + '\n\n— ' + surahData.name + ' Suresi, ' + a.numberInSurah + '. Ayet\n\nkuran-kerim.bakiciersen.workers.dev';
-  if(navigator.share) { navigator.share({title:'Kuran-ı Kerim',text}); }
-  else { navigator.clipboard&&navigator.clipboard.writeText(text).then(()=>toast('📋 Panoya kopyalandı')); }
+  var a = ayahs[i];
+  var text = a.text + '\n\n' + a.trans + '\n\n— ' + surahData.name + ' Suresi, ' + a.numberInSurah + '. Ayet\n\nhttps://kuran-kerim.bakiciersen.workers.dev';
+  if (navigator.share) {
+    navigator.share({ title: 'Kuran-ı Kerim', text: text }).catch(function(){});
+    return;
+  }
+  // navigator.share yok — seçenekli modal
+  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
+  var tgUrl = 'https://t.me/share/url?url=https%3A%2F%2Fkuran-kerim.bakiciersen.workers.dev&text=' + encodeURIComponent(a.text + '\n\n' + a.trans);
+  showModal(
+    '<div style="text-align:center;padding:8px 0">' +
+    '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px">📤 Paylaş</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px">' +
+    '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">💬</span> WhatsApp ile Paylaş</a>' +
+    '<a href="' + tgUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#0088cc;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">✈️</span> Telegram ile Paylaş</a>' +
+    '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(decodeURIComponent(\'' + encodeURIComponent(text) + '\')).then(function(){toast(\'📋 Panoya kopyalandı\')});closeModal()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;width:100%;justify-content:center"><span style="font-size:20px">📋</span> Panoya Kopyala</button>' +
+    '<button onclick="closeModal()" style="background:transparent;color:var(--text3);border:none;padding:8px;cursor:pointer;font-size:13px">Kapat</button>' +
+    '</div></div>'
+  );
 }
 
 // ── OKUNUŞ ──
@@ -9071,10 +9100,24 @@ function copyDua(i, cat) {
 }
 
 function shareDua(i, cat) {
-  const d = DUA_DATA[cat][i];
-  const text = d.title + '\n\n' + d.ar + '\n\n' + d.meal + '\n\n📚 ' + d.kaynak;
-  if(navigator.share) navigator.share({title: d.title, text});
-  else copyDua(i, cat);
+  var d = DUA_DATA[cat][i];
+  var text = d.title + '\n\n' + d.ar + '\n\n' + d.meal + '\n\n📚 ' + d.kaynak + '\n\nhttps://kuran-kerim.bakiciersen.workers.dev';
+  if (navigator.share) {
+    navigator.share({ title: d.title, text: text }).catch(function(){});
+    return;
+  }
+  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
+  var tgUrl = 'https://t.me/share/url?url=https%3A%2F%2Fkuran-kerim.bakiciersen.workers.dev&text=' + encodeURIComponent(d.title + '\n\n' + d.ar);
+  showModal(
+    '<div style="text-align:center;padding:8px 0">' +
+    '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px">📤 Paylaş</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px">' +
+    '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">💬</span> WhatsApp ile Paylaş</a>' +
+    '<a href="' + tgUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#0088cc;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">✈️</span> Telegram ile Paylaş</a>' +
+    '<button onclick="copyDua(' + i + ',\'' + cat + '\');closeModal()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;width:100%;justify-content:center"><span style="font-size:20px">📋</span> Panoya Kopyala</button>' +
+    '<button onclick="closeModal()" style="background:transparent;color:var(--text3);border:none;padding:8px;cursor:pointer;font-size:13px">Kapat</button>' +
+    '</div></div>'
+  );
 }
 
 // Sayfa açılınca ilk kategoriyi göster
@@ -11415,7 +11458,14 @@ window.addEventListener('load', function() {
 // ── Install Prompt ──
 var _deferredPrompt = null;
 
-// Zaten kuruluysa banner gösterme
+// Versiyon kontrolü — yeni sürümde localStorage temizle, banner tekrar çıksın
+var _PWA_VER = 'v35';
+if (localStorage.getItem('pwa-ver') !== _PWA_VER) {
+  localStorage.removeItem('pwa-installed');
+  localStorage.removeItem('pwa-banner-dismissed');
+  localStorage.setItem('pwa-ver', _PWA_VER);
+}
+
 var _isStandalone = (window.navigator.standalone === true) ||
   (window.matchMedia('(display-mode: standalone)').matches);
 
@@ -11424,42 +11474,55 @@ window.addEventListener('beforeinstallprompt', function(e) {
   _deferredPrompt = e;
   var btn = document.getElementById('aibInstallBtn');
   if (btn) btn.style.display = 'flex';
-  if (!_isStandalone && !localStorage.getItem('pwa-installed') && !localStorage.getItem('pwa-banner-dismissed')) {
+  // Standalone değilse 2 saniye sonra banner göster (her zaman)
+  if (!_isStandalone) {
     setTimeout(showInstallBanner, 2000);
   }
 });
 
 function triggerInstall() {
-  if (!_deferredPrompt) return;
-  _deferredPrompt.prompt();
-  _deferredPrompt.userChoice.then(function(r) {
-    if (r.outcome === 'accepted') {
-      localStorage.setItem('pwa-installed', '1');
-      if (typeof toast === 'function') toast('✅ Uygulama kuruldu!');
-    }
-    _deferredPrompt = null;
+  if (_deferredPrompt) {
+    // Chrome/Android — native install prompt
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(function(r) {
+      if (r.outcome === 'accepted') {
+        localStorage.setItem('pwa-installed', '1');
+        if (typeof toast === 'function') toast('✅ Uygulama ana ekrana eklendi!');
+      }
+      _deferredPrompt = null;
+      dismissInstall();
+    });
+  } else {
+    // Prompt hazır değil — QR modal ile manuel yönlendirme
     dismissInstall();
-  });
+    showQRModal();
+  }
 }
 
 function showInstallBanner() {
-  if (document.getElementById('_instBanner')) return;
   if (_isStandalone) return;
+  if (document.getElementById('_instBanner')) return;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
   var b = document.createElement('div');
   b.id = '_instBanner';
-  b.style.cssText = 'position:fixed;bottom:76px;left:16px;right:16px;z-index:9999;background:linear-gradient(135deg,#b8922e,#7a5c1a);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(160,120,50,0.4);font-family:Outfit,sans-serif;color:#fff;animation:_sUp 0.4s ease';
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  b.style.cssText = 'position:fixed;bottom:76px;left:12px;right:12px;z-index:99999;background:linear-gradient(135deg,#b8922e,#7a5c1a);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 40px rgba(160,120,50,0.55);font-family:Outfit,sans-serif;color:#fff;animation:_sUp 0.4s ease';
   if (isIOS) {
-    b.innerHTML = '<div style="font-size:22px;flex-shrink:0">📱</div>' +
-      '<div style="flex:1"><div style="font-weight:700;font-size:14px">Uygulamayı Kur</div>' +
-      '<div style="font-size:11px;opacity:0.85">Safari: Paylaş 🔗 → "Ana Ekrana Ekle"</div></div>' +
-      '<button onclick="dismissInstall()" style="background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px;line-height:1">✕</button>';
+    b.innerHTML =
+      '<div style="font-size:24px;flex-shrink:0">📱</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-weight:700;font-size:14px;margin-bottom:2px">Uygulamayı Kur</div>' +
+        '<div style="font-size:11px;opacity:0.9;line-height:1.4">Paylaş ⬆ → <b>"Ana Ekrana Ekle"</b></div>' +
+      '</div>' +
+      '<button onclick="dismissInstall()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:18px;cursor:pointer;padding:6px 8px;border-radius:8px;line-height:1;flex-shrink:0">✕</button>';
   } else {
-    b.innerHTML = '<img src="/icons/icon-192.png" width="40" height="40" style="border-radius:10px;flex-shrink:0" onerror="this.style.display=\'none\'">' +
-      '<div style="flex:1"><div style="font-weight:700;font-size:14px">Uygulamayı Kur</div>' +
-      '<div style="font-size:11px;opacity:0.85">Ana ekrana ekle — offline çalışır</div></div>' +
-      '<button onclick="triggerInstall()" style="background:#fff;color:#2a4a4e;border:none;border-radius:10px;padding:7px 14px;font-weight:700;cursor:pointer;font-size:13px">Kur</button>' +
-      '<button onclick="dismissInstall()" style="background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px;line-height:1">✕</button>';
+    b.innerHTML =
+      '<img src="/icons/icon-192.png" width="42" height="42" style="border-radius:12px;flex-shrink:0" onerror="this.style.display=\'none\'">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-weight:700;font-size:14px;margin-bottom:2px">Uygulamayı Kur</div>' +
+        '<div style="font-size:11px;opacity:0.9">Ana ekrana ekle — offline çalışır</div>' +
+      '</div>' +
+      '<button onclick="triggerInstall()" style="background:#fff;color:#2a4a4e;border:none;border-radius:10px;padding:8px 16px;font-weight:800;cursor:pointer;font-size:13px;flex-shrink:0;white-space:nowrap">Kur ▶</button>' +
+      '<button onclick="dismissInstall()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:18px;cursor:pointer;padding:6px 8px;border-radius:8px;line-height:1;flex-shrink:0">✕</button>';
   }
   document.body.appendChild(b);
 }
@@ -11467,7 +11530,6 @@ function showInstallBanner() {
 function dismissInstall() {
   var b = document.getElementById('_instBanner');
   if (b) b.remove();
-  localStorage.setItem('pwa-banner-dismissed', '1');
 }
 
 window.addEventListener('appinstalled', function() {
@@ -11512,13 +11574,7 @@ function showQRModal() {
     if(!e.target.closest('.ayah-ar,.s-ar,.esma-ar,input,textarea,[data-selectable]')){e.preventDefault();return false;}
   });
   document.addEventListener('dragstart',function(e){e.preventDefault();return false;});
-  // iframe kontrolü kaldırıldı — gerekirse ayarlar menüsünde yönetilebilir
-  let _dv=false;
-  setInterval(function(){
-    const w=window.outerWidth-window.innerWidth>160,h=window.outerHeight-window.innerHeight>160;
-    if((w||h)&&!_dv){_dv=true;_dvWarn();}
-    if(!w&&!h)_dv=false;
-  },1000);
+  // iframe kontrolü kaldırıldı
   function _cpWarn(){
     let w=document.getElementById('_cpW');
     if(w){clearTimeout(w._t);w.remove();}
@@ -11527,13 +11583,7 @@ function showQRModal() {
     w.innerHTML='🔒 © 2026 Kuran-ı Kerim<br><span style="font-size:12px;font-weight:400;opacity:0.9">Telif hakkıyla korunmaktadır.</span>';
     document.body.appendChild(w);w._t=setTimeout(()=>w.remove(),3000);
   }
-  function _dvWarn(){
-    if(document.getElementById('_dvW'))return;
-    const w=document.createElement('div');w.id='_dvW';
-    w.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999999;background:#b71c1c;color:#fff;padding:10px 20px;font-family:Outfit,sans-serif;font-size:13px;font-weight:700;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.4)';
-    w.innerHTML='⚠️ © 2026 Bakiciersen — Tüm hakları saklıdır.<span onclick="this.parentElement.remove()" style="float:right;cursor:pointer;margin-left:16px">✕</span>';
-    document.body.appendChild(w);
-  }
+
   const s=document.createElement('style');
   s.textContent='@keyframes _sUp{from{opacity:0;transform:translateY(100px)}to{opacity:1;transform:translateY(0)}}*{-webkit-user-select:none;-moz-user-select:none;user-select:none}input,textarea,[data-selectable],.ayah-ar,.s-ar{-webkit-user-select:text!important;user-select:text!important}';
   document.head.appendChild(s);
