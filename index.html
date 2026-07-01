@@ -2959,20 +2959,36 @@ window.onload = () => {
     }
   }, 120);
 
-  // Açılışta eski cache sil — her zaman taze API fetch
-  try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e) {}
+  // Kayıtlı namaz vakitleri varsa hemen göster (offline/yavaş internet güvenliği)
+  // — artık açılışta silinmiyor, sadece arka planda tazeleniyor
   var _ntIds = ['nt-imsak','nt-gunes','nt-ogle','nt-ikindi','nt-aksam','nt-yatsi'];
-  for(var _ni=0; _ni<_ntIds.length; _ni++) { var _elnt=document.getElementById(_ntIds[_ni]); if(_elnt) _elnt.textContent='...'; }
-  // Kayıtlı konumu yükle — namaz vakitleri ve ezan zamanlayıcıları
+  (function renderCachedPrayerTimes() {
+    try {
+      var savedRaw = localStorage.getItem('savedPrayerTimes');
+      if(!savedRaw) return;
+      var t = JSON.parse(savedRaw);
+      function cleanT(v) { return v ? v.replace(/ \(.*?\)/g,'').trim() : '--:--'; }
+      var mapT = { 'nt-imsak':t.Imsak, 'nt-gunes':t.Sunrise, 'nt-ogle':t.Dhuhr, 'nt-ikindi':t.Asr, 'nt-aksam':t.Maghrib, 'nt-yatsi':t.Isha };
+      for(var _ni=0; _ni<_ntIds.length; _ni++) {
+        var _elnt = document.getElementById(_ntIds[_ni]);
+        if(_elnt) _elnt.textContent = cleanT(mapT[_ntIds[_ni]]);
+      }
+      var savedCityName = localStorage.getItem('savedCity') || '';
+      var locEl = document.getElementById('locInfo');
+      var cityEl = document.getElementById('namazCity');
+      if(locEl) locEl.textContent = '📍 ' + (savedCityName || 'Kaydedilmiş Konum') + ' (tazeleniyor...)';
+      if(cityEl) cityEl.textContent = savedCityName;
+      var box = document.getElementById('nextNamazBox');
+      if(box) box.style.display = 'block';
+      startCountdown(t);
+      scheduleAllEzan(t);
+    } catch(e) {}
+  })();
+  // Kayıtlı konumu yükle — arka planda API'den taze vakitleri çeker, başarılı olursa üzerine yazar
   setTimeout(loadSavedLocation, 250);
 
   // Dakika bazlı ezan kontrolü başlat (mobil arka plan güvenli)
   startEzanInterval();
-  // Kayıtlı vakitleri varsa scheduleAllEzan'ı hemen çalıştır
-  setTimeout(function() {
-    var saved = localStorage.getItem('savedPrayerTimes');
-    if(saved) { try { scheduleAllEzan(JSON.parse(saved)); } catch(e) {} }
-  }, 500);
 };
 
 function buildSurahs() {
@@ -6083,9 +6099,7 @@ function renderAyahs() {
   const t = UI_TEXT[lang] || UI_TEXT['tr'];
   document.getElementById('ayahList').innerHTML = ayahs.map((a,i)=>`
     <div class="ayah-card" id="ac${i}"
-      onclick="selectAyah(${i})"
-      oncontextmenu="event.preventDefault();ayahMenu(${i})"
-      ontouchstart="startAyahLongPress(${i})" ontouchend="clearAyahLongPress()">
+      onclick="selectAyah(${i})">
       <div class="ay-ar">${a.text} <span class="ay-num">${a.numberInSurah}</span></div>
       <div class="ay-okunus" id="okunusWrap${i}" style="display:none">
         <div class="ay-tafsir-label">${t.ay_okunus_label||'🔤 Okunuş'}</div>
@@ -7331,29 +7345,6 @@ function showModal(content) {
 function closeModal() {
   document.getElementById('modalOverlay').style.display = 'none';
   document.body.style.overflow = '';
-}
-
-// ── AYET UZUN BASMA ──
-let ayahLpTimer = null;
-function startAyahLongPress(i){ ayahLpTimer=setTimeout(()=>ayahMenu(i),600); }
-function clearAyahLongPress(){ if(ayahLpTimer){clearTimeout(ayahLpTimer);ayahLpTimer=null;} }
-
-function ayahMenu(i) {
-  const a = ayahs[i];
-  showModal(`
-    <div style="font-family:'Scheherazade New',serif;font-size:20px;direction:rtl;text-align:right;margin-bottom:12px;color:var(--text);line-height:1.8">${a.text}</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7">${a.trans}</div>
-    <div class="smenu-grid">
-      <button class="smenu-btn" onclick="closeModal();copyAyah(${i})">📋 Kopyala</button>
-      <button class="smenu-btn" onclick="closeModal();shareAyah(${i})">📤 Paylaş</button>
-      <button class="smenu-btn" onclick="closeModal();loadOkunus(${i})">🔤 Okunuş</button>
-      <button class="smenu-btn" onclick="closeModal();loadTafsir(${i})">📚 Tefsir</button>
-      <button class="smenu-btn" onclick="closeModal();setBookmark(surahData.n,${i})">🔖 Yer İmi</button>
-      <button class="smenu-btn" onclick="closeModal();toggleFav(${i})">${isFav(surahData&&surahData.n,a.numberInSurah)?'💚 Kayıtlı':'💚 Kaydet'}</button>
-      <button class="smenu-btn" onclick="closeModal();playAyah(${i})">🔊 Dinle</button>
-      <button class="smenu-btn" onclick="closeModal();showSureHakkinda(surahData&&surahData.n)">ℹ️ Sure Hakkında</button>
-    </div>
-  `);
 }
 
 // ── KOPYALA ──
@@ -9167,6 +9158,8 @@ function getEzanUrl(n) {
 // Ezan zamanlayıcı handle'ları
 const _ezanTimers = {};
 let _ezanNotifGranted = false;
+// Aynı vakit için scheduleAllEzan (setTimeout) ile checkEzan (setInterval) çakışmasını önleyen ortak kilit
+let _ezanLastPlayed = {};
 
 // Bildirim izni iste
 async function requestEzanNotif() {
@@ -9216,6 +9209,13 @@ function scheduleAllEzan(timings) {
     if(msUntil <= 0) continue;
 
     _ezanTimers[vakit] = setTimeout(async () => {
+      // Tam vakit anı (offset=0) ise checkEzan ile çakışmayı önlemek için ortak kilidi kullan
+      const exactKey = vakit + '_' + hh + ':' + mm;
+      if(offset === 0) {
+        if(_ezanLastPlayed[exactKey]) return;
+        _ezanLastPlayed[exactKey] = true;
+      }
+
       // Ezan çal
       playEzanVakit(vakit);
 
@@ -9240,7 +9240,6 @@ function scheduleAllEzan(timings) {
 }
 
 // ── Dakika bazlı ezan kontrolü — mobil arka plan için güvenli ──
-let _ezanLastPlayed = {};
 function startEzanInterval() {
   function checkEzan() {
     var saved = localStorage.getItem('savedPrayerTimes');
