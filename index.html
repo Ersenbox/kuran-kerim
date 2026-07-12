@@ -6852,12 +6852,16 @@ async function loadNamazForCoords(lat, lng) {
     var mm2 = String(now.getMonth()+1).padStart(2,'0');
     var yyyy = now.getFullYear();
     var todayStr = dd + '-' + mm2 + '-' + yyyy;
-    // Aladhan API — method=13 (Diyanet), school=1 (Hanafi)
+    // İkindi (Asr) mezhebi: 0 = Standart/Şafi (Diyanet resmi takvimi böyle) | 1 = Hanefi
+    // Diyanet(13) ve MWL(3) => Standart (İkindi ~17:38, Diyanet uygulamasıyla birebir)
+    // IGMG(12) => Hanefi (Millî Görüş takipçileri İkindi'yi Hanefi vaktinde kılar)
+    var school = (method === '12') ? '1' : '0';
+    // Aladhan API — method + doğru mezhep
     var url = 'https://api.aladhan.com/v1/timings/' + todayStr
       + '?latitude=' + lat
       + '&longitude=' + lng
       + '&method=' + method
-      + '&school=1'
+      + '&school=' + school
       + '&timezonestring=' + encodeURIComponent(tz);
     var r = await fetch(url);
     if(!r.ok) throw new Error('HTTP ' + r.status);
@@ -9485,8 +9489,9 @@ async function fetchMonthlyTimes(lat, lng, container) {
     const today = now.getDate();
     
     const method = localStorage.getItem("prayerMethod") || "13";
+    const school = (method === '12') ? '1' : '0'; // Diyanet/MWL=Standart, IGMG=Hanefi (günlük vakitlerle aynı mantık)
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
-    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}&method=${method}&timezonestring=${encodeURIComponent(tz)}&school=1`);
+    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}&method=${method}&timezonestring=${encodeURIComponent(tz)}&school=${school}`);
     const j = await r.json();
     
     if(!j.data) throw new Error('Veri yok');
@@ -9523,7 +9528,7 @@ async function fetchMonthlyTimes(lat, lng, container) {
       </table>
       </div>
       <div style="font-size:11px;color:var(--text4);text-align:center;margin-top:8px">
-        Bugün sarı renkle işaretli ✦ Kaynak: AlAdhan API — Diyanet İşleri yöntemi (Method 13, Hanefi)
+        Bugün sarı renkle işaretli ✦ Kaynak: AlAdhan API — Diyanet İşleri yöntemi (Method 13, İkindi: Standart)
       </div>
     `;
     
