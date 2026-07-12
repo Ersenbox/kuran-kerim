@@ -2845,6 +2845,7 @@ function savePrayerMethod() {
   var pmEl = document.getElementById('prayerMethod');
   var method = (pmEl ? pmEl.value : '') || '13';
   localStorage.setItem('prayerMethod', method);
+  try { localStorage.setItem('prayerMethodManual', '1'); } catch(e){} // elle seçildi → otomatik seçim artık ezmesin
   try { localStorage.removeItem('savedPrayerTimes'); localStorage.removeItem('prayerTimesDate'); } catch(e){}
   var lat = parseFloat(localStorage.getItem('savedLat'));
   var lng = parseFloat(localStorage.getItem('savedLng'));
@@ -6841,11 +6842,58 @@ async function getNamazTimes() {
   }, () => { document.getElementById('locInfo').textContent = '❌ Konum izni reddedildi. Lütfen tarayıcı ayarlarından konum iznini ver.'; });
 }
 
+// ── DÜZELT 2: Manuel şehir girişi (GPS gerekmez) ──
+async function loadNamazForCity() {
+  var inp = document.getElementById('manualCityInput');
+  var city = inp ? inp.value.trim() : '';
+  if(!city){ toast('⚠️ Önce bir şehir yaz (örn: Berlin)'); return; }
+  var locEl = document.getElementById('locInfo');
+  if(locEl) locEl.textContent = '🔎 "' + city + '" aranıyor...';
+  try {
+    var now = new Date();
+    var todayStr = String(now.getDate()).padStart(2,'0') + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + now.getFullYear();
+    var method = localStorage.getItem('prayerMethod') || '13';
+    // Aladhan şehir adını koordinata çevirir (geocode) — dünya geneli çalışır
+    var r = await fetch('https://api.aladhan.com/v1/timingsByAddress/' + todayStr + '?address=' + encodeURIComponent(city) + '&method=' + method);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    var j = await r.json();
+    if(!j.data || !j.data.meta || j.data.meta.latitude == null) throw new Error('bulunamadı');
+    var lat = j.data.meta.latitude, lng = j.data.meta.longitude;
+    savedLat = lat; savedLng = lng; savedCity = city;
+    try {
+      localStorage.setItem('savedLat', lat);
+      localStorage.setItem('savedLng', lng);
+      localStorage.setItem('savedCity', city);
+    } catch(e){}
+    await loadNamazForCoords(lat, lng); // tek doğruluk kaynağı: mevcut fonksiyon
+  } catch(e) {
+    if(locEl) locEl.textContent = '❌ Şehir bulunamadı: ' + city;
+    toast('❌ Şehir bulunamadı — doğru yazdığından emin ol');
+  }
+}
+
+// ── EKLE 1: Bölgeye göre otomatik hesaplama kaynağı (kullanıcı elle seçmediyse) ──
+// Sadece dropdown'daki 3 kaynak: 13=Diyanet, 3=MWL, 12=IGMG
+function _autoMethodForTz(tz) {
+  tz = tz || '';
+  if (tz.indexOf('Europe/') === 0) return '13';   // Türkiye + Avrupa → Diyanet (diaspora)
+  return '3';                                       // Dünya geneli → Muslim World League
+}
+
 async function loadNamazForCoords(lat, lng) {
   try {
     var method = localStorage.getItem('prayerMethod') || '13';
     // Timezone otomatik tespit
     var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
+    // EKLE 1: Kullanıcı elle seçmediyse, bölgeye göre kaynağı otomatik ayarla
+    if (localStorage.getItem('prayerMethodManual') !== '1') {
+      var autoM = _autoMethodForTz(tz);
+      if (autoM && autoM !== method) {
+        method = autoM;
+        try { localStorage.setItem('prayerMethod', method); } catch(e){}
+        var pmEl0 = document.getElementById('prayerMethod'); if(pmEl0) pmEl0.value = method;
+      }
+    }
     // Bugünün tarihi DD-MM-YYYY formatında
     var now = new Date();
     var dd = String(now.getDate()).padStart(2,'0');
@@ -6856,11 +6904,19 @@ async function loadNamazForCoords(lat, lng) {
     // Diyanet(13) ve MWL(3) => Standart (İkindi ~17:38, Diyanet uygulamasıyla birebir)
     // IGMG(12) => Hanefi (Millî Görüş takipçileri İkindi'yi Hanefi vaktinde kılar)
     var school = (method === '12') ? '1' : '0';
-    // Aladhan API — method + doğru mezhep
+    // ── Yol 1: Yüksek enlem İmsak/Yatsı düzeltmesi ──
+    // Berlin gibi yerlerde (|enlem| >= 48.5°) yazın güneş 18°'ye ulaşmaz; method 13'ün
+    // 18° açısı İmsak/Yatsı'yı şaşırtır (02:33 / 23:34). Diyanet fiilen ~12° kullanır.
+    // Sadece Diyanet(13) + yüksek enlemde açıyı 12°'ye çekiyoruz (İkindi Standart kalır).
+    var methodParam = '&method=' + method;
+    if ((method === '13' || method === '3') && Math.abs(lat) >= 48.5) {
+      methodParam = '&method=99&methodSettings=12,null,12'; // fajr=12°, isha=12°
+    }
+    // Aladhan API — method + doğru mezhep + yüksek enlem düzeltmesi
     var url = 'https://api.aladhan.com/v1/timings/' + todayStr
       + '?latitude=' + lat
       + '&longitude=' + lng
-      + '&method=' + method
+      + methodParam
       + '&school=' + school
       + '&timezonestring=' + encodeURIComponent(tz);
     var r = await fetch(url);
@@ -9379,12 +9435,19 @@ function loadEzanSettings() {
     if(btn) {
       if(_ezanNotifGranted) {
         btn.textContent = '🔔 Bildirim Açık ✓';
-        btn.style.background = 'rgba(160,120,50,0.15)';
-        btn.style.borderColor = 'var(--g2)';
-        btn.style.color = 'var(--g2)';
+        btn.style.background = '#16a34a';
+        btn.style.borderColor = '#15803d';
+        btn.style.color = '#ffffff';
       } else if(Notification.permission === 'denied') {
-        btn.textContent = '🔕 Bildirim Engellendi';
-        btn.style.color = 'rgba(239,83,80,0.8)';
+        btn.textContent = '🔕 Bildirim Engellendi (tarayıcı ayarından aç)';
+        btn.style.background = 'rgba(239,83,80,0.15)';
+        btn.style.borderColor = 'rgba(239,83,80,0.6)';
+        btn.style.color = 'rgba(239,83,80,0.95)';
+      } else {
+        btn.textContent = '🔔 Bildirim İzni Ver (Otomatik Ezan)';
+        btn.style.background = 'var(--bg2)';
+        btn.style.borderColor = 'var(--border2)';
+        btn.style.color = 'var(--text)';
       }
     }
   }
@@ -9400,7 +9463,27 @@ function _getEzanSrc(vakit) {
   return vakit === 'sabah' ? EZAN_SRC_SABAH : EZAN_SRC_GENEL;
 }
 
+// ── DÜZELT 3: Tek tek durdur (her vakit Çal ↔ Durdur toggle) ──
+var _playingVakit = null;
+function _resetCalButtons() {
+  document.querySelectorAll('.ezan-cal-btn').forEach(function(b) {
+    b.classList.remove('playing');
+    b.textContent = '▶ Çal';
+  });
+  _playingVakit = null;
+}
+function _onEzanEnded() {
+  document.querySelectorAll('.ezan-btn').forEach(function(b) { b.classList.remove('playing'); });
+  _resetCalButtons();
+}
+
 function playEzanVakit(vakit, forcePlay) {
+  // DÜZELT 3: Bu vakit zaten çalıyorsa → durdur (toggle)
+  var _pa = document.getElementById('ezanAudio');
+  if (_playingVakit === vakit && _pa && !_pa.paused) {
+    stopEzan();
+    return;
+  }
   // Mevcut sesi tamamen durdur — aynı anda 2 ses çalmasın
   stopEzanSilent();
 
@@ -9433,9 +9516,10 @@ function playEzanVakit(vakit, forcePlay) {
 
   audio.play().then(function() {
     toast('🔊 ' + (vakit_tr[vakit] || vakit) + ' Ezanı çalıyor...');
-    document.querySelectorAll('.ezan-btn').forEach(function(b) { b.classList.remove('playing'); });
+    _resetCalButtons();
+    _playingVakit = vakit;
     var btn = document.querySelector('.ezan-cal-btn[onclick*="' + vakit + '"]');
-    if (btn) btn.classList.add('playing');
+    if (btn) { btn.classList.add('playing'); btn.textContent = '⏹ Durdur'; }
   }).catch(function(e) {
     toast('⚠️ Ezan çalınamadı. Sayfayla etkileşime geçtikten sonra tekrar deneyin.');
     console.warn('Ezan oynatma hatası:', e);
@@ -9455,6 +9539,7 @@ function stopEzanSilent() {
     audio.currentTime = 0;
   }
   document.querySelectorAll('.ezan-btn').forEach(function(b) { b.classList.remove('playing'); });
+  _resetCalButtons();
 }
 
 function stopEzan() {
@@ -9490,8 +9575,13 @@ async function fetchMonthlyTimes(lat, lng, container) {
     
     const method = localStorage.getItem("prayerMethod") || "13";
     const school = (method === '12') ? '1' : '0'; // Diyanet/MWL=Standart, IGMG=Hanefi (günlük vakitlerle aynı mantık)
+    // Yol 1: yüksek enlem İmsak/Yatsı düzeltmesi (günlük vakitlerle aynı)
+    let methodParam = `&method=${method}`;
+    if ((method === '13' || method === '3') && Math.abs(lat) >= 48.5) {
+      methodParam = '&method=99&methodSettings=12,null,12';
+    }
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
-    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}&method=${method}&timezonestring=${encodeURIComponent(tz)}&school=${school}`);
+    const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}${methodParam}&timezonestring=${encodeURIComponent(tz)}&school=${school}`);
     const j = await r.json();
     
     if(!j.data) throw new Error('Veri yok');
@@ -10842,6 +10932,13 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
       <button class="loc-btn" onclick="getNamazTimes()">📍 Konumumu Al</button>
     </div>
 
+    <div style="display:flex;gap:8px;margin:8px 0 4px;flex-wrap:wrap">
+      <input id="manualCityInput" type="text" placeholder="🏙️ Şehir yaz (örn: Berlin, Istanbul, Köln...)"
+        onkeydown="if(event.key==='Enter'){loadNamazForCity();}"
+        style="flex:1;min-width:180px;padding:10px 12px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:14px;font-family:Outfit,sans-serif">
+      <button class="loc-btn" onclick="loadNamazForCity()" style="white-space:nowrap">🔎 Şehri Bul</button>
+    </div>
+
     <!-- SESLI EZAN -->
     <div class="ezan-player" id="ezanPlayer" style="display:none">
       <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px">🔊 Sesli Ezan</div>
@@ -10925,7 +11022,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
         </div>
       </div>
       <button class="ezan-btn ezan-stop" onclick="stopEzan()" style="width:100%">⏹ Durdur</button>
-      <audio id="ezanAudio" volume="0.8" onended="document.querySelectorAll('.ezan-btn').forEach(b=>b.classList.remove('playing'))"></audio>
+      <audio id="ezanAudio" volume="0.8" onended="_onEzanEnded()"></audio>
     </div>
 
     <div class="next-namaz" id="nextNamazBox" style="display:none">
@@ -10941,6 +11038,10 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
       <div class="namaz-card"><div class="namaz-icon">🌤️</div><div class="namaz-label">İkindi</div><div class="namaz-time" id="nt-ikindi">--:--</div></div>
       <div class="namaz-card"><div class="namaz-icon">🌆</div><div class="namaz-label">Akşam</div><div class="namaz-time" id="nt-aksam">--:--</div></div>
       <div class="namaz-card"><div class="namaz-icon">🌙</div><div class="namaz-label">Yatsı</div><div class="namaz-time" id="nt-yatsi">--:--</div></div>
+    </div>
+
+    <div id="temkinNote" style="margin-top:12px;padding:11px 14px;background:rgba(160,120,50,0.10);border:1px solid rgba(160,120,50,0.30);border-radius:12px;font-size:12.5px;line-height:1.6;color:var(--text3)">
+      ⚠️ <b>Dikkat:</b> Ekranda görünen ezan vakitleri, kullanılan hesaplama kaynağına göre resmî ezandan birkaç dakika farklı olabilir. Diyanet'in <b>"temkin" (ihtiyat)</b> dakikaları ve yüksek enlem kuralları nedeniyle özellikle <b>İmsak / Yatsı</b> için mahallî cami/Diyanet vaktini esas alınız.
     </div>
 
     <!-- AYLIK İMSAKİYE -->
