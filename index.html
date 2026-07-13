@@ -2290,6 +2290,10 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
   <div class="main">
     <div class="sec-head"><h2 id="gridTitle">114 Sure</h2><span class="sec-badge" id="gridBadge">TÜM SURELER</span></div>
     <p class="sec-desc">Okumak istediğin sureye tıkla</p>
+    <details style="margin:10px 0;border:1px solid var(--border2);border-radius:14px;background:var(--bg);padding:4px 12px">
+      <summary style="cursor:pointer;font-weight:700;font-size:14px;padding:9px 0;list-style:none">📖 Kur'an Duaları <span style="opacity:.6;font-size:12px;font-weight:400">(başlarken / bitince — dokun-aç)</span></summary>
+      <div id="kuranDuaInline" style="padding-bottom:6px"></div>
+    </details>
     <div class="view-toggle">
       <button class="vt-btn active" id="vt-sure" onclick="setView('sure')">📖 Sureler</button>
       <button class="vt-btn" id="vt-juz" onclick="setView('juz')">📚 30 Cüz</button>
@@ -6053,6 +6057,7 @@ async function openSurah(n) {
   curAyah = 0; playing = false;
   document.getElementById('playBtn').textContent = '▶';
   showPage('reader');
+  showDua('kuranBasla', true); // EKLE 3: Kur'an'a başlama duası
   document.getElementById('rTitle').textContent = `${surahData.ar} — ${surahData.name}`;
   var sureDur = getSurahDurationSec(n-1);
   document.getElementById('rSub').textContent = `${n}. Sure • ${surahData.ayah} Ayet • ${surahData.type?'Medeni':'Mekke'}` + (sureDur ? ' • ⏱' + formatDuration(sureDur) : '');
@@ -6304,6 +6309,7 @@ function nextAyah() {
         cuzMode = false;
         toast('✅ ' + cuzSurahIdx + '. cüz tamamlandı!');
       }
+      showDua('kuranSalavat', true); // EKLE 4: Kur'an bitince salavat
     }
   }
 }
@@ -9472,9 +9478,101 @@ function _resetCalButtons() {
   });
   _playingVakit = null;
 }
+// ═══ EZAN & KUR'AN DUALARI (EKLE 1-4) ═══
+var DUALAR = {
+  ezanZikri: {
+    baslik: '🕌 Ezan Zikri (ezan sırasında okunur)',
+    okunus: "Merhaben bi'l-kâili adlâ, merhaben bi's-salâti ve ehlâ.",
+    meal: '',
+    kaynak: "Hatîb el-Bağdâdî, Râmûzü'l-Ehâdîs, s. 435, No: 5426"
+  },
+  ezanDuasi: {
+    baslik: '🤲 Ezan Duası (ezandan sonra okunur)',
+    arapca: 'اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ إِنَّكَ لَا تُخْلِفُ الْمِيعَادَ',
+    okunus: "Allâhümme rabbe hâzihi'd-da'veti't-tâmmeh, ve's-salâti'l-kâimeh, âti Muhammedeni'l-vesîlete ve'l-fadîleh, veb'ashü makâmen mahmûdeni'llezî vaadteh. İnneke lâ tuhliful mîâd.",
+    meal: "Allah'ım! Ey şu eksiksiz davetin ve kılınacak namazın Rabbi! Muhammed'e vesîleyi ve fazîleti ver; onu, kendisine vaad ettiğin Makâm-ı Mahmûd'a ulaştır. Şüphesiz sen vaadinden dönmezsin.",
+    kaynak: 'Buhârî, Ezân 8; Müslim, Salât 11; Tirmizî, Mevâkît 43'
+  },
+  kuranBasla: {
+    baslik: "📖 Kur'an'a Başlama Duası",
+    okunus: "Allâhümme bil-haqqi enzeltehû ve bil-haqqi nezel. Allâhümme azzim fîhi rağbetî. Vec'alhü nûral-libasarî ve basîratî ve şifâel-lisadrî. Allâhümme zeyyin bihî lisânî ve cemmil bihî vechî ve qavvi bihî cesedî (ve keffir bihî zünûbî). Verzuqnî tilâvetehû alâ tâatike ânâelleyli ve etrâfennehâr. Vahşurnâ meannebiyyi (s.a.v.) ve âlihil-ahyâr.",
+    meal: "Allah'ım! Kur'an'ı hak ile indirdin, o da hak ile indi. Ona rağbetimi artır; onu gözümün nuru, basiretim ve gönlümün şifası kıl. Dilimi onunla süsle, yüzümü güzelleştir, bedenimi kuvvetlendir (ve günahlarımı bağışla). Gece gündüz rızan için onu okumayı nasip et. Beni Peygamber (s.a.v.) ve seçkin âl'iyle beraber haşret.",
+    kaynak: "Mecmûatü'l-Ahzâb (Gümüşhânevî), c.1, s.591 — bir dua mecmuasıdır (hadis değildir)"
+  },
+  kuranSalavat: {
+    baslik: "🌸 Kur'an Bitince Salavat",
+    okunus: "Allâhümme salli ve sellim alâ seyyidinâ Muhammedin ve alâ âli seyyidinâ Muhammed. Bi adedi mâ fî cemî'il-qur'âni harfen harfen ve bi adedi külli harfin elfen elfâ.",
+    meal: "Allah'ım! Efendimiz Muhammed'e ve âline; Kur'an'daki her harf adedince ve her harfin binlerce katı adedince salât ve selâm eyle.",
+    kaynak: ''
+  }
+};
+function _duaAutoAcik(){ return localStorage.getItem('duaAutoShow') !== '0'; }
+function toggleDuaAuto(){ localStorage.setItem('duaAutoShow', _duaAutoAcik() ? '0' : '1'); var k=document.getElementById('duaKart'); if(k) k.remove(); }
+function _bestTrVoice(){
+  var vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+  return vs.find(function(v){ return /google/i.test(v.name) && /tr/i.test(v.lang); })
+      || vs.find(function(v){ return v.lang === 'tr-TR'; })
+      || vs.find(function(v){ return /^tr/i.test(v.lang); }) || null;
+}
+function _speakDua(key){
+  var d = DUALAR[key]; if(!d || !('speechSynthesis' in window)) return;
+  var u = new SpeechSynthesisUtterance((d.okunus||'').replace(/\(.*?\)/g,''));
+  u.lang='tr-TR'; u.rate=0.72; u.pitch=1;               // DÜZELT: daha yavaş + doğal
+  var v=_bestTrVoice(); if(v) u.voice=v;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+function playDuaTTS(key){
+  // (c) Önce gerçek MP3 dene (/public/audio/dua-<key>.mp3), yoksa TTS'e düş
+  var fell=false; function fb(){ if(fell) return; fell=true; _speakDua(key); }
+  try {
+    var a=new Audio('/public/audio/dua-'+key+'.mp3');
+    a.onerror=fb;
+    var p=a.play();
+    if(p && p.catch) p.catch(fb);
+  } catch(e){ fb(); }
+}
+// Sabit (inline) dua bölümlerini DUALAR'dan doldur
+function renderInlineDuas(){
+  function mk(key){
+    var d=DUALAR[key]; if(!d) return '';
+    var s='<div style="border:1px solid var(--border2);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--bg2)">';
+    s+='<div style="font-weight:700;font-size:13.5px;margin-bottom:4px">'+d.baslik+'</div>';
+    if(d.arapca) s+='<div dir="rtl" style="font-size:18px;text-align:right;line-height:2.1;margin:4px 0">'+d.arapca+'</div>';
+    if(d.okunus) s+='<div style="font-size:13.5px;margin:4px 0;line-height:1.7"><b>Okunuşu:</b> '+d.okunus+'</div>';
+    if(d.meal)   s+='<div style="font-size:12.5px;opacity:.9;margin:4px 0;line-height:1.6"><b>Meali:</b> '+d.meal+'</div>';
+    if(d.kaynak) s+='<div style="font-size:11.5px;opacity:.72;margin-top:5px">📚 '+d.kaynak+'</div>';
+    s+='<button onclick="playDuaTTS(\''+key+'\')" style="margin-top:8px;background:#16a34a;color:#fff;border:none;border-radius:9px;padding:7px 15px;cursor:pointer;font-size:13px">🔊 Dinle</button>';
+    s+='</div>'; return s;
+  }
+  var e=document.getElementById('ezanDuaInline'); if(e) e.innerHTML=mk('ezanZikri')+mk('ezanDuasi');
+  var k=document.getElementById('kuranDuaInline'); if(k) k.innerHTML=mk('kuranBasla')+mk('kuranSalavat');
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', renderInlineDuas);
+else renderInlineDuas();
+// Sesler geç yüklenirse en iyi Türkçe sesi yakalamak için:
+if(window.speechSynthesis) speechSynthesis.onvoiceschanged = function(){};
+function showDua(key, auto){
+  var d = DUALAR[key]; if(!d) return;
+  if(auto && !_duaAutoAcik()) return;
+  var old = document.getElementById('duaKart'); if(old) old.remove();
+  var box = document.createElement('div');
+  box.id = 'duaKart';
+  box.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:99999;width:min(94vw,560px);max-height:72vh;overflow:auto;background:var(--bg,#0e3b32);color:var(--text,#ffffff);border:1px solid rgba(160,120,50,.55);border-radius:16px;box-shadow:0 12px 44px rgba(0,0,0,.45);padding:16px 18px;font-family:Outfit,system-ui,sans-serif;line-height:1.75';
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:15px">'+d.baslik+'</b><button onclick="document.getElementById(\'duaKart\').remove()" style="background:none;border:none;color:inherit;font-size:20px;cursor:pointer;line-height:1">✕</button></div>';
+  if(d.arapca) h += '<div dir="rtl" style="font-size:20px;text-align:right;margin:8px 0;line-height:2.1">'+d.arapca+'</div>';
+  if(d.okunus) h += '<div style="font-size:15px;margin:6px 0"><b>Okunuşu:</b> '+d.okunus+'</div>';
+  if(d.meal)   h += '<div style="font-size:13.5px;opacity:.92;margin:6px 0"><b>Meali:</b> '+d.meal+'</div>';
+  if(d.kaynak) h += '<div style="font-size:12px;opacity:.75;margin-top:8px">📚 Kaynak: '+d.kaynak+'</div>';
+  h += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button onclick="playDuaTTS(\''+key+'\')" style="flex:1;min-width:120px;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:9px;cursor:pointer;font-size:14px">🔊 Sesli Oku</button><button onclick="speechSynthesis.cancel();document.getElementById(\'duaKart\').remove()" style="background:rgba(255,255,255,.12);color:inherit;border:none;border-radius:10px;padding:9px 14px;cursor:pointer;font-size:14px">Kapat</button></div>';
+  h += '<div style="text-align:center;margin-top:8px"><a href="javascript:void(0)" onclick="toggleDuaAuto()" style="font-size:11.5px;opacity:.7;color:inherit">Bu duaları otomatik gösterme</a></div>';
+  box.innerHTML = h;
+  document.body.appendChild(box);
+}
+
 function _onEzanEnded() {
   document.querySelectorAll('.ezan-btn').forEach(function(b) { b.classList.remove('playing'); });
   _resetCalButtons();
+  showDua('ezanDuasi', true); // EKLE 2: ezan bitince Ezan Duası
 }
 
 function playEzanVakit(vakit, forcePlay) {
@@ -9520,6 +9618,7 @@ function playEzanVakit(vakit, forcePlay) {
     _playingVakit = vakit;
     var btn = document.querySelector('.ezan-cal-btn[onclick*="' + vakit + '"]');
     if (btn) { btn.classList.add('playing'); btn.textContent = '⏹ Durdur'; }
+    showDua('ezanZikri', true); // EKLE 1: ezan sırasında okunan zikir
   }).catch(function(e) {
     toast('⚠️ Ezan çalınamadı. Sayfayla etkileşime geçtikten sonra tekrar deneyin.');
     console.warn('Ezan oynatma hatası:', e);
@@ -11018,10 +11117,15 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
           🔔 Bildirim İzni Ver (Otomatik Ezan)
         </button>
         <div style="font-size:11px;color:var(--text4);margin-top:4px;text-align:center">
-          İzin verirsen vakitler gelince otomatik bildirim + ezan çalar
+          Uygulama <b>açıkken</b> vakit gelince otomatik bildirim + ezan çalar. Telefon kilitliyken / uygulama kapalıyken (örn. gece Sabah ezanı) çalması, web uygulamalarında mümkün değildir — bunun için mağazadan kurulan (native) sürüm gerekir.
         </div>
       </div>
       <button class="ezan-btn ezan-stop" onclick="stopEzan()" style="width:100%">⏹ Durdur</button>
+
+      <details style="margin-top:12px;border:1px solid var(--border2);border-radius:14px;background:var(--bg);padding:4px 12px">
+        <summary style="cursor:pointer;font-weight:700;font-size:14px;padding:9px 0;list-style:none">📿 Ezan Duaları <span style="opacity:.6;font-size:12px;font-weight:400">(dokun-aç)</span></summary>
+        <div id="ezanDuaInline" style="padding-bottom:6px"></div>
+      </details>
       <audio id="ezanAudio" volume="0.8" onended="_onEzanEnded()"></audio>
     </div>
 
