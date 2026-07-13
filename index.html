@@ -6916,7 +6916,10 @@ async function loadNamazForCoords(lat, lng) {
     // Sadece Diyanet(13) + yüksek enlemde açıyı 12°'ye çekiyoruz (İkindi Standart kalır).
     var methodParam = '&method=' + method;
     if ((method === '13' || method === '3') && Math.abs(lat) >= 48.5) {
-      methodParam = '&method=99&methodSettings=12,null,12'; // fajr=12°, isha=12°
+      // Yüksek enlemde 18° güneşe ulaşmaz -> İmsak/Yatsı şaşar. Yerleşik method=12 (12° açı)
+      // Berlin'de İmsak/Yatsı'yı Diyanet'e ~2-3 dk yaklaştırır (İkindi 'school' ile Standart kalır).
+      // NOT: custom method=99 bazı sunucularda 400 verdiği için yerleşik method tercih edildi.
+      methodParam = '&method=12';
     }
     // Aladhan API — method + doğru mezhep + yüksek enlem düzeltmesi
     var url = 'https://api.aladhan.com/v1/timings/' + todayStr
@@ -9702,7 +9705,7 @@ async function fetchMonthlyTimes(lat, lng, container) {
     // Yol 1: yüksek enlem İmsak/Yatsı düzeltmesi (günlük vakitlerle aynı)
     let methodParam = `&method=${method}`;
     if ((method === '13' || method === '3') && Math.abs(lat) >= 48.5) {
-      methodParam = '&method=99&methodSettings=12,null,12';
+      methodParam = '&method=12'; // yüksek enlem: yerleşik 12° açı (günlük vakitlerle aynı, 400 vermez)
     }
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
     const r = await fetch(`https://api.aladhan.com/v1/calendar/${year}/${month}?latitude=${lat}&longitude=${lng}${methodParam}&timezonestring=${encodeURIComponent(tz)}&school=${school}`);
