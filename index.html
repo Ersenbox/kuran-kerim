@@ -9303,6 +9303,31 @@ function scheduleAllEzan(timings) {
       toast('🕌 ' + (vakitTR[vakit]||vakit) + ' vakti' + (offset>0?' ('+offset+' dk önce bildirim)':''));
     }, msUntil);
   }
+  // Native kabuk (Capacitor) varsa: kapalıyken/telefon kilitliyken çalan ezanı da kur
+  if (typeof scheduleNativeEzan === 'function') scheduleNativeEzan(timings);
+}
+
+// ── NATIVE (Capacitor) ezan — telefon kilitli/app kapalıyken çalar. Web'de sessizce atlanır. ──
+async function scheduleNativeEzan(timings){
+  try{
+    if(!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform())) return; // web => çık
+    var LN = window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
+    if(!LN) return;
+    try{ await LN.requestPermissions(); }catch(e){}
+    var trmap = {sabah:'Sabah',ogle:'Öğle',ikindi:'İkindi',aksam:'Akşam',yatsi:'Yatsı'};
+    var map = [['sabah', timings.Fajr||timings.Imsak],['ogle',timings.Dhuhr],['ikindi',timings.Asr],['aksam',timings.Maghrib],['yatsi',timings.Isha]];
+    var notifs=[];
+    for(var i=0;i<map.length;i++){
+      var vakit=map[i][0], hhmm=map[i][1]; if(!hhmm) continue;
+      var p=String(hhmm).replace(/ \(.*?\)/,'').trim().split(':'); var h=parseInt(p[0],10), m=parseInt(p[1],10);
+      if(isNaN(h)||isNaN(m)) continue;
+      var at=new Date(); at.setHours(h,m,0,0); if(at<new Date()) at.setDate(at.getDate()+1); // geçtiyse yarın
+      notifs.push({ id:1000+i, title:'🕌 Ezan Vakti', body:(trmap[vakit]||vakit)+' vakti girdi',
+        schedule:{ at:at, repeats:true, every:'day' },
+        sound: (vakit==='sabah' ? 'sabah.wav' : 'ezan.wav'), smallIcon:'ic_stat_icon', channelId:'ezan' });
+    }
+    if(notifs.length) await LN.schedule({ notifications: notifs });
+  }catch(e){}
 }
 
 // ── Dakika bazlı ezan kontrolü — mobil arka plan için güvenli ──
