@@ -9317,6 +9317,16 @@ async function scheduleNativeEzan(timings){
     var LN = window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
     if(!LN) return;
     try{ await LN.requestPermissions(); }catch(e){}
+    // Android 8+ (API 26+): bildirim sesi KANALA baglidir, tek tek bildirime degil.
+    // Bir kanal = bir ses. Bu yuzden iki kanal kuruyoruz:
+    //   ezan_std   -> ezan.mp3   (Ogle/Ikindi/Aksam/Yatsi)
+    //   ezan_sabah -> sabah.mp3  (Sabah)
+    // Ses dosyalari: android/app/src/main/res/raw/ezan.mp3 ve sabah.mp3
+    // NOT: Bir kanalin sesi ilk olusturulustan sonra DEGISMEZ; sesi degistirirsen app'i kaldirip yeniden kur.
+    try{
+      await LN.createChannel({ id:'ezan_std',   name:'Ezan',        description:'Namaz vakti ezani',  sound:'ezan.mp3',  importance:5, visibility:1, vibration:true });
+      await LN.createChannel({ id:'ezan_sabah', name:'Sabah Ezani', description:'Sabah namazi ezani', sound:'sabah.mp3', importance:5, visibility:1, vibration:true });
+    }catch(e){}
     var trmap = {sabah:'Sabah',ogle:'Öğle',ikindi:'İkindi',aksam:'Akşam',yatsi:'Yatsı'};
     var map = [['sabah', timings.Fajr||timings.Imsak],['ogle',timings.Dhuhr],['ikindi',timings.Asr],['aksam',timings.Maghrib],['yatsi',timings.Isha]];
     var notifs=[];
@@ -9325,9 +9335,11 @@ async function scheduleNativeEzan(timings){
       var p=String(hhmm).replace(/ \(.*?\)/,'').trim().split(':'); var h=parseInt(p[0],10), m=parseInt(p[1],10);
       if(isNaN(h)||isNaN(m)) continue;
       var at=new Date(); at.setHours(h,m,0,0); if(at<new Date()) at.setDate(at.getDate()+1); // geçtiyse yarın
+      var chan = (vakit==='sabah' ? 'ezan_sabah' : 'ezan_std');
+      var snd  = (vakit==='sabah' ? 'sabah.mp3'  : 'ezan.mp3'); // Android 7 fallback; 8+ sesi kanaldan calar
       notifs.push({ id:1000+i, title:'🕌 Ezan Vakti', body:(trmap[vakit]||vakit)+' vakti girdi',
-        schedule:{ at:at, repeats:true, every:'day' },
-        sound: (vakit==='sabah' ? 'sabah.wav' : 'ezan.wav'), smallIcon:'ic_stat_icon', channelId:'ezan' });
+        schedule:{ at:at, repeats:true, every:'day', allowWhileIdle:true },
+        sound: snd, smallIcon:'ic_stat_icon', channelId:chan });
     }
     if(notifs.length) await LN.schedule({ notifications: notifs });
   }catch(e){}
