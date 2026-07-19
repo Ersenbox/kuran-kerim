@@ -8732,13 +8732,13 @@ function showKutDetay(ci, ii) {
       </div>
 
       <!-- Sekme içerikleri -->
-      <div id="kd-contents" style="min-height:160px;padding:14px 0 8px">
+      <div id="kd-contents" style="min-height:80px;max-height:220px;overflow-y:auto;padding:14px 0 8px">
 
         <!-- 0: Arapça -->
         <div id="kdc-0">
-          <div style="font-family:'Scheherazade New',serif;font-size:26px;color:var(--g1);
-            text-align:right;direction:rtl;line-height:2;padding:14px;
-            background:var(--bg2);border-radius:12px;border:1px solid var(--border)">
+          <div style="font-family:'Scheherazade New',serif;font-size:${(z.ar||'').length>200?'16px':(z.ar||'').length>80?'18px':'22px'};color:var(--g1);
+            text-align:right;direction:rtl;line-height:1.8;padding:14px;
+            background:var(--bg2);border-radius:12px;border:1px solid var(--border);word-wrap:break-word;overflow-wrap:break-word">
             ${z.ar||'—'}
           </div>
         </div>
@@ -8747,7 +8747,7 @@ function showKutDetay(ci, ii) {
         <div id="kdc-1" style="display:none">
           <div style="font-size:14px;color:var(--text2);line-height:1.9;
             padding:12px 14px;background:var(--bg2);border-radius:12px;
-            border-left:3px solid var(--g2)">
+            border-left:3px solid var(--g2);word-wrap:break-word;overflow-wrap:break-word">
             ${(z.vird||'—').replace(/\//g,'<br><span style="color:var(--text4);font-size:11px">— veya —</span><br>')}
           </div>
         </div>
@@ -8755,7 +8755,7 @@ function showKutDetay(ci, ii) {
         <!-- 2: Meal -->
         <div id="kdc-2" style="display:none">
           <div style="font-size:13px;color:var(--text2);line-height:1.9;font-style:italic;
-            padding:12px 14px;background:var(--bg2);border-radius:12px">
+            padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">
             ${z.meal||'—'}
           </div>
         </div>
@@ -8763,7 +8763,7 @@ function showKutDetay(ci, ii) {
         <!-- 3: Açıklama -->
         <div id="kdc-3" style="display:none">
           <div style="font-size:13px;color:var(--text3);line-height:1.8;
-            padding:12px 14px;background:var(--bg2);border-radius:12px">
+            padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">
             ${z.aciklama||'—'}
           </div>
         </div>
@@ -8772,7 +8772,7 @@ function showKutDetay(ci, ii) {
         <div id="kdc-4" style="display:none">
           <div style="font-size:12px;color:var(--text3);line-height:1.7;
             padding:12px 14px;background:var(--bg3);border-radius:12px;
-            border:1px solid var(--border2)">
+            border:1px solid var(--border2);word-wrap:break-word;overflow-wrap:break-word">
             📚 ${z.kaynak||'—'}
           </div>
         </div>
@@ -9462,11 +9462,40 @@ function setSpeed(s) {
 
 // ── SESLI EZAN ──
 // Ezan sesleri: Mishary Alafasy - evrensel İslami ezan
-// ── EZAN SESLERİ — 3 dosya: ezan.mp3, Ezan SABAH.mp3, Alafasy EZAN - EZAN DUASI.mp3 ──
+// ── EZAN SESLERİ — yerel dosya + CDN fallback ──
+// Yerel: /public/audio/ veya /audio/ (CF Pages çıktı dizinine göre)
+// CDN:   cdn.aladhan.com/audio/adhans/ (güvenilir, CORS destekli)
+var EZAN_LOCAL = [
+  ['audio/ezan.mp3','public/audio/ezan.mp3'],
+  ['audio/Ezan%20SABAH.mp3','public/audio/Ezan%20SABAH.mp3'],
+  ['audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3','public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3']
+];
+var EZAN_CDN = [
+  'https://cdn.aladhan.com/audio/adhans/a4.mp3',
+  'https://cdn.aladhan.com/audio/adhans/a9.mp3',
+  'https://cdn.aladhan.com/audio/adhans/a7.mp3'
+];
 function getEzanUrl(n) {
-  if(String(n) === '2') return '/public/audio/Ezan%20SABAH.mp3';
-  if(String(n) === '3') return '/public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3';
-  return '/public/audio/ezan.mp3';
+  var idx = 0;
+  if(String(n) === '2') idx = 1;
+  else if(String(n) === '3') idx = 2;
+  return EZAN_CDN[idx]; // CDN her zaman erişilebilir
+}
+/* Yerel dosya varsa onu kullan, yoksa CDN'e düş */
+function loadEzanWithFallback(audio, ezanIdx) {
+  var locals = EZAN_LOCAL[ezanIdx] || EZAN_LOCAL[0];
+  var cdn = EZAN_CDN[ezanIdx] || EZAN_CDN[0];
+  /* Önce ilk yerel yolu dene */
+  audio.src = locals[0];
+  audio.onerror = function() {
+    /* İkinci yerel yolu dene */
+    audio.onerror = function() {
+      /* CDN'e düş */
+      audio.onerror = null;
+      audio.src = cdn;
+    };
+    audio.src = locals[1];
+  };
 }
 
 // Ezan ayarlarını kaydet
@@ -9633,16 +9662,11 @@ function saveEzanSettings(changedVakit) {
       var audio2 = document.getElementById('ezanAudio');
       if (audio2) {
         stopEzanSilent();
-        // 1 = ezan.mp3, 2 = Ezan SABAH.mp3, 3 = Alafasy EZAN - EZAN DUASI.mp3
-        var prevSrc;
-        if (String(n2) === 'S1' || n2 === 2 || (changedVakit === 'sabah' && n2 === 1)) {
-          prevSrc = '/public/audio/Ezan%20SABAH.mp3';
-        } else if (String(n2) === 'S2' || n2 === 3) {
-          prevSrc = '/public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3';
-        } else {
-          prevSrc = '/public/audio/ezan.mp3';
-        }
-        audio2.src = prevSrc;
+        // Ezan index belirle + CDN fallback
+        var prevIdx = 0;
+        if (String(n2) === 'S1' || n2 === 2 || (changedVakit === 'sabah' && n2 === 1)) { prevIdx = 1; }
+        else if (String(n2) === 'S2' || n2 === 3) { prevIdx = 2; }
+        loadEzanWithFallback(audio2, prevIdx);
         audio2.volume = parseFloat(s.vol) || 0.8;
         audio2.load();
         audio2.play().then(function() {
@@ -9701,8 +9725,8 @@ function loadEzanSettings() {
 // ezan.mp3            → Genel ezan (Öğle, İkindi, Akşam, Yatsı)
 // Ezan SABAH.mp3      → Sabah (Fajr) ezanı
 // Alafasy EZAN - EZAN DUASI.mp3 → Alafasy ezan duası
-var EZAN_SRC_SABAH = '/public/audio/Ezan%20SABAH.mp3';
-var EZAN_SRC_GENEL = '/public/audio/ezan.mp3';
+var EZAN_SRC_SABAH = EZAN_CDN[1];
+var EZAN_SRC_GENEL = EZAN_CDN[0];
 
 function _getEzanSrc(vakit) {
   return vakit === 'sabah' ? EZAN_SRC_SABAH : EZAN_SRC_GENEL;
@@ -9764,7 +9788,8 @@ function playDuaTTS(key){
   // (c) Önce gerçek MP3 dene (/public/audio/dua-<key>.mp3), yoksa TTS'e düş
   var fell=false; function fb(){ if(fell) return; fell=true; _speakDua(key); }
   try {
-    var a=new Audio('/public/audio/dua-'+key+'.mp3');
+    var a=new Audio('audio/dua-'+key+'.mp3');
+    a.onerror=function(){a.src='public/audio/dua-'+key+'.mp3';};
     a.onerror=fb;
     var p=a.play();
     if(p && p.catch) p.catch(fb);
@@ -9847,17 +9872,15 @@ function playEzanVakit(vakit, forcePlay) {
   var volEl = document.getElementById('ezanVolume');
   audio.volume = volEl ? (parseFloat(volEl.value) || 0.8) : 0.8;
 
-  var src;
-  // 1 = ezan.mp3 (genel), 2 = Ezan SABAH.mp3 (sabah özel), 3 = Alafasy EZAN - EZAN DUASI.mp3
-  // S1 geriye dönük uyumluluk: sabah ezanı
+  // Ezan dosya indexi belirle: 0=genel, 1=sabah, 2=alafasy
+  var ezanIdx = 0;
   if (String(ezanNum) === 'S1' || ezanNum === 2 || (vakit === 'sabah' && ezanNum === 1)) {
-    src = '/public/audio/Ezan%20SABAH.mp3';
+    ezanIdx = 1;
   } else if (String(ezanNum) === 'S2' || ezanNum === 3) {
-    src = '/public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3';
-  } else {
-    src = '/public/audio/ezan.mp3';
+    ezanIdx = 2;
   }
-  audio.src = src;
+  // Yerel dosya yoksa CDN'e düşen fallback sistemi
+  loadEzanWithFallback(audio, ezanIdx);
   audio.load();
 
   var vakit_tr = {sabah:'Sabah', ogle:'Öğle', ikindi:'İkindi', aksam:'Akşam', yatsi:'Yatsı'};
@@ -10157,67 +10180,59 @@ function showCustomZikirDetay(i, z) {
   const tgt = z.target || 33;
   const kalan = Math.max(0, tgt - cnt);
   const pct = Math.min(100, Math.round(cnt / tgt * 100));
+  /* Uzun Arapça metinler için otomatik font boyutu küçült */
+  var arLen = (z.ar||'').length;
+  var arFontSize = arLen > 200 ? '16px' : arLen > 80 ? '18px' : '22px';
 
-  showModal(`
-    <div id="kd-wrap" style="display:flex;flex-direction:column;gap:0">
-      <div style="margin-bottom:12px">
-        <div style="font-size:18px;font-weight:800;color:var(--text);line-height:1.3">${z.name}</div>
-        <div style="font-size:12px;color:var(--text4);margin-top:2px">${z.desc||''}</div>
-      </div>
-      <div id="kd-tabs" style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;overflow-x:auto;scrollbar-width:none">
-        ${['Arapça','Vird','Meal','Açıklama','Kaynak'].map((tab,ti)=>
-          '<button id="kdt-'+ti+'" onclick="kdTab('+ti+')" style="flex-shrink:0;padding:8px 12px;font-size:12px;font-weight:700;background:none;border:none;border-bottom:3px solid '+(ti===0?'var(--g1)':'transparent')+';color:'+(ti===0?'var(--g1)':'var(--text3)')+';cursor:pointer;font-family:Outfit,sans-serif;transition:all 0.15s;white-space:nowrap">'+tab+'</button>'
-        ).join('')}
-      </div>
-      <div id="kd-contents" style="min-height:160px;padding:14px 0 8px">
-        <div id="kdc-0">
-          <div style="font-family:'Scheherazade New',serif;font-size:26px;color:var(--g1);text-align:right;direction:rtl;line-height:2;padding:14px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);word-wrap:break-word;overflow-wrap:break-word">${z.ar||'—'}</div>
-        </div>
-        <div id="kdc-1" style="display:none">
-          <div style="font-size:14px;color:var(--text2);line-height:1.9;padding:12px 14px;background:var(--bg2);border-radius:12px;border-left:3px solid var(--g2);word-wrap:break-word;overflow-wrap:break-word">${z.tr||z.vird||'—'}</div>
-        </div>
-        <div id="kdc-2" style="display:none">
-          <div style="font-size:13px;color:var(--text2);line-height:1.9;font-style:italic;padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">${z.meal||'—'}</div>
-        </div>
-        <div id="kdc-3" style="display:none">
-          <div style="font-size:13px;color:var(--text2);line-height:1.8;padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">${z.aciklama||'—'}</div>
-        </div>
-        <div id="kdc-4" style="display:none">
-          <div style="font-size:13px;color:var(--text2);line-height:1.8;padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">📖 ${z.kaynak||'—'}</div>
-        </div>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border);margin:4px 0 12px">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
-        <div style="text-align:center">
-          <div style="font-size:36px;font-weight:900;color:var(--text);line-height:1">${cnt}</div>
-          <div style="font-size:11px;color:var(--text4)">${z.name}</div>
-        </div>
-        <button onclick="closeModal();curTesbi=${i};updateTesbiUI();countTesbi()" style="flex:1;padding:14px;background:linear-gradient(135deg,var(--g1),var(--g2));color:white;border:none;border-radius:16px;font-size:18px;font-weight:800;cursor:pointer;font-family:Outfit,sans-serif">Oku & Say</button>
-        <button onclick="closeModal();curTesbi=${i};resetCount()" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">↺</button>
-      </div>
-      <div style="width:100%;height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px">
-        <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--g1),var(--g2));border-radius:99px;transition:width 0.3s"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:14px">
-        <div style="text-align:center;flex:1;padding:8px;background:var(--bg2);border-radius:10px;margin-right:4px">
-          <div style="font-size:18px;font-weight:800;color:var(--text)">${cnt}</div>
-          <div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase">Sayılan</div>
-        </div>
-        <div style="text-align:center;flex:1;padding:8px;background:var(--bg2);border-radius:10px;margin:0 4px">
-          <div style="font-size:18px;font-weight:800;color:var(--text)">${tgt}</div>
-          <div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase">Hedef</div>
-        </div>
-        <div style="text-align:center;flex:1;padding:8px;background:var(--bg2);border-radius:10px;margin-left:4px">
-          <div style="font-size:18px;font-weight:800;color:var(--text)">${kalan}</div>
-          <div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase">Kalan</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="closeModal();curTesbi=${i};updateTesbiUI()" class="loc-btn" style="flex:1;font-size:13px;padding:10px">＋ Listeme Ekle</button>
-        <button onclick="closeModal()" class="ay-btn" style="font-size:13px;padding:10px 16px">← Geri</button>
-      </div>
-    </div>
-  `);
+  var HTML = '<div id="kd-wrap" style="display:flex;flex-direction:column;gap:0">'
+    + '<div style="margin-bottom:12px">'
+    + '<div style="font-size:18px;font-weight:800;color:var(--text);line-height:1.3">' + z.name + '</div>'
+    + '<div style="font-size:12px;color:var(--text4);margin-top:2px">' + (z.desc||'') + '</div>'
+    + '</div>'
+    + '<div id="kd-tabs" style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;overflow-x:auto;scrollbar-width:none">';
+  var tabNames = ['Arapça','Vird','Meal','Açıklama','Kaynak'];
+  for(var ti=0;ti<tabNames.length;ti++){
+    HTML += '<button id="kdt-'+ti+'" onclick="kdTab('+ti+')" style="flex-shrink:0;padding:8px 12px;font-size:12px;font-weight:700;background:none;border:none;border-bottom:3px solid '+(ti===0?'var(--g1)':'transparent')+';color:'+(ti===0?'var(--g1)':'var(--text3)')+';cursor:pointer;font-family:Outfit,sans-serif;transition:all 0.15s;white-space:nowrap">'+tabNames[ti]+'</button>';
+  }
+  HTML += '</div>'
+    + '<div id="kd-contents" style="min-height:80px;max-height:220px;overflow-y:auto;padding:14px 0 8px">'
+    + '<div id="kdc-0"><div style="font-family:\'Scheherazade New\',serif;font-size:'+arFontSize+';color:var(--g1);text-align:right;direction:rtl;line-height:1.8;padding:14px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);word-wrap:break-word;overflow-wrap:break-word">' + (z.ar||'—') + '</div></div>'
+    + '<div id="kdc-1" style="display:none"><div style="font-size:14px;color:var(--text2);line-height:1.9;padding:12px 14px;background:var(--bg2);border-radius:12px;border-left:3px solid var(--g2);word-wrap:break-word;overflow-wrap:break-word">' + (z.tr||z.vird||'—') + '</div></div>'
+    + '<div id="kdc-2" style="display:none"><div style="font-size:13px;color:var(--text2);line-height:1.9;font-style:italic;padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">' + (z.meal||'—') + '</div></div>'
+    + '<div id="kdc-3" style="display:none"><div style="font-size:13px;color:var(--text2);line-height:1.8;padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">' + (z.aciklama||'—') + '</div></div>'
+    + '<div id="kdc-4" style="display:none"><div style="font-size:13px;color:var(--text2);line-height:1.8;padding:12px 14px;background:var(--bg2);border-radius:12px;word-wrap:break-word;overflow-wrap:break-word">📖 ' + (z.kaynak||'—') + '</div></div>'
+    + '</div>'
+    + '<hr style="border:none;border-top:1px solid var(--border);margin:4px 0 12px">'
+    + '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">'
+    + '<div style="text-align:center"><div style="font-size:36px;font-weight:900;color:var(--text);line-height:1">' + cnt + '</div><div style="font-size:11px;color:var(--text4)">' + z.name + '</div></div>'
+    + '<button onclick="closeModal();curTesbi='+i+';updateTesbiUI();incrementTesbi()" style="flex:1;padding:14px;background:linear-gradient(135deg,var(--g1),var(--g2));color:white;border:none;border-radius:16px;font-size:18px;font-weight:800;cursor:pointer;font-family:Outfit,sans-serif">Oku & Say</button>'
+    + '<button onclick="closeModal();curTesbi='+i+';resetTesbi()" style="width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">↺</button>'
+    + '</div>'
+    + '<div style="width:100%;height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--g1),var(--g2));border-radius:99px;transition:width 0.3s"></div></div>'
+    + '<div style="display:flex;justify-content:space-between;margin-bottom:14px">'
+    + '<div style="text-align:center;flex:1;padding:8px;background:var(--bg2);border-radius:10px;margin-right:4px"><div style="font-size:18px;font-weight:800;color:var(--text)">' + cnt + '</div><div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase">Sayılan</div></div>'
+    + '<div style="text-align:center;flex:1;padding:8px;background:var(--bg2);border-radius:10px;margin:0 4px"><div style="font-size:18px;font-weight:800;color:var(--text)">' + tgt + '</div><div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase">Hedef</div></div>'
+    + '<div style="text-align:center;flex:1;padding:8px;background:var(--bg2);border-radius:10px;margin-left:4px"><div style="font-size:18px;font-weight:800;color:var(--text)">' + kalan + '</div><div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase">Kalan</div></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<button onclick="closeModal();curTesbi='+i+';updateTesbiUI()" class="loc-btn" style="flex:1;font-size:13px;padding:10px">＋ Listeme Ekle</button>'
+    + '<button onclick="closeModal()" class="ay-btn" style="font-size:13px;padding:10px 16px">← Geri</button>'
+    + '</div></div>';
+
+  showModal(HTML);
+
+  /* ══ Tab geçiş fonksiyonunu TANIMLA (custom zikir için de çalışsın) ══ */
+  window.kdTab = function(idx) {
+    for(var j=0;j<5;j++){
+      var btn=document.getElementById('kdt-'+j);
+      var div=document.getElementById('kdc-'+j);
+      if(btn&&div){
+        div.style.display = j===idx ? 'block' : 'none';
+        btn.style.color = j===idx ? 'var(--g1)' : 'var(--text3)';
+        btn.style.borderBottomColor = j===idx ? 'var(--g1)' : 'transparent';
+      }
+    }
+  };
 }
 
 function moveZikir(i, dir) {
@@ -10346,11 +10361,20 @@ function editZikir(i) {
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Arapça Yazımı</label>
         <textarea class="zikir-input zikir-input-ar" id="editZikirAr" rows="3" style="resize:vertical;min-height:60px">${(z.ar||'').replace(/</g,'&lt;')}</textarea>
 
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Okunuşu (Vird)</label>
+        <textarea class="zikir-input" id="editZikirVird" rows="3" style="resize:vertical;min-height:60px">${(z.vird||z.tr||'').replace(/</g,'&lt;')}</textarea>
+
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Türkçe Meali</label>
         <textarea class="zikir-input" id="editZikirMeal" rows="3" style="resize:vertical;min-height:60px">${(z.meal||'').replace(/</g,'&lt;')}</textarea>
 
         <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Hedef Sayı</label>
         <input class="zikir-input" id="editZikirHedef" type="number" value="${z.target}" min="1" max="99999">
+
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Açıklama</label>
+        <textarea class="zikir-input" id="editZikirAciklama" rows="3" style="resize:vertical;min-height:60px">${(z.aciklama||'').replace(/</g,'&lt;')}</textarea>
+
+        <label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px">Kaynak</label>
+        <textarea class="zikir-input" id="editZikirKaynak" rows="2" style="resize:vertical;min-height:44px">${(z.kaynak||'').replace(/</g,'&lt;')}</textarea>
       </div>
     </div>
     <div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap">
@@ -10380,8 +10404,12 @@ function saveEditZikir(i) {
     ...z,
     name: ad,
     ar: document.getElementById('editZikirAr')?.value.trim() || z.ar || '',
+    vird: document.getElementById('editZikirVird')?.value.trim() || z.vird || '',
+    tr: document.getElementById('editZikirVird')?.value.trim() || z.tr || '',
     meal: document.getElementById('editZikirMeal')?.value.trim() || z.meal || '',
     target: parseInt(document.getElementById('editZikirHedef')?.value) || z.target || 33,
+    aciklama: document.getElementById('editZikirAciklama')?.value.trim() || z.aciklama || '',
+    kaynak: document.getElementById('editZikirKaynak')?.value.trim() || z.kaynak || '',
   };
 
   // Tüm zikirler (kütüphane + custom) override ile kaydedilir
