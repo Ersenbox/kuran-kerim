@@ -487,6 +487,37 @@ body::before {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 10px;
 }
+/* ── SECDE AYETİ BADGE ── */
+.secde-badge {
+  display:inline-flex;align-items:center;gap:3px;
+  background:linear-gradient(135deg,#d4a017,#b8860b);
+  color:#fff;font-size:9px;font-weight:800;
+  padding:2px 7px;border-radius:10px;
+  letter-spacing:0.04em;
+  box-shadow:0 1px 4px rgba(212,160,23,0.4);
+  white-space:nowrap;
+}
+.secde-badge-juz {
+  display:inline-flex;align-items:center;gap:2px;
+  background:linear-gradient(135deg,#d4a017,#b8860b);
+  color:#fff;font-size:8px;font-weight:800;
+  padding:1px 5px;border-radius:8px;
+  margin-left:3px;
+  box-shadow:0 1px 3px rgba(212,160,23,0.35);
+}
+.secde-ayah-box {
+  margin:8px 0 4px;padding:12px 14px;
+  background:linear-gradient(135deg,rgba(212,160,23,0.12),rgba(184,134,11,0.06));
+  border:2px solid rgba(212,160,23,0.5);
+  border-radius:14px;
+  border-left:4px solid #d4a017;
+}
+.secde-ayah-box .secde-title {
+  font-size:13px;font-weight:800;color:#d4a017;margin-bottom:6px;
+}
+.secde-ayah-box .secde-desc {
+  font-size:12px;line-height:1.7;color:var(--text2);
+}
 .surah-card {
   background: var(--card);
   border: 2px solid var(--border2);
@@ -2273,17 +2304,20 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
         <div id="gunlukAyetAr" style="font-family:'Scheherazade New',serif;font-size:21px;line-height:2;text-align:right;direction:rtl;color:var(--text);margin-bottom:8px"></div>
         <div id="gunlukAyetTr" style="font-size:14px;line-height:1.8;color:var(--text2);font-weight:500;padding-top:8px;border-top:1px solid var(--border)"></div>
         <div id="gunlukAyetRef" style="font-size:11px;color:var(--g1);font-weight:800;margin-top:6px"></div>
+        <button onclick="shareGunluk('ayet')" style="margin-top:8px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--g1);background:transparent;color:var(--g1);font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📤 Paylaş</button>
       </div>
       <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;margin-bottom:8px">
         <div style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:0.08em;margin-bottom:8px" id="gunlukDuaBaslik">🤲 GÜNÜN DUASI</div>
         <div id="gunlukDuaAr" style="font-family:'Scheherazade New',serif;font-size:19px;line-height:2;text-align:right;direction:rtl;color:var(--text);margin-bottom:8px"></div>
         <div id="gunlukDuaTr" style="font-size:14px;line-height:1.8;color:var(--text2);font-weight:500;padding-top:8px;border-top:1px solid var(--border)"></div>
         <div id="gunlukDuaRef" style="font-size:11px;color:var(--gold);font-weight:700;margin-top:6px"></div>
+        <button onclick="shareGunluk('dua')" style="margin-top:8px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📤 Paylaş</button>
       </div>
       <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px">
         <div style="font-size:10px;font-weight:800;color:var(--text3);letter-spacing:0.08em;margin-bottom:8px" id="gunlukHadisBaslik">💡 GÜNÜN HADİSİ</div>
         <div id="gunlukHadisTr" style="font-size:14px;line-height:1.9;color:var(--text2);font-weight:500;font-style:italic"></div>
         <div id="gunlukHadisRef" style="font-size:11px;color:var(--text3);font-weight:700;margin-top:6px"></div>
+        <button onclick="shareGunluk('hadis')" style="margin-top:8px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--text3);background:transparent;color:var(--text3);font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📤 Paylaş</button>
       </div>
     </div>
   </div>
@@ -2842,6 +2876,32 @@ let bookmarkSurah = parseInt(localStorage.getItem('bookmarkSurah')||'0');
 let bookmarkAyah = parseInt(localStorage.getItem('bookmarkAyah')||'0');
 let settings = JSON.parse(localStorage.getItem('qSettings')||'{"sayimSes":false,"hedefSes":true,"zikirMod":"titresim"}');
 let hizliSureler = JSON.parse(localStorage.getItem('hizliSureler')||'[1,36,55,67,112,113,114]');
+
+// ── SECDE AYETLERİ (14 adet — İslam alimleri ittifakı) ──
+const SECDE_AYETLERI = [
+  {sure:7,  ayet:206, isim:"A'râf"},
+  {sure:13, ayet:15,  isim:"Ra'd"},
+  {sure:16, ayet:50,  isim:"Nahl"},
+  {sure:17, ayet:109, isim:"İsrâ"},
+  {sure:19, ayet:58,  isim:"Meryem"},
+  {sure:22, ayet:18,  isim:"Hac"},
+  {sure:25, ayet:60,  isim:"Furkân"},
+  {sure:27, ayet:26,  isim:"Neml"},
+  {sure:32, ayet:15,  isim:"Secde"},
+  {sure:38, ayet:24,  isim:"Sâd"},
+  {sure:41, ayet:37,  isim:"Fussilet"},
+  {sure:53, ayet:62,  isim:"Necm"},
+  {sure:84, ayet:21,  isim:"İnşikâk"},
+  {sure:96, ayet:19,  isim:"Alak"}
+];
+// Sure numarasına göre hızlı erişim
+const SECDE_SURAH_MAP = {};
+SECDE_AYETLERI.forEach(function(s){
+  if(!SECDE_SURAH_MAP[s.sure]) SECDE_SURAH_MAP[s.sure] = [];
+  SECDE_SURAH_MAP[s.sure].push(s.ayet);
+});
+function hasSecdeSurah(n){ return !!SECDE_SURAH_MAP[n]; }
+function isSecdeAyah(surahNum, ayahNum){ var arr = SECDE_SURAH_MAP[surahNum]; return arr && arr.indexOf(ayahNum) >= 0; }
 
 // INIT
 
@@ -5883,6 +5943,7 @@ function buildSurahGrid(list) {
       + (durStr ? ' <span style="font-size:10px;color:var(--g1);font-weight:700">⏱'+durStr+'</span>' : '')
       + (ez?'<span style="font-size:11px;color:#ffd600">⭐Ezber</span>':'')
       + (isBm?'<span style="font-size:11px;color:#e53935">🔖</span>':'')
+      + (hasSecdeSurah(s.n)?'<span class="secde-badge">۩ Secde</span>':'')
       + '</div></div></div>';
   }).join('');
 }
@@ -5933,7 +5994,7 @@ function surahMenuMobile(n){
 
 /* Sure sayfasından geri dönünce o sureye scroll yap */
 function goBackToSurahList(){
-  var lastSurah = currentSurah || 1;
+  var lastSurah = (surahData && surahData.n) || 1;
   showPage('home');
   setTimeout(function(){
     var card = document.querySelector('.surah-card[data-surah="'+lastSurah+'"]');
@@ -6136,6 +6197,7 @@ function renderAyahs() {
         <div class="ay-tafsir-label" id="tafsirLabel${i}">${t.ay_tafsir_label||'📖 Meal / Tercüme'}</div>
         <div class="ay-tafsir show" id="tafsir${i}">${t.ay_loading||'Yükleniyor...'}</div>
       </div>
+      ${isSecdeAyah(surahData.n, a.numberInSurah) ? '<div class="secde-ayah-box"><div class="secde-title">۩ SECDE AYETİ — TİLAVET SECDESİ</div><div class="secde-desc"><b>Bu ayeti okuyan veya dinleyen kişi tilavet secdesi yapar.</b><br><br>📋 <b>Nasıl yapılır:</b><br>1️⃣ Kıbleye dön ve niyet et: <i>"Tilavet secdesi yapmaya niyet ettim."</i><br>2️⃣ "Allahu Ekber" diyerek secdeye git.<br>3️⃣ Secdede 3 kere <b>"Sübhâne Rabbiye\'l-A\'lâ"</b> de.<br>4️⃣ "Allahu Ekber" diyerek kalk. Selâm gerekmez.<br><br>⚠️ <b>Not:</b> Hanefi mezhebine göre tilavet secdesi vâciptir. Diğer mezheplerde sünnettir. Abdestli olmak gerekir.</div></div>' : ''}
       <div class="ay-actions">
         <button class="ay-btn ay-play-btn" id="ayPlayBtn${i}" onclick="event.stopPropagation();toggleAyahPlay(${i})">▶ Dinle</button>
         <button class="ay-btn ay-stop-btn" id="ayStopBtn${i}" onclick="event.stopPropagation();stopAyahPlay(${i})" style="display:none;border-color:rgba(239,83,80,0.5);color:#ef5350">⏹ Dur</button>
@@ -6838,7 +6900,8 @@ function buildJuzGrid() {
       var isBmSurah = isBookmarkedJuz && (sn === parseInt(localStorage.getItem('bookmarkSurah')||'0'));
       var sDur = getSurahDurationSec(sn-1);
       var sDurStr = sDur > 0 ? ' <span style="font-size:9px;color:var(--text4)">⏱'+formatDuration(sDur)+'</span>' : '';
-      return '<span class="juz-surah-pill' + (isBmSurah ? ' juz-pill-bookmark' : '') + '" onclick="openSurahInCuz(' + sn + ',' + jn + ')">' + sn + '. ' + (SURAH_NAMES[lang][sn-1]||SURAH_NAMES.tr[sn-1]) + sDurStr + '</span>';
+      var secdeJuz = hasSecdeSurah(sn) ? '<span class="secde-badge-juz">۩</span>' : '';
+      return '<span class="juz-surah-pill' + (isBmSurah ? ' juz-pill-bookmark' : '') + '" onclick="openSurahInCuz(' + sn + ',' + jn + ')">' + sn + '. ' + (SURAH_NAMES[lang][sn-1]||SURAH_NAMES.tr[sn-1]) + sDurStr + secdeJuz + '</span>';
     }).join('');
     return '<div class="juz-card' + (isBookmarkedJuz ? ' juz-bookmarked' : '') + '" id="juz' + jn + '">'
       + '<div class="juz-header" onclick="toggleJuz(' + jn + ')">'
@@ -7467,6 +7530,47 @@ function shareAyah(i) {
     '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">💬</span> WhatsApp ile Paylaş</a>' +
     '<a href="' + tgUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#0088cc;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">✈️</span> Telegram ile Paylaş</a>' +
     '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(decodeURIComponent(\'' + encodeURIComponent(text) + '\')).then(function(){toast(\'📋 Panoya kopyalandı\')});closeModal()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;width:100%;justify-content:center"><span style="font-size:20px">📋</span> Panoya Kopyala</button>' +
+    '<button onclick="closeModal()" style="background:transparent;color:var(--text3);border:none;padding:8px;cursor:pointer;font-size:13px">Kapat</button>' +
+    '</div></div>'
+  );
+}
+
+// ── GÜNLÜK İÇERİK PAYLAŞ ──
+function shareGunluk(tip) {
+  var text = '';
+  var title = '';
+  if(tip === 'ayet') {
+    var ar = (document.getElementById('gunlukAyetAr')||{}).textContent || '';
+    var tr = (document.getElementById('gunlukAyetTr')||{}).textContent || '';
+    var ref = (document.getElementById('gunlukAyetRef')||{}).textContent || '';
+    title = '📖 Günün Ayeti';
+    text = title + '\n\n' + ar + '\n\n' + tr + '\n\n' + ref;
+  } else if(tip === 'dua') {
+    var ar = (document.getElementById('gunlukDuaAr')||{}).textContent || '';
+    var tr = (document.getElementById('gunlukDuaTr')||{}).textContent || '';
+    var ref = (document.getElementById('gunlukDuaRef')||{}).textContent || '';
+    title = '🤲 Günün Duası';
+    text = title + '\n\n' + ar + '\n\n' + tr + '\n\n' + ref;
+  } else if(tip === 'hadis') {
+    var tr = (document.getElementById('gunlukHadisTr')||{}).textContent || '';
+    var ref = (document.getElementById('gunlukHadisRef')||{}).textContent || '';
+    title = '💡 Günün Hadisi';
+    text = title + '\n\n' + tr + '\n\n' + ref;
+  }
+  text += '\n\nhttps://kuran-kerim.bakiciersen.workers.dev';
+  if(navigator.share) {
+    navigator.share({title: title, text: text}).catch(function(){});
+    return;
+  }
+  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
+  var tgUrl = 'https://t.me/share/url?url=https%3A%2F%2Fkuran-kerim.bakiciersen.workers.dev&text=' + encodeURIComponent(text);
+  showModal(
+    '<div style="text-align:center;padding:8px 0">' +
+    '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px">📤 Paylaş</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px">' +
+    '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">💬</span> WhatsApp</a>' +
+    '<a href="' + tgUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#0088cc;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">✈️</span> Telegram</a>' +
+    '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(decodeURIComponent(\'' + encodeURIComponent(text) + '\')).then(function(){toast(\'📋 Kopyalandı\')});closeModal()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;width:100%;justify-content:center"><span style="font-size:20px">📋</span> Panoya Kopyala</button>' +
     '<button onclick="closeModal()" style="background:transparent;color:var(--text3);border:none;padding:8px;cursor:pointer;font-size:13px">Kapat</button>' +
     '</div></div>'
   );
@@ -9237,11 +9341,11 @@ function setSpeed(s) {
 
 // ── SESLI EZAN ──
 // Ezan sesleri: Mishary Alafasy - evrensel İslami ezan
-// ── EZAN SESLERİ — Yerel /public/audio/azan{1-21}.mp3 ──
+// ── EZAN SESLERİ — 3 dosya: ezan.mp3, Ezan SABAH.mp3, Alafasy EZAN - EZAN DUASI.mp3 ──
 function getEzanUrl(n) {
-  // Yerel ezan dosyaları: /public/audio/azan1.mp3 → azan21.mp3
-  const num = Math.max(1, Math.min(21, parseInt(n) || 1));
-  return '/public/audio/azan' + num + '.mp3';
+  if(String(n) === '2') return '/public/audio/Ezan%20SABAH.mp3';
+  if(String(n) === '3') return '/public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3';
+  return '/public/audio/ezan.mp3';
 }
 
 // Ezan ayarlarını kaydet
@@ -9350,8 +9454,8 @@ async function scheduleNativeEzan(timings){
     // Ses dosyalari: android/app/src/main/res/raw/ezan.mp3 ve sabah.mp3
     // NOT: Bir kanalin sesi ilk olusturulustan sonra DEGISMEZ; sesi degistirirsen app'i kaldirip yeniden kur.
     try{
-      await LN.createChannel({ id:'ezan_std',   name:'Ezan',        description:'Namaz vakti ezani',  sound:'ezan.mp3',  importance:5, visibility:1, vibration:true });
-      await LN.createChannel({ id:'ezan_sabah', name:'Sabah Ezani', description:'Sabah namazi ezani', sound:'sabah.mp3', importance:5, visibility:1, vibration:true });
+      await LN.createChannel({ id:'ezan_std',   name:'Ezan',        description:'Namaz vakti ezani',  sound:'ezan.mp3',          importance:5, visibility:1, vibration:true });
+      await LN.createChannel({ id:'ezan_sabah', name:'Sabah Ezani', description:'Sabah namazi ezani', sound:'ezan_sabah.mp3',    importance:5, visibility:1, vibration:true });
     }catch(e){}
     var trmap = {sabah:'Sabah',ogle:'Öğle',ikindi:'İkindi',aksam:'Akşam',yatsi:'Yatsı'};
     var map = [['sabah', timings.Fajr||timings.Imsak],['ogle',timings.Dhuhr],['ikindi',timings.Asr],['aksam',timings.Maghrib],['yatsi',timings.Isha]];
@@ -9362,7 +9466,7 @@ async function scheduleNativeEzan(timings){
       if(isNaN(h)||isNaN(m)) continue;
       var at=new Date(); at.setHours(h,m,0,0); if(at<new Date()) at.setDate(at.getDate()+1); // geçtiyse yarın
       var chan = (vakit==='sabah' ? 'ezan_sabah' : 'ezan_std');
-      var snd  = (vakit==='sabah' ? 'sabah.mp3'  : 'ezan.mp3'); // Android 7 fallback; 8+ sesi kanaldan calar
+      var snd  = (vakit==='sabah' ? 'ezan_sabah.mp3'  : 'ezan.mp3'); // Android 7 fallback; 8+ sesi kanaldan calar
       notifs.push({ id:1000+i, title:'🕌 Ezan Vakti', body:(trmap[vakit]||vakit)+' vakti girdi',
         schedule:{ at:at, repeats:true, every:'day', allowWhileIdle:true },
         sound: snd, smallIcon:'ic_stat_icon', channelId:chan });
@@ -9461,14 +9565,14 @@ function saveEzanSettings(changedVakit) {
       var audio2 = document.getElementById('ezanAudio');
       if (audio2) {
         stopEzanSilent();
-        // Sabah + 1 (Klasik) → sabah.mp3; diğerleri → azan{n}.mp3
+        // 1 = ezan.mp3, 2 = Ezan SABAH.mp3, 3 = Alafasy EZAN - EZAN DUASI.mp3
         var prevSrc;
-        if (String(n2) === 'S1' || (changedVakit === 'sabah' && n2 === 1)) {
-          prevSrc = '/public/audio/sabah.mp3';
-        } else if (String(n2) === 'S2') {
-          prevSrc = '/public/audio/azan11.mp3';
+        if (String(n2) === 'S1' || n2 === 2 || (changedVakit === 'sabah' && n2 === 1)) {
+          prevSrc = '/public/audio/Ezan%20SABAH.mp3';
+        } else if (String(n2) === 'S2' || n2 === 3) {
+          prevSrc = '/public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3';
         } else {
-          prevSrc = '/public/audio/azan' + Math.max(1, Math.min(21, n2)) + '.mp3';
+          prevSrc = '/public/audio/ezan.mp3';
         }
         audio2.src = prevSrc;
         audio2.volume = parseFloat(s.vol) || 0.8;
@@ -9525,10 +9629,11 @@ function loadEzanSettings() {
   }
 }
 
-// ── EZAN SES SİSTEMİ — Yerel MP3 (CDN bağımsız) ──
-// sabah.mp3  → Sabah (Fajr) ezanı
-// ezan.mp3   → Öğle, İkindi, Akşam, Yatsı ezanı
-var EZAN_SRC_SABAH = '/public/audio/sabah.mp3';
+// ── EZAN SES SİSTEMİ — 3 Dosya (CDN bağımsız) ──
+// ezan.mp3            → Genel ezan (Öğle, İkindi, Akşam, Yatsı)
+// Ezan SABAH.mp3      → Sabah (Fajr) ezanı
+// Alafasy EZAN - EZAN DUASI.mp3 → Alafasy ezan duası
+var EZAN_SRC_SABAH = '/public/audio/Ezan%20SABAH.mp3';
 var EZAN_SRC_GENEL = '/public/audio/ezan.mp3';
 
 function _getEzanSrc(vakit) {
@@ -9665,13 +9770,14 @@ function playEzanVakit(vakit, forcePlay) {
   audio.volume = volEl ? (parseFloat(volEl.value) || 0.8) : 0.8;
 
   var src;
-  // S1 = sabah.mp3 (özel sabah ezanı 1), S2 = azan11.mp3 (özel sabah ezanı 2)
-  if (String(ezanNum) === 'S1' || (vakit === 'sabah' && ezanNum === 1)) {
-    src = '/public/audio/sabah.mp3';
-  } else if (String(ezanNum) === 'S2') {
-    src = '/public/audio/azan11.mp3';
+  // 1 = ezan.mp3 (genel), 2 = Ezan SABAH.mp3 (sabah özel), 3 = Alafasy EZAN - EZAN DUASI.mp3
+  // S1 geriye dönük uyumluluk: sabah ezanı
+  if (String(ezanNum) === 'S1' || ezanNum === 2 || (vakit === 'sabah' && ezanNum === 1)) {
+    src = '/public/audio/Ezan%20SABAH.mp3';
+  } else if (String(ezanNum) === 'S2' || ezanNum === 3) {
+    src = '/public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3';
   } else {
-    src = '/public/audio/azan' + Math.max(1, Math.min(21, ezanNum)) + '.mp3';
+    src = '/public/audio/ezan.mp3';
   }
   audio.src = src;
   audio.load();
@@ -11195,7 +11301,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌅 Sabah</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-sabah" onchange="saveEzanSettings('sabah')"><option value="0">🔇 Kapalı</option><option value="S1">🌅 Sabah Özel 1 (Sabah.mp3)</option><option value="S2">🌅 Sabah Özel 2 (Hicaz)</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-sabah" onchange="saveEzanSettings('sabah')"><option value="0">🔇 Kapalı</option><option value="1">🕌 Ezan (Genel)</option><option value="2">🌅 Sabah Ezanı (Özel)</option><option value="3">🎙️ Alafasy — Ezan Duası</option></select>
           <select id="notif-sabah" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -11206,7 +11312,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">☀️ Öğle</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-ogle" onchange="saveEzanSettings('ogle')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-ogle" onchange="saveEzanSettings('ogle')"><option value="0">🔇 Kapalı</option><option value="1">🕌 Ezan (Genel)</option><option value="2">🌅 Sabah Ezanı (Özel)</option><option value="3">🎙️ Alafasy — Ezan Duası</option></select>
           <select id="notif-ogle" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -11217,7 +11323,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌤️ İkindi</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-ikindi" onchange="saveEzanSettings('ikindi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-ikindi" onchange="saveEzanSettings('ikindi')"><option value="0">🔇 Kapalı</option><option value="1">🕌 Ezan (Genel)</option><option value="2">🌅 Sabah Ezanı (Özel)</option><option value="3">🎙️ Alafasy — Ezan Duası</option></select>
           <select id="notif-ikindi" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -11228,7 +11334,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌆 Akşam</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-aksam" onchange="saveEzanSettings('aksam')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-aksam" onchange="saveEzanSettings('aksam')"><option value="0">🔇 Kapalı</option><option value="1">🕌 Ezan (Genel)</option><option value="2">🌅 Sabah Ezanı (Özel)</option><option value="3">🎙️ Alafasy — Ezan Duası</option></select>
           <select id="notif-aksam" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
@@ -11239,7 +11345,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
         <div class="ezan-vakit-row">
           <span class="ezan-vakit-label">🌙 Yatsı</span>
-          <select class="reciter-sel ezan-vakit-select" id="ezan-yatsi" onchange="saveEzanSettings('yatsi')"><option value="0">🔇 Kapalı</option><option value="1">Ezan 1 — Klasik</option><option value="2">Ezan 2 — Güzel Ses</option><option value="3">Ezan 3 — Muhteşem</option><option value="4">Ezan 4 — Sabah Özel</option><option value="5">Ezan 5 — Akşam Özel</option><option value="6">Ezan 6 — Mekke Tarzı</option><option value="7">Ezan 7 — Hüzünlü</option><option value="8">Ezan 8 — Rast Makamı</option><option value="9">Ezan 9 — Uşak Makamı</option><option value="10">Ezan 10 — Sabâ Makamı</option><option value="11">Ezan 11 — Hicaz Makamı</option><option value="12">Ezan 12 — Segah Makamı</option><option value="13">Ezan 13 — Nihavent</option><option value="14">Ezan 14 — Çargah Makamı</option><option value="15">Ezan 15 — Kürdi Makamı</option><option value="16">Ezan 16 — Saba Zemzeme</option><option value="17">Ezan 17 — Türk Ezanı</option><option value="18">Ezan 18 — Mısır Tarzı</option><option value="19">Ezan 19 — Hicaz Zemin</option><option value="20">Ezan 20 — Çift Ezan</option><option value="21">Ezan 21 — Özel</option></select>
+          <select class="reciter-sel ezan-vakit-select" id="ezan-yatsi" onchange="saveEzanSettings('yatsi')"><option value="0">🔇 Kapalı</option><option value="1">🕌 Ezan (Genel)</option><option value="2">🌅 Sabah Ezanı (Özel)</option><option value="3">🎙️ Alafasy — Ezan Duası</option></select>
           <select id="notif-yatsi" class="ezan-notif-select" onchange="saveEzanSettings()"><option value="0">⏰ Vaktinde</option>
 <option value="5">5 dk önce</option>
 <option value="10">10 dk önce</option>
