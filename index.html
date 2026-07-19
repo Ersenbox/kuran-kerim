@@ -9464,9 +9464,9 @@ function setSpeed(s) {
 // Ezan sesleri: Mishary Alafasy - evrensel İslami ezan
 // ── EZAN SESLERİ — yerel dosya + CDN fallback ──
 var EZAN_LOCAL = [
-  ['audio/ezan.mp3','public/audio/ezan.mp3'],
-  ['audio/Ezan%20SABAH.mp3','public/audio/Ezan%20SABAH.mp3'],
-  ['audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3','public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3']
+  ['public/audio/ezan.mp3','audio/ezan.mp3'],
+  ['public/audio/Ezan%20SABAH.mp3','audio/Ezan%20SABAH.mp3'],
+  ['public/audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3','audio/Alafasy%20EZAN%20-%20EZAN%20DUASI.mp3']
 ];
 var EZAN_CDN = [
   'https://cdn.aladhan.com/audio/adhans/a4.mp3',
@@ -9479,17 +9479,26 @@ function getEzanUrl(n) {
   else if(String(n) === '3') idx = 2;
   return EZAN_CDN[idx];
 }
-function loadEzanWithFallback(audio, ezanIdx) {
+function loadEzanWithFallback(audio, ezanIdx, onReady) {
   var locals = EZAN_LOCAL[ezanIdx] || EZAN_LOCAL[0];
   var cdn = EZAN_CDN[ezanIdx] || EZAN_CDN[0];
-  audio.src = locals[0];
-  audio.onerror = function() {
-    audio.onerror = function() {
+  var sources = [locals[0], locals[1], cdn];
+  var attempt = 0;
+  function tryNext() {
+    if (attempt >= sources.length) {
+      if (onReady) onReady(false);
+      return;
+    }
+    audio.onerror = function() { attempt++; tryNext(); };
+    audio.oncanplaythrough = function() {
       audio.onerror = null;
-      audio.src = cdn;
+      audio.oncanplaythrough = null;
+      if (onReady) onReady(true);
     };
-    audio.src = locals[1];
-  };
+    audio.src = sources[attempt];
+    audio.load();
+  }
+  tryNext();
 }
 
 // Ezan ayarlarını kaydet
@@ -9659,14 +9668,15 @@ function saveEzanSettings(changedVakit) {
         var prevIdx = 0;
         if (String(n2) === 'S1' || n2 === 2 || (changedVakit === 'sabah' && n2 === 1)) { prevIdx = 1; }
         else if (String(n2) === 'S2' || n2 === 3) { prevIdx = 2; }
-        loadEzanWithFallback(audio2, prevIdx);
         audio2.volume = parseFloat(s.vol) || 0.8;
-        audio2.load();
-        audio2.play().then(function() {
-          toast('🔊 Önizleme çalıyor (5 sn)...');
-          setTimeout(function() { try { audio2.pause(); audio2.currentTime = 0; } catch(e) {} }, 5000);
-        }).catch(function(e) {
-          toast('⚠️ Önizleme çalınamadı: ' + e.message);
+        loadEzanWithFallback(audio2, prevIdx, function(ok) {
+          if (!ok) { toast('⚠️ Önizleme dosyası yüklenemedi'); return; }
+          audio2.play().then(function() {
+            toast('🔊 Önizleme çalıyor (5 sn)...');
+            setTimeout(function() { try { audio2.pause(); audio2.currentTime = 0; } catch(e) {} }, 5000);
+          }).catch(function(e) {
+            toast('⚠️ Önizleme çalınamadı: ' + e.message);
+          });
         });
       }
     }
@@ -9781,9 +9791,11 @@ function playDuaTTS(key){
   // (c) Önce gerçek MP3 dene (/public/audio/dua-<key>.mp3), yoksa TTS'e düş
   var fell=false; function fb(){ if(fell) return; fell=true; _speakDua(key); }
   try {
-    var a=new Audio('audio/dua-'+key+'.mp3');
-    a.onerror=function(){a.src='public/audio/dua-'+key+'.mp3';};
-    a.onerror=fb;
+    var a=new Audio('public/audio/dua-'+key+'.mp3');
+    a.onerror=function(){
+      a.onerror=fb;
+      a.src='audio/dua-'+key+'.mp3';
+    };
     var p=a.play();
     if(p && p.catch) p.catch(fb);
   } catch(e){ fb(); }
@@ -9868,21 +9880,24 @@ function playEzanVakit(vakit, forcePlay) {
   var ezanIdx = 0;
   if (String(ezanNum) === 'S1' || ezanNum === 2 || (vakit === 'sabah' && ezanNum === 1)) { ezanIdx = 1; }
   else if (String(ezanNum) === 'S2' || ezanNum === 3) { ezanIdx = 2; }
-  loadEzanWithFallback(audio, ezanIdx);
-  audio.load();
-
   var vakit_tr = {sabah:'Sabah', ogle:'Öğle', ikindi:'İkindi', aksam:'Akşam', yatsi:'Yatsı'};
 
-  audio.play().then(function() {
-    toast('🔊 ' + (vakit_tr[vakit] || vakit) + ' Ezanı çalıyor...');
-    _resetCalButtons();
-    _playingVakit = vakit;
-    var btn = document.querySelector('.ezan-cal-btn[onclick*="' + vakit + '"]');
-    if (btn) { btn.classList.add('playing'); btn.textContent = '⏹ Durdur'; }
-    showDua('ezanZikri', true); // EKLE 1: ezan sırasında okunan zikir
-  }).catch(function(e) {
-    toast('⚠️ Ezan çalınamadı. Sayfayla etkileşime geçtikten sonra tekrar deneyin.');
-    console.warn('Ezan oynatma hatası:', e);
+  loadEzanWithFallback(audio, ezanIdx, function(ok) {
+    if (!ok) {
+      toast('⚠️ Ezan dosyası yüklenemedi. İnternet bağlantınızı kontrol edin.');
+      return;
+    }
+    audio.play().then(function() {
+      toast('🔊 ' + (vakit_tr[vakit] || vakit) + ' Ezanı çalıyor...');
+      _resetCalButtons();
+      _playingVakit = vakit;
+      var btn = document.querySelector('.ezan-cal-btn[onclick*="' + vakit + '"]');
+      if (btn) { btn.classList.add('playing'); btn.textContent = '⏹ Durdur'; }
+      showDua('ezanZikri', true); // EKLE 1: ezan sırasında okunan zikir
+    }).catch(function(e) {
+      toast('⚠️ Ezan çalınamadı. Sayfayla etkileşime geçtikten sonra tekrar deneyin.');
+      console.warn('Ezan oynatma hatası:', e);
+    });
   });
 }
 
