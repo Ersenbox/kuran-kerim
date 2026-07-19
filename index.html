@@ -487,36 +487,110 @@ body::before {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 10px;
 }
-/* ── SECDE AYETİ BADGE ── */
+/* ── SECDE AYETİ BADGE (Altın İslami Stempel) ── */
 .secde-badge {
-  display:inline-flex;align-items:center;gap:3px;
-  background:linear-gradient(135deg,#d4a017,#b8860b);
-  color:#fff;font-size:9px;font-weight:800;
-  padding:2px 7px;border-radius:10px;
-  letter-spacing:0.04em;
-  box-shadow:0 1px 4px rgba(212,160,23,0.4);
+  display:inline-flex;align-items:center;gap:4px;
+  background:linear-gradient(135deg,#f5d060,#d4a017,#b8860b,#d4a017);
+  color:#3a2400;font-size:10px;font-weight:900;
+  padding:3px 10px;border-radius:12px;
+  letter-spacing:0.06em;
+  box-shadow:0 2px 8px rgba(212,160,23,0.55), inset 0 1px 0 rgba(255,255,255,0.35);
   white-space:nowrap;
+  border:1.5px solid rgba(255,215,0,0.6);
+  text-shadow:0 1px 0 rgba(255,255,255,0.3);
+  animation: secdeGlow 2.5s ease-in-out infinite alternate;
+}
+@keyframes secdeGlow {
+  0% { box-shadow:0 2px 8px rgba(212,160,23,0.55), inset 0 1px 0 rgba(255,255,255,0.35); }
+  100% { box-shadow:0 2px 14px rgba(255,215,0,0.7), inset 0 1px 0 rgba(255,255,255,0.35); }
 }
 .secde-badge-juz {
-  display:inline-flex;align-items:center;gap:2px;
-  background:linear-gradient(135deg,#d4a017,#b8860b);
-  color:#fff;font-size:8px;font-weight:800;
-  padding:1px 5px;border-radius:8px;
-  margin-left:3px;
-  box-shadow:0 1px 3px rgba(212,160,23,0.35);
+  display:inline-flex;align-items:center;gap:3px;
+  background:linear-gradient(135deg,#f5d060,#d4a017,#b8860b);
+  color:#3a2400;font-size:9px;font-weight:900;
+  padding:2px 7px;border-radius:10px;
+  margin-left:4px;
+  box-shadow:0 2px 6px rgba(212,160,23,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+  border:1px solid rgba(255,215,0,0.5);
+  text-shadow:0 1px 0 rgba(255,255,255,0.25);
 }
 .secde-ayah-box {
-  margin:8px 0 4px;padding:12px 14px;
-  background:linear-gradient(135deg,rgba(212,160,23,0.12),rgba(184,134,11,0.06));
-  border:2px solid rgba(212,160,23,0.5);
-  border-radius:14px;
-  border-left:4px solid #d4a017;
+  margin:12px 0 6px;padding:16px 18px;
+  background:linear-gradient(135deg,rgba(245,208,96,0.14),rgba(212,160,23,0.08),rgba(184,134,11,0.05));
+  border:2px solid rgba(255,215,0,0.45);
+  border-radius:16px;
+  border-left:5px solid #d4a017;
+  box-shadow:0 4px 20px rgba(212,160,23,0.15);
+  position:relative;
+  overflow:hidden;
+}
+.secde-ayah-box::before {
+  content:'۩';position:absolute;top:-10px;right:10px;
+  font-size:60px;opacity:0.06;color:#d4a017;
+  font-family:'Amiri',serif;pointer-events:none;
 }
 .secde-ayah-box .secde-title {
-  font-size:13px;font-weight:800;color:#d4a017;margin-bottom:6px;
+  font-size:14px;font-weight:900;color:#d4a017;margin-bottom:8px;
+  text-shadow:0 1px 2px rgba(0,0,0,0.15);
 }
 .secde-ayah-box .secde-desc {
-  font-size:12px;line-height:1.7;color:var(--text2);
+  font-size:12.5px;line-height:1.8;color:var(--text2);
+}
+/* ── 14 SECDE AYETİ ALTIN KUTU ── */
+.secde-info-golden {
+  margin:14px 0;padding:18px;
+  background:linear-gradient(135deg,rgba(245,208,96,0.12),rgba(212,160,23,0.07));
+  border:2px solid rgba(255,215,0,0.4);
+  border-radius:18px;
+  box-shadow:0 4px 24px rgba(212,160,23,0.18);
+  position:relative;overflow:hidden;
+}
+.secde-info-golden::before {
+  content:'۩';position:absolute;top:-15px;right:15px;
+  font-size:80px;opacity:0.05;color:#d4a017;
+  font-family:'Amiri',serif;pointer-events:none;
+}
+.secde-info-golden .sib-title {
+  font-size:16px;font-weight:900;color:#d4a017;
+  margin-bottom:12px;text-align:center;
+  text-shadow:0 1px 2px rgba(0,0,0,0.12);
+}
+.secde-info-golden .sib-list {
+  display:flex;flex-direction:column;gap:6px;
+}
+.secde-info-golden .sib-item {
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;
+  background:linear-gradient(135deg,rgba(212,160,23,0.1),rgba(184,134,11,0.04));
+  border:1px solid rgba(255,215,0,0.25);
+  border-radius:12px;
+  cursor:pointer;transition:all 0.2s;
+  font-size:13px;font-weight:600;color:var(--text);
+}
+.secde-info-golden .sib-item:hover {
+  background:linear-gradient(135deg,rgba(212,160,23,0.2),rgba(184,134,11,0.1));
+  border-color:rgba(255,215,0,0.5);
+  transform:translateX(3px);
+}
+.secde-info-golden .sib-item .sib-num {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;
+  background:linear-gradient(135deg,#d4a017,#b8860b);
+  color:#fff;font-size:11px;font-weight:900;
+  border-radius:50%;flex-shrink:0;
+}
+/* ── TİLAVET SECDESİ NASIL YAPILIR KUTU ── */
+.tilavet-howto-box {
+  margin:0 0 14px;padding:16px 18px;
+  background:linear-gradient(135deg,rgba(245,208,96,0.08),rgba(212,160,23,0.04));
+  border:1.5px solid rgba(255,215,0,0.3);
+  border-radius:16px;border-left:4px solid #d4a017;
+}
+.tilavet-howto-box .thb-title {
+  font-size:14px;font-weight:900;color:#d4a017;margin-bottom:8px;
+}
+.tilavet-howto-box .thb-text {
+  font-size:12.5px;line-height:1.85;color:var(--text2);
 }
 .surah-card {
   background: var(--card);
@@ -2327,6 +2401,22 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
     <details style="margin:10px 0;border:1px solid var(--border2);border-radius:14px;background:var(--bg);padding:4px 12px">
       <summary style="cursor:pointer;font-weight:700;font-size:14px;padding:9px 0;list-style:none">📖 Kur'an Duaları <span style="opacity:.6;font-size:12px;font-weight:400">(başlarken / bitince — dokun-aç)</span></summary>
       <div id="kuranDuaInline" style="padding-bottom:6px"></div>
+    </details>
+    <!-- ══ EKLE 2: 14 SECDE AYETİ ALTIN KUTUSU ══ -->
+    <details style="margin:10px 0" id="secdeInfoDetails">
+      <summary style="cursor:pointer;list-style:none;margin:0;padding:0">
+        <div class="secde-info-golden" style="margin:0;cursor:pointer">
+          <div class="sib-title">۩ Kur'an'da 14 Secde Ayeti <span style="font-size:11px;opacity:.6;font-weight:400">(Hanefi — dokun-aç)</span></div>
+        </div>
+      </summary>
+      <div class="secde-info-golden" style="margin-top:-2px;border-top:none;border-top-left-radius:0;border-top-right-radius:0">
+        <div class="sib-list" id="secdeInfoList"></div>
+      </div>
+      <!-- ══ EKLE 4: TİLAVET SECDESİ NASIL YAPILIR ══ -->
+      <div class="tilavet-howto-box" style="margin-top:8px">
+        <div class="thb-title">🕌 Tilavet Secdesi Nasıl Yapılır?</div>
+        <div class="thb-text">Kur'an-ı Kerim'de secde ayeti okunduğunda veya işitildiğinde abdestli, temiz ve kıbleye dönük şekilde <i>"Niyet ettim Allah rızası için tilavet secdesi yapmaya"</i> diye niyet edilir. Eller kaldırılmadan tekbir getirilip secdeye varılır; 3 defa <b>Sübhâne Rabbiye'l-a'lâ</b> denir. Tekrar tekbirle ayağa kalkılırken <b>Gufrâneke rabbenâ ve ileyke'l-masîr</b> duası okunur.</div>
+      </div>
     </details>
     <div class="view-toggle">
       <button class="vt-btn active" id="vt-sure" onclick="setView('sure')">📖 Sureler</button>
@@ -5995,7 +6085,11 @@ function surahMenuMobile(n){
 /* Sure sayfasından geri dönünce o sureye scroll yap */
 function goBackToSurahList(){
   var lastSurah = (surahData && surahData.n) || 1;
+  // Sayfayı göster
   showPage('home');
+  // Bottom nav'ı güncelle
+  if(typeof updateBNav === 'function') updateBNav('home');
+  // Scroll to last surah
   setTimeout(function(){
     var card = document.querySelector('.surah-card[data-surah="'+lastSurah+'"]');
     if(!card){
@@ -6197,7 +6291,7 @@ function renderAyahs() {
         <div class="ay-tafsir-label" id="tafsirLabel${i}">${t.ay_tafsir_label||'📖 Meal / Tercüme'}</div>
         <div class="ay-tafsir show" id="tafsir${i}">${t.ay_loading||'Yükleniyor...'}</div>
       </div>
-      ${isSecdeAyah(surahData.n, a.numberInSurah) ? '<div class="secde-ayah-box"><div class="secde-title">۩ SECDE AYETİ — TİLAVET SECDESİ</div><div class="secde-desc"><b>Bu ayeti okuyan veya dinleyen kişi tilavet secdesi yapar.</b><br><br>📋 <b>Nasıl yapılır:</b><br>1️⃣ Kıbleye dön ve niyet et: <i>"Tilavet secdesi yapmaya niyet ettim."</i><br>2️⃣ "Allahu Ekber" diyerek secdeye git.<br>3️⃣ Secdede 3 kere <b>"Sübhâne Rabbiye\'l-A\'lâ"</b> de.<br>4️⃣ "Allahu Ekber" diyerek kalk. Selâm gerekmez.<br><br>⚠️ <b>Not:</b> Hanefi mezhebine göre tilavet secdesi vâciptir. Diğer mezheplerde sünnettir. Abdestli olmak gerekir.</div></div>' : ''}
+      ${isSecdeAyah(surahData.n, a.numberInSurah) ? '<div class="secde-ayah-box"><div class="secde-title">۩ SECDE AYETİ — TİLAVET SECDESİ</div><div class="secde-desc"><b>Bu bir secde ayetidir.</b><br><br>Kur\\u0027an-ı Kerim\\u0027de secde ayeti okunduğunda veya işitildiğinde abdestli, temiz ve kıbleye dönük şekilde <i>"Niyet ettim Allah rızası için tilavet secdesi yapmaya"</i> diye niyet edilir. Eller kaldırılmadan tekbir getirilip secdeye varılır; 3 defa <b>Sübhâne Rabbiye\\u0027l-a\\u0027lâ</b> denir. Tekrar tekbirle ayağa kalkılırken <b>Gufrâneke rabbenâ ve ileyke\\u0027l-masîr</b> duası okunur.<br><br>⚠️ <b>Not:</b> Hanefi mezhebine göre tilavet secdesi vâciptir. Diğer mezheplerde sünnettir. Abdestli olmak gerekir.</div></div>' : ''}
       <div class="ay-actions">
         <button class="ay-btn ay-play-btn" id="ayPlayBtn${i}" onclick="event.stopPropagation();toggleAyahPlay(${i})">▶ Dinle</button>
         <button class="ay-btn ay-stop-btn" id="ayStopBtn${i}" onclick="event.stopPropagation();stopAyahPlay(${i})" style="display:none;border-color:rgba(239,83,80,0.5);color:#ef5350">⏹ Dur</button>
@@ -9717,6 +9811,16 @@ function renderInlineDuas(){
   }
   var e=document.getElementById('ezanDuaInline'); if(e) e.innerHTML=mk('ezanZikri')+mk('ezanDuasi');
   var k=document.getElementById('kuranDuaInline'); if(k) k.innerHTML=mk('kuranBasla')+mk('kuranSalavat');
+  // ── 14 Secde Ayeti listesini doldur ──
+  var sl=document.getElementById('secdeInfoList');
+  if(sl && typeof SECDE_AYETLERI!=='undefined'){
+    sl.innerHTML=SECDE_AYETLERI.map(function(s,i){
+      return '<div class="sib-item" onclick="openSurah('+s.sure+')">'+
+        '<span class="sib-num">'+(i+1)+'</span>'+
+        '<span>'+s.isim+' ('+s.sure+') — Ayet '+s.ayet+'</span>'+
+        '</div>';
+    }).join('');
+  }
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', renderInlineDuas);
 else renderInlineDuas();
@@ -10729,6 +10833,10 @@ function toggleMore() {
 }
 // showPage override — hem header hem bottom nav sync
 const _origShow = showPage;
+showPage = function(p) {
+  _origShow(p);
+  if(typeof updateBNav === 'function') updateBNav(p);
+};
 
 // ── TOAST ──
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
