@@ -3096,6 +3096,8 @@ window.onload = () => {
 
   // Kayıtlı ezan ayarlarını yükle (DOM hazır olduktan sonra)
   setTimeout(loadEzanSettings, 100);
+  // Push bildirim abonelik durumunu kontrol et
+  setTimeout(function(){ if(typeof checkPushSubscription==='function') checkPushSubscription(); }, 500);
 
   // Kayıtlı hesaplama metodunu select'e yansıt
   setTimeout(function() {
@@ -9527,6 +9529,161 @@ async function requestEzanNotif() {
   return _ezanNotifGranted;
 }
 
+// ══════════════════════════════════════════════════════
+// PUSH BİLDİRİM SİSTEMİ — App Kapalıyken Ezan Bildirimi
+// Cloudflare Worker + KV + VAPID (Web Push)
+// ══════════════════════════════════════════════════════
+
+var EZAN_PUSH_API = 'https://kuran-kerim-push.SENIN_SUBDOMAIN.workers.dev';
+var VAPID_PUBLIC_KEY = 'BJ4bArRijtI0yPF_Cas_Yk279KgbmKOMMXSR4PwsS-NpB2OeUafmu_fcuT9vsPCPVQHhxZgpkfr2Xl_a_QX8GSQ';
+
+function urlBase64ToUint8Array_push(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var raw = atob(base64);
+  var arr = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+var _pushSubscription = null;
+
+async function togglePushSubscription() {
+  var btn = document.getElementById('pushSubBtn');
+  if (!btn) return;
+
+  // Zaten abone mi?
+  if (_pushSubscription) {
+    // Aboneliği iptal et
+    try {
+      await fetch(EZAN_PUSH_API + '/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: _pushSubscription.endpoint })
+      });
+      await _pushSubscription.unsubscribe();
+    } catch(e) {}
+    _pushSubscription = null;
+    localStorage.removeItem('pushSubscribed');
+    btn.textContent = '🔔 Push Bildirim Aç (App Kapalıyken)';
+    btn.style.background = 'linear-gradient(135deg,#1b5e20,#2e7d32)';
+    toast('🔕 Push bildirim iptal edildi');
+    return;
+  }
+
+  // Yeni abonelik
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    toast('⚠️ Bu tarayıcı push bildirimleri desteklemiyor');
+    return;
+  }
+
+  try {
+    // Bildirim izni
+    var perm = await Notification.requestPermission();
+    if (perm !== 'granted') {
+      toast('❌ Bildirim izni reddedildi');
+      return;
+    }
+
+    // SW registration al
+    var reg = await navigator.serviceWorker.ready;
+
+    // Push subscribe
+    var sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array_push(VAPID_PUBLIC_KEY)
+    });
+
+    _pushSubscription = sub;
+
+    // Konum ve ayarları topla
+    var lat = parseFloat(localStorage.getItem('savedLat'));
+    var lng = parseFloat(localStorage.getItem('savedLng'));
+    var city = localStorage.getItem('savedCity') || '';
+    var method = localStorage.getItem('prayerMethod') || '13';
+    var ezanS = {};
+    try { ezanS = JSON.parse(localStorage.getItem('ezanSettings') || '{}'); } catch(e){}
+
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+      toast('⚠️ Önce konumunu belirle (konum izni ver veya şehir ara)');
+      try { await sub.unsubscribe(); } catch(e){}
+      _pushSubscription = null;
+      return;
+    }
+
+    // Worker'a gönder
+    var resp = await fetch(EZAN_PUSH_API + '/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: sub.toJSON(),
+        lat: lat,
+        lng: lng,
+        city: city,
+        method: method,
+        ezanSettings: ezanS,
+        timezone: -(new Date().getTimezoneOffset() / 60)
+      })
+    });
+
+    if (!resp.ok) throw new Error('Worker yanıt vermedi');
+
+    localStorage.setItem('pushSubscribed', '1');
+    btn.textContent = '🔔 Push Bildirim Açık ✓ (iptal et)';
+    btn.style.background = '#16a34a';
+    toast('🔔 Push bildirim aktif! App kapalıyken bile ezan bildirimi gelecek.');
+
+  } catch(e) {
+    toast('⚠️ Push abonelik hatası: ' + e.message);
+    console.error('Push subscribe error:', e);
+  }
+}
+
+// Sayfa açılınca mevcut aboneliği kontrol et
+async function checkPushSubscription() {
+  var btn = document.getElementById('pushSubBtn');
+  if (!btn) return;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    btn.textContent = '⚠️ Push desteklenmiyor';
+    btn.style.opacity = '0.5';
+    btn.disabled = true;
+    return;
+  }
+  try {
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      _pushSubscription = sub;
+      btn.textContent = '🔔 Push Bildirim Açık ✓ (iptal et)';
+      btn.style.background = '#16a34a';
+    }
+  } catch(e) {}
+}
+
+// Ezan ayarları değişince Worker'ı da güncelle
+function syncPushSettings() {
+  if (!_pushSubscription) return;
+  var lat = parseFloat(localStorage.getItem('savedLat'));
+  var lng = parseFloat(localStorage.getItem('savedLng'));
+  var city = localStorage.getItem('savedCity') || '';
+  var method = localStorage.getItem('prayerMethod') || '13';
+  var ezanS = {};
+  try { ezanS = JSON.parse(localStorage.getItem('ezanSettings') || '{}'); } catch(e){}
+
+  fetch(EZAN_PUSH_API + '/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      subscription: _pushSubscription.toJSON(),
+      lat: lat, lng: lng, city: city,
+      method: method, ezanSettings: ezanS,
+      timezone: -(new Date().getTimezoneOffset() / 60)
+    })
+  }).catch(function(e){ console.warn('Push sync error:', e); });
+}
+
+// ══════════════════════════════════════════════════════
+
 function ezanFiredKey(dateObj,vakit,offMin){
   var ds=dateObj.getFullYear()+'-'+(dateObj.getMonth()+1)+'-'+dateObj.getDate();
   return 'kuran_ezan_fired_'+ds+'_'+vakit+'_'+offMin;
@@ -9657,6 +9814,8 @@ function saveEzanSettings(changedVakit) {
     notif_yatsi:  document.getElementById('notif-yatsi')?.value  || '0',
   };
   try { localStorage.setItem('ezanSettings', JSON.stringify(s)); } catch(e) {}
+  // Push ayarlarını da senkronize et
+  if (typeof syncPushSettings === 'function') syncPushSettings();
   // Ezan seçimi değişince kısa önizleme çal (5 sn)
   if (changedVakit) {
     var selEl2 = document.getElementById('ezan-' + changedVakit);
@@ -11447,13 +11606,19 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
       </div>
 
-      <!-- BİLDİRİM İZİN BUTONU -->
+      <!-- BİLDİRİM İZİN BUTONU (yerel — app açıkken) -->
       <div style="margin-bottom:10px">
         <button id="notifPermBtn" onclick="requestEzanNotif().then(ok=>{loadEzanSettings();if(ok)toast('🔔 Bildirim izni verildi — Vakitler otomatik bildirilecek');else toast('❌ Bildirim izni reddedildi')})" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">
           🔔 Bildirim İzni Ver (Otomatik Ezan)
         </button>
+      </div>
+      <!-- PUSH BİLDİRİM BUTONU (app kapalıyken) -->
+      <div style="margin-bottom:10px">
+        <button id="pushSubBtn" onclick="togglePushSubscription()" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--border2);background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px">
+          🔔 Push Bildirim Aç (App Kapalıyken)
+        </button>
         <div style="font-size:11px;color:var(--text4);margin-top:4px;text-align:center">
-          Uygulama <b>açıkken</b> vakit gelince otomatik bildirim + ezan çalar. Telefon kilitliyken / uygulama kapalıyken (örn. gece Sabah ezanı) çalması, web uygulamalarında mümkün değildir — bunun için mağazadan kurulan (native) sürüm gerekir.
+          App kapalıyken bile vakit gelince telefonuna bildirim gelir. İnternet bağlantısı gerekir.
         </div>
       </div>
       <button class="ezan-btn ezan-stop" onclick="stopEzan()" style="width:100%">⏹ Durdur</button>

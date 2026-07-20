@@ -3,8 +3,8 @@
 // Cache version güncellendi → eski cache temizlenir
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'kuran-v46';
-const CACHE_VERSION = '2026-06-22-v46';
+const CACHE_NAME = 'kuran-v47';
+const CACHE_VERSION = '2026-07-20-v47';
 
 // Cache'lenecek dosyalar
 const CACHE_FILES = [
@@ -47,13 +47,13 @@ const CACHE_FILES = [
 
 // ── INSTALL: Yeni cache kur ──
 self.addEventListener('install', event => {
-  console.log('[SW v46] Installing...');
+  console.log('[SW v47] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // Promise.allSettled: tek MP3 hata verse de diğerleri cache'lenir
       return Promise.allSettled(
         CACHE_FILES.map(url => cache.add(url).catch(err => {
-          console.warn('[SW v46] Cache skip:', url, err.message);
+          console.warn('[SW v47] Cache skip:', url, err.message);
         }))
       );
     })
@@ -64,19 +64,19 @@ self.addEventListener('install', event => {
 
 // ── ACTIVATE: ESKİ CACHE'LERİ TEMİZLE ──
 self.addEventListener('activate', event => {
-  console.log('[SW v46] Activating — clearing old caches...');
+  console.log('[SW v47] Activating — clearing old caches...');
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys
           .filter(key => key !== CACHE_NAME)
           .map(key => {
-            console.log('[SW v46] Deleting old cache:', key);
+            console.log('[SW v47] Deleting old cache:', key);
             return caches.delete(key);
           })
       );
     }).then(() => {
-      console.log('[SW v46] Old caches cleared');
+      console.log('[SW v47] Old caches cleared');
       // Tüm açık sekmeleri hemen güncelle
       return self.clients.claim();
     })
@@ -133,6 +133,55 @@ self.addEventListener('fetch', event => {
   );
 });
 
+// ── PUSH: Sunucudan gelen push bildirimlerini göster ──
+self.addEventListener('push', event => {
+  console.log('[SW v47] Push received');
+  let data = { title: '🕌 Ezan Vakti', body: 'Namaz vakti girdi!' };
+  try {
+    if (event.data) data = event.data.json();
+  } catch (e) {
+    console.warn('[SW v47] Push parse error:', e);
+  }
+
+  const options = {
+    body: data.body || 'Kuran-ı Kerim uygulaması',
+    icon: data.icon || '/icons/icon-192.png',
+    badge: '/icons/icon-96.png',
+    tag: data.tag || 'ezan-push',
+    requireInteraction: true,
+    vibrate: [200, 100, 200, 100, 200],
+    data: {
+      url: data.url || '/',
+      vakit: data.vakit || ''
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || '🕌 Ezan Vakti', options)
+  );
+});
+
+// ── NOTIFICATION CLICK: Bildirime tıklayınca uygulamayı aç ──
+self.addEventListener('notificationclick', event => {
+  console.log('[SW v47] Notification clicked:', event.notification.tag);
+  event.notification.close();
+
+  const urlToOpen = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // Zaten açık bir pencere varsa ona odaklan
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Yoksa yeni pencere aç
+      return clients.openWindow(urlToOpen);
+    })
+  );
+});
+
 // ── MESAJ: Manuel cache temizle ──
 self.addEventListener('message', event => {
   if (event.data === 'SKIP_WAITING') {
@@ -142,6 +191,6 @@ self.addEventListener('message', event => {
     caches.keys().then(keys => {
       keys.forEach(key => caches.delete(key));
     });
-    console.log('[SW v46] All caches cleared by message');
+    console.log('[SW v47] All caches cleared by message');
   }
 });
