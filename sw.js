@@ -133,51 +133,86 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// ── PUSH: Sunucudan gelen push bildirimlerini göster ──
+// ── PUSH: Worker'dan veri çek + bildirim göster + app açıksa ezan çal ──
+var PUSH_API_URL = 'https://kuran-kerim-push.deindigitalerhelfer.workers.dev';
+
 self.addEventListener('push', event => {
   console.log('[SW v47] Push received');
-  let data = { title: '🕌 Ezan Vakti', body: 'Namaz vakti girdi!' };
-  try {
-    if (event.data) data = event.data.json();
-  } catch (e) {
-    console.warn('[SW v47] Push parse error:', e);
-  }
-
-  const options = {
-    body: data.body || 'Kuran-ı Kerim uygulaması',
-    icon: data.icon || '/icons/icon-192.png',
-    badge: '/icons/icon-96.png',
-    tag: data.tag || 'ezan-push',
-    requireInteraction: true,
-    vibrate: [200, 100, 200, 100, 200],
-    data: {
-      url: data.url || '/',
-      vakit: data.vakit || ''
-    }
-  };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || '🕌 Ezan Vakti', options)
+    (async () => {
+      let data = { title: '🕌 Ezan Vakti', body: 'Namaz vakti girdi!', vakit: '', tag: 'ezan-push' };
+
+      // Payload varsa kullan (gelecekte şifreli payload eklenirse)
+      try {
+        if (event.data) {
+          data = event.data.json();
+        }
+      } catch (e) {}
+
+      // Payload yoksa Worker'dan bildirim verisini çek
+      if (!event.data || !data.vakit) {
+        try {
+          var reg = self.registration;
+          var sub = await reg.pushManager.getSubscription();
+          if (sub) {
+            var resp = await fetch(PUSH_API_URL + '/notify-data?endpoint=' + encodeURIComponent(sub.endpoint));
+            if (resp.ok) {
+              var fetched = await resp.json();
+              if (fetched && fetched.title) data = fetched;
+            }
+          }
+        } catch (e) {
+          console.warn('[SW v47] notify-data fetch error:', e);
+        }
+      }
+
+      // Bildirim göster
+      await self.registration.showNotification(data.title || '🕌 Ezan Vakti', {
+        body: data.body || 'Kuran-ı Kerim uygulaması',
+        icon: data.icon || '/icons/icon-192.png',
+        badge: '/icons/icon-96.png',
+        tag: data.tag || 'ezan-push',
+        requireInteraction: true,
+        vibrate: [200, 100, 200, 100, 200],
+        data: {
+          url: data.url || '/',
+          vakit: data.vakit || ''
+        }
+      });
+
+      // App açıksa ezan çal mesajı gönder
+      var allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (var client of allClients) {
+        if (client.url.includes(self.location.origin)) {
+          client.postMessage({
+            type: 'EZAN_PUSH',
+            vakit: data.vakit || ''
+          });
+        }
+      }
+    })()
   );
 });
 
-// ── NOTIFICATION CLICK: Bildirime tıklayınca uygulamayı aç ──
+// ── NOTIFICATION CLICK: Bildirime tıklayınca uygulamayı aç + ezan çal ──
 self.addEventListener('notificationclick', event => {
   console.log('[SW v47] Notification clicked:', event.notification.tag);
+  var vakit = (event.notification.data && event.notification.data.vakit) || '';
   event.notification.close();
-
-  const urlToOpen = (event.notification.data && event.notification.data.url) || '/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-      // Zaten açık bir pencere varsa ona odaklan
-      for (const client of windowClients) {
+      // Zaten açık bir pencere varsa → ezan çal mesajı gönder + odaklan
+      for (var client of windowClients) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.postMessage({ type: 'EZAN_PUSH', vakit: vakit });
           return client.focus();
         }
       }
-      // Yoksa yeni pencere aç
-      return clients.openWindow(urlToOpen);
+      // Yoksa yeni pencere aç — URL'e vakit parametresi ekle
+      var openUrl = '/?playEzan=1' + (vakit ? '&vakit=' + vakit : '');
+      return clients.openWindow(openUrl);
     })
   );
 });

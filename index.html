@@ -9534,7 +9534,7 @@ async function requestEzanNotif() {
 // Cloudflare Worker + KV + VAPID (Web Push)
 // ══════════════════════════════════════════════════════
 
-var EZAN_PUSH_API = 'https://kuran-kerim-push.deindigitalerhelfer.workers.dev';
+var EZAN_PUSH_API = 'https://kuran-kerim-push.SENIN_SUBDOMAIN.workers.dev';
 var VAPID_PUBLIC_KEY = 'BJ4bArRijtI0yPF_Cas_Yk279KgbmKOMMXSR4PwsS-NpB2OeUafmu_fcuT9vsPCPVQHhxZgpkfr2Xl_a_QX8GSQ';
 
 function urlBase64ToUint8Array_push(base64String) {
@@ -12118,8 +12118,34 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('controllerchange', function() {
       window.location.reload();
     });
+
+    // ── SW'den gelen EZAN_PUSH mesajını dinle (app açıkken push gelirse ezan çal) ──
+    navigator.serviceWorker.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'EZAN_PUSH') {
+        console.log('[PWA] EZAN_PUSH received, vakit:', event.data.vakit);
+        if (typeof playEzan === 'function') {
+          playEzan(event.data.vakit || '');
+        }
+      }
+    });
   });
 }
+
+// ── Bildirime tıklayınca açılan URL'den ezan çal ──
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('playEzan') === '1') {
+    var vakit = params.get('vakit') || '';
+    // URL'i temizle (parametreleri kaldır)
+    window.history.replaceState({}, '', '/');
+    // Sayfa yüklendikten sonra ezan çal
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        if (typeof playEzan === 'function') playEzan(vakit);
+      }, 1500); // SW + DOM hazır olsun
+    });
+  }
+})();
 
 // ── Gerçek QR Üret (banner + modal için) ──
 function _buildQR(containerId, size) {
