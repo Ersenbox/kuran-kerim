@@ -410,40 +410,7 @@ body::before {
   padding: 40px 20px 28px;
   position: relative;
   z-index: 1;
-  overflow: hidden;
-  border-radius: 0 0 24px 24px;
-  min-height: 240px;
 }
-/* ── Hero Slider ── */
-.hero-slide {
-  position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 1.8s ease-in-out;
-  z-index: 0;
-}
-.hero-slide.active { opacity: 1; }
-.hero-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.6) 100%);
-  z-index: 1;
-}
-[data-theme="dark"] .hero-overlay {
-  background: linear-gradient(180deg, rgba(20,20,20,0.6) 0%, rgba(20,20,20,0.78) 50%, rgba(20,20,20,0.55) 100%);
-}
-/* Slider dots */
-.hero-dots {
-  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 6px; z-index: 3;
-}
-.hero-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--g1); opacity: 0.3;
-  border: none; padding: 0; cursor: pointer;
-  transition: opacity 0.3s, transform 0.3s;
-}
-.hero-dot.active { opacity: 0.9; transform: scale(1.35); }
 .bismillah {
   font-family: 'Scheherazade New', serif;
   font-size: clamp(28px, 5vw, 58px);
@@ -516,12 +483,12 @@ body::before {
 .page[style*="background-image"]::before {
   content: '';
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.82);
+  background: rgba(255,255,255,0.45);
   z-index: 0;
   pointer-events: none;
 }
 [data-theme="dark"] .page[style*="background-image"]::before {
-  background: rgba(18,18,30,0.85);
+  background: rgba(18,18,30,0.50);
 }
 .page[style*="background-image"] > * { position: relative; z-index: 1; }
 
@@ -2418,19 +2385,8 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 <!-- HOME -->
 <div class="page active" id="page-home" style="background-image:url('public/slider/s5.jpg')">
   <div class="hero">
-    <div class="hero-slide active" style="background-image:url('public/slider/s1.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s2.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s3.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s4.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s5.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s6.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s7.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s8.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s9.jpg')"></div>
-    <div class="hero-overlay"></div>
     <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
     <div class="hero-sub">Rahman ve Rahim olan Allah'ın adıyla</div>
-    <div class="hero-dots" id="heroDots"></div>
   </div>
   <div class="search-wrap">
     <input class="search-inp" id="homeQ" placeholder="Sure ara..." oninput="filterSurahs(this.value)" onfocus="homeSearchFocus()" onblur="setTimeout(homeSearchBlur,200)">
@@ -2881,32 +2837,6 @@ window.onload = () => {
   localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
 
   buildSurahGrid(buildSurahs()); buildEsma(); updateFavCount(); setupSearch(); renderTesbiSel(); updateTesbiUI(); renderDiniGunler(); setTimeout(initSurahFilters, 300);
-
-  // ── Hero Slider ──
-  (function(){
-    var slides = document.querySelectorAll('.hero-slide');
-    var dotsEl = document.getElementById('heroDots');
-    if(!slides.length) return;
-    var cur = 0, total = slides.length;
-    // Build dots
-    for(var i=0;i<total;i++){
-      var d = document.createElement('button');
-      d.className = 'hero-dot' + (i===0?' active':'');
-      d.setAttribute('aria-label','Slide '+(i+1));
-      d.dataset.idx = i;
-      d.onclick = function(){ goSlide(parseInt(this.dataset.idx)); };
-      dotsEl.appendChild(d);
-    }
-    var dots = dotsEl.querySelectorAll('.hero-dot');
-    function goSlide(n){
-      slides[cur].classList.remove('active');
-      dots[cur].classList.remove('active');
-      cur = n % total;
-      slides[cur].classList.add('active');
-      dots[cur].classList.add('active');
-    }
-    setInterval(function(){ goSlide(cur+1); }, 5500);
-  })();
 
   // Kayıtlı dil ve kıraat seçimini UI'ya yansıt
   const langSel = document.getElementById('langSel');
