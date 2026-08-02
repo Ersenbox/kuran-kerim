@@ -410,16 +410,54 @@ body::before {
   padding: 40px 20px 28px;
   position: relative;
   z-index: 1;
+  overflow: hidden;
+  border-radius: 0 0 24px 24px;
+  min-height: 160px;
 }
+/* ── Hero Slider ── */
+.hero-slide {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.8s ease-in-out;
+  z-index: 0;
+}
+.hero-slide.active { opacity: 1; }
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.6) 100%);
+  z-index: 1;
+}
+[data-theme="dark"] .hero-overlay {
+  background: linear-gradient(180deg, rgba(20,20,20,0.6) 0%, rgba(20,20,20,0.78) 50%, rgba(20,20,20,0.55) 100%);
+}
+/* Slider dots */
+.hero-dots {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 3;
+}
+.hero-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--g1); opacity: 0.3;
+  border: none; padding: 0; cursor: pointer;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.hero-dot.active { opacity: 0.9; transform: scale(1.35); }
 .bismillah {
   font-family: 'Scheherazade New', serif;
   font-size: clamp(28px, 5vw, 58px);
   line-height: 1.6;
   color: var(--g1);
-  text-shadow: 0 0 30px rgba(180,148,60,0.3);
+  text-shadow: 0 2px 16px rgba(0,0,0,0.18), 0 0 30px rgba(180,148,60,0.3);
   margin-bottom: 8px;
+  position: relative; z-index: 2;
 }
-.hero-sub { font-size: 14px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+.hero-sub {
+  font-size: 14px; color: var(--text3); letter-spacing: 0.1em;
+  text-transform: uppercase; font-weight: 600;
+  position: relative; z-index: 2;
+}
 
 /* ══════════════════════════════════════
    SEARCH
@@ -2360,8 +2398,19 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 <!-- HOME -->
 <div class="page active" id="page-home">
   <div class="hero">
+    <div class="hero-slide active" style="background-image:url('public/slider/s1.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s2.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s3.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s4.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s5.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s6.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s7.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s8.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('public/slider/s9.jpg')"></div>
+    <div class="hero-overlay"></div>
     <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
     <div class="hero-sub">Rahman ve Rahim olan Allah'ın adıyla</div>
+    <div class="hero-dots" id="heroDots"></div>
   </div>
   <div class="search-wrap">
     <input class="search-inp" id="homeQ" placeholder="Sure ara..." oninput="filterSurahs(this.value)" onfocus="homeSearchFocus()" onblur="setTimeout(homeSearchBlur,200)">
@@ -2369,36 +2418,6 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
   </div>
   <!-- Arama sonuçları — arama kutusunun hemen altında, günlük kartın üstünde -->
   <div id="homeSearchResult" style="display:none;padding:0 20px;margin-bottom:8px"></div>
-  <!-- ── GÜNÜN AYETİ / DUASI / HADİSİ ── -->
-  <div id="gunlukKart" style="padding:0 20px;margin:16px 0 4px">
-    <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border2);border-radius:18px;padding:18px 20px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-16px;right:-16px;font-size:70px;opacity:0.05;pointer-events:none">📖</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <div style="background:var(--g2);border-radius:8px;padding:3px 10px;font-size:11px;font-weight:800;color:#fff" id="gunlukTarih"></div>
-        <div style="font-size:12px;color:var(--text3);font-weight:600" id="gunlukLabel">📅 Günün İçeriği</div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;margin-bottom:8px">
-        <div style="font-size:10px;font-weight:800;color:var(--g1);letter-spacing:0.08em;margin-bottom:8px" id="gunlukAyetBaslik">📖 GÜNÜN AYETİ</div>
-        <div id="gunlukAyetAr" style="font-family:'Scheherazade New',serif;font-size:21px;line-height:2;text-align:right;direction:rtl;color:var(--text);margin-bottom:8px"></div>
-        <div id="gunlukAyetTr" style="font-size:14px;line-height:1.8;color:var(--text2);font-weight:500;padding-top:8px;border-top:1px solid var(--border)"></div>
-        <div id="gunlukAyetRef" style="font-size:11px;color:var(--g1);font-weight:800;margin-top:6px"></div>
-        <button onclick="shareGunluk('ayet')" style="margin-top:8px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--g1);background:transparent;color:var(--g1);font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📤 Paylaş</button>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;margin-bottom:8px">
-        <div style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:0.08em;margin-bottom:8px" id="gunlukDuaBaslik">🤲 GÜNÜN DUASI</div>
-        <div id="gunlukDuaAr" style="font-family:'Scheherazade New',serif;font-size:19px;line-height:2;text-align:right;direction:rtl;color:var(--text);margin-bottom:8px"></div>
-        <div id="gunlukDuaTr" style="font-size:14px;line-height:1.8;color:var(--text2);font-weight:500;padding-top:8px;border-top:1px solid var(--border)"></div>
-        <div id="gunlukDuaRef" style="font-size:11px;color:var(--gold);font-weight:700;margin-top:6px"></div>
-        <button onclick="shareGunluk('dua')" style="margin-top:8px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📤 Paylaş</button>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px">
-        <div style="font-size:10px;font-weight:800;color:var(--text3);letter-spacing:0.08em;margin-bottom:8px" id="gunlukHadisBaslik">💡 GÜNÜN HADİSİ</div>
-        <div id="gunlukHadisTr" style="font-size:14px;line-height:1.9;color:var(--text2);font-weight:500;font-style:italic"></div>
-        <div id="gunlukHadisRef" style="font-size:11px;color:var(--text3);font-weight:700;margin-top:6px"></div>
-        <button onclick="shareGunluk('hadis')" style="margin-top:8px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--text3);background:transparent;color:var(--text3);font-size:11px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">📤 Paylaş</button>
-      </div>
-    </div>
-  </div>
   <div class="main">
     <div class="sec-head"><h2 id="gridTitle">114 Sure</h2><span class="sec-badge" id="gridBadge">TÜM SURELER</span></div>
     <p class="sec-desc">Okumak istediğin sureye tıkla</p>
@@ -2725,242 +2744,6 @@ const ESMA = [
 
 
 // ══════════════════════════════════════════════════════════════
-// GÜNLÜK AYET / DUA / HADİS — 15 DİL — Her gece gece yarısı değişir
-// ══════════════════════════════════════════════════════════════
-
-const GUNLUK_DATA = [
-  {
-    ayet_ar: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
-    ayet_ref: "İnşirah 94:6",
-    dua_ar: "رَبِّ اشْرَحْ لِي صَدْرِي",
-    dua_ref: "Tâhâ 20:25",
-    hadis_tr: "Kolaylaştırınız, güçleştirmeyiniz. Müjdeleyiniz, nefret ettirmeyiniz.",
-    hadis_ref: "Buhârî, İlim 11",
-    tr: { ayet: "Gerçekten güçlükle birlikte kolaylık vardır.", dua: "Rabbim! Göğsümü (kalbimi) aç, bana kolaylık ver." },
-    de: { ayet: "Wahrlich, mit der Schwierigkeit kommt Erleichterung.", dua: "Mein Herr, öffne mir meine Brust." },
-    en: { ayet: "Indeed, with hardship comes ease.", dua: "My Lord, expand my breast for me." },
-    fr: { ayet: "Certes, avec la difficulté vient la facilité.", dua: "Seigneur, ouvre ma poitrine." },
-    ru: { ayet: "Поистине, вместе с трудностью приходит облегчение.", dua: "Господь мой! Расширь мне грудь мою." },
-    id: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhanku, lapangkanlah dadaku." },
-    ur: { ayet: "بیشک تکلیف کے ساتھ آسانی ہے۔", dua: "اے میرے رب! میرا سینہ کھول دے۔" },
-    es: { ayet: "En verdad, junto con la dificultad viene la facilidad.", dua: "Señor mío, ensánchame el pecho." },
-    bn: { ayet: "নিশ্চয়ই কষ্টের সাথে স্বস্তি আছে।", dua: "হে আমার রব! আমার বুক প্রশস্ত করে দাও।" },
-    ar: { ayet: "إِنَّ مَعَ الْعُسْرِ يُسْرًا", dua: "رَبِّ اشْرَحْ لِي صَدْرِي" },
-    nl: { ayet: "Voorwaar, met moeilijkheid komt gemak.", dua: "Mijn Heer, open mijn borst voor mij." },
-    it: { ayet: "In verità, con la difficoltà viene la facilità.", dua: "Signore mio, aprimi il petto." },
-    fa: { ayet: "به راستی با سختی آسانی است.", dua: "پروردگارا! سینه‌ام را برایم بگشا." },
-    ms: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhanku, lapangkanlah dadaku." },
-    sw: { ayet: "Hakika pamoja na ugumu kuna urahisi.", dua: "Mola wangu, nipanulie kifua changu." }
-  },
-  {
-    ayet_ar: "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ",
-    ayet_ref: "Bakara 2:45",
-    dua_ar: "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ",
-    dua_ref: "Ebû Dâvûd, Vitir 26",
-    hadis_tr: "Sabır bir nurdur. Allah sabredenlerle beraberdir.",
-    hadis_ref: "Müslim, Taharet 1",
-    tr: { ayet: "Sabır ve namazla yardım isteyin.", dua: "Allah'ım! Seni zikretmem, şükretmem ve güzel ibadet etmem için bana yardım et." },
-    de: { ayet: "Sucht Beistand durch Geduld und Gebet.", dua: "O Allah, hilf mir, Dich zu gedenken, Dir zu danken und Dich schön zu verehren." },
-    en: { ayet: "Seek help through patience and prayer.", dua: "O Allah, help me remember You, thank You, and worship You well." },
-    fr: { ayet: "Cherchez secours par la patience et la prière.", dua: "Ô Allah, aide-moi à Te rappeler, à Te remercier et à T'adorer." },
-    ru: { ayet: "Прибегайте к помощи через терпение и молитву.", dua: "О Аллах, помоги мне поминать Тебя, благодарить Тебя и хорошо поклоняться Тебе." },
-    id: { ayet: "Mohonlah pertolongan dengan sabar dan shalat.", dua: "Ya Allah, bantulah aku untuk mengingat-Mu, bersyukur kepada-Mu, dan beribadah dengan baik." },
-    ur: { ayet: "صبر اور نماز سے مدد مانگو۔", dua: "اے اللہ! مجھے تیرا ذکر کرنے، شکر کرنے اور اچھی عبادت کرنے میں مدد فرما۔" },
-    es: { ayet: "Buscad ayuda con la paciencia y la oración.", dua: "¡Oh Alá, ayúdame a recordarte, agradecerte y adorarte bien!" },
-    bn: { ayet: "ধৈর্য ও নামাযের মাধ্যমে সাহায্য চাও।", dua: "হে আল্লাহ! আমাকে তোমাকে স্মরণ করতে, কৃতজ্ঞ হতে এবং সুন্দরভাবে ইবাদত করতে সাহায্য কর।" },
-    ar: { ayet: "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ", dua: "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ" },
-    nl: { ayet: "Zoek hulp door geduld en gebed.", dua: "O Allah, help mij U te gedenken, U te danken en U goed te aanbidden." },
-    it: { ayet: "Cercate aiuto nella pazienza e nella preghiera.", dua: "O Allah, aiutami a ricordarTi, ringraziarTi e adorarTi bene." },
-    fa: { ayet: "از صبر و نماز یاری بجویید.", dua: "خدایا! مرا در یاد تو، سپاسگزاری از تو و نیکو عبادت کردنت یاری ده." },
-    ms: { ayet: "Pohonlah pertolongan dengan sabar dan solat.", dua: "Ya Allah, bantulah aku mengingatiMu, bersyukur kepadaMu dan beribadah dengan baik." },
-    sw: { ayet: "Tafuteni msaada kwa subira na sala.", dua: "Ee Mwenyezi Mungu, nikusaidie kukukumbuka, kukushukuru na kukuabudu vizuri." }
-  },
-  {
-    ayet_ar: "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ",
-    ayet_ref: "Âl-i İmrân 3:173",
-    dua_ar: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ",
-    dua_ref: "Buhârî, Daavât 39",
-    hadis_tr: "Allah'a tevekkül eden kimseye Allah yeter.",
-    hadis_ref: "İbn Mâce, Zühd 14",
-    tr: { ayet: "Allah bize yeter; O ne güzel vekildir!", dua: "Allah'ım! Keder ve üzüntüden sana sığınırım." },
-    de: { ayet: "Allah genügt uns, und Er ist der beste Verwalter!", dua: "O Allah, ich suche Zuflucht bei Dir vor Kummer und Trauer." },
-    en: { ayet: "Allah is sufficient for us, and He is the best Disposer of affairs!", dua: "O Allah, I seek refuge in You from worry and grief." },
-    fr: { ayet: "Allah nous suffit et quel excellent Protecteur !", dua: "Ô Allah, je cherche refuge en Toi contre le souci et le chagrin." },
-    ru: { ayet: "Нам достаточно Аллаха, и как прекрасен Он, покровитель!", dua: "О Аллах, прибегаю к Тебе от тревоги и печали." },
-    id: { ayet: "Cukuplah Allah bagi kami, dan Dia sebaik-baik Pelindung!", dua: "Ya Allah, aku berlindung kepada-Mu dari rasa cemas dan sedih." },
-    ur: { ayet: "اللہ ہمارے لیے کافی ہے اور وہ بہترین وکیل ہے!", dua: "اے اللہ! میں فکر اور غم سے تیری پناہ مانگتا ہوں۔" },
-    es: { ayet: "¡Allah nos basta y Él es el mejor Protector!", dua: "¡Oh Alá, me refugio en Ti de la preocupación y la tristeza!" },
-    bn: { ayet: "আল্লাহ আমাদের জন্য যথেষ্ট এবং তিনি কত উত্তম অভিভাবক!", dua: "হে আল্লাহ! আমি উদ্বেগ ও দুঃখ থেকে তোমার আশ্রয় চাই।" },
-    ar: { ayet: "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ", dua: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ" },
-    nl: { ayet: "Allah is genoeg voor ons, en Hij is de beste Beschermer!", dua: "O Allah, ik zoek mijn toevlucht bij U voor zorgen en verdriet." },
-    it: { ayet: "Allah ci basta, ed Egli è il miglior Protettore!", dua: "O Allah, mi rifugio in Te dall'ansia e dal dolore." },
-    fa: { ayet: "خداوند برای ما کافی است و چه نیکو وکیلی است!", dua: "خدایا! از غم و اندوه به تو پناه می‌برم." },
-    ms: { ayet: "Allah memadai bagi kami dan Dia sebaik-baik Penjaga!", dua: "Ya Allah, aku berlindung kepada-Mu dari rasa bimbang dan sedih." },
-    sw: { ayet: "Allah anatutosha, na Yeye ni bora wa mawakala!", dua: "Ee Mwenyezi Mungu, ninaomba hifadhi yako dhidi ya wasiwasi na huzuni." }
-  },
-  {
-    ayet_ar: "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
-    ayet_ref: "Talâk 65:2",
-    dua_ar: "اللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي",
-    dua_ref: "Müslim, Zikir 71",
-    hadis_tr: "Kim Allah'tan korkarsa, Allah ona her sıkıntıdan bir çıkış yolu açar.",
-    hadis_ref: "Tirmizî, Talâk 12",
-    tr: { ayet: "Kim Allah'tan korkarsa, Allah ona bir çıkış yolu açar.", dua: "Allah'ım! İşimin özü olan dinimi bana güzelleştir." },
-    de: { ayet: "Wer Allah fürchtet, dem öffnet Er einen Ausweg.", dua: "O Allah, verbessere für mich meine Religion, die das Fundament meiner Angelegenheiten ist." },
-    en: { ayet: "Whoever fears Allah, He will make a way out for him.", dua: "O Allah, rectify for me my religion which is the safeguard of my affairs." },
-    fr: { ayet: "Quiconque craint Allah, Il lui trouvera une issue.", dua: "Ô Allah, améliore pour moi ma religion qui est la sauvegarde de mes affaires." },
-    ru: { ayet: "Кто боится Аллаха, тому Он откроет выход.", dua: "О Аллах, исправь мою религию, которая является основой моих дел." },
-    id: { ayet: "Barangsiapa bertakwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", dua: "Ya Allah, perbaikilah agamaku yang menjadi penjaga urusanku." },
-    ur: { ayet: "جو اللہ سے ڈرتا ہے، اللہ اس کے لیے راستہ نکالتا ہے۔", dua: "اے اللہ! میرے دین کو درست کر جو میرے معاملات کی بنیاد ہے۔" },
-    es: { ayet: "A quien teme a Alá, Él le abrirá una salida.", dua: "¡Oh Alá, rectifica para mí mi religión que es la salvaguarda de mis asuntos!" },
-    bn: { ayet: "যে ব্যক্তি আল্লাহকে ভয় করে, তিনি তার জন্য পথ বের করে দেন।", dua: "হে আল্লাহ! আমার দ্বীনকে সংশোধন করে দাও যা আমার বিষয়সমূহের রক্ষাকবচ।" },
-    ar: { ayet: "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا", dua: "اللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي" },
-    nl: { ayet: "Wie Allah vreest, voor hem opent Hij een uitweg.", dua: "O Allah, verbeter mijn religie voor mij, die de bescherming van mijn zaken is." },
-    it: { ayet: "Chi teme Allah, Egli gli aprirà una via d'uscita.", dua: "O Allah, rettifica per me la mia religione che è il baluardo delle mie faccende." },
-    fa: { ayet: "هر کس از خدا بترسد، خداوند برای او راه خروجی می‌گشاید.", dua: "خدایا! دینم را که حافظ امور من است برایم اصلاح کن." },
-    ms: { ayet: "Sesiapa yang bertakwa kepada Allah, nescaya Dia akan membukakan jalan keluar baginya.", dua: "Ya Allah, perbaikilah agamaku yang menjadi penjaga urusanku." },
-    sw: { ayet: "Anayemcha Mwenyezi Mungu, Yeye atamleteea njia ya kutoka.", dua: "Ee Mwenyezi Mungu, ninisahihishie dini yangu ambayo ni kinga ya mambo yangu." }
-  },
-  {
-    ayet_ar: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
-    ayet_ref: "İnşirah 94:5",
-    dua_ar: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً",
-    dua_ref: "Bakara 2:201",
-    hadis_tr: "Mümin için her hal hayırlıdır. Sevinirse şükreder, üzülürse sabreder.",
-    hadis_ref: "Müslim, Zühd 64",
-    tr: { ayet: "Şüphesiz güçlükle birlikte kolaylık vardır.", dua: "Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver." },
-    de: { ayet: "Wahrlich, mit der Schwierigkeit kommt Erleichterung.", dua: "Unser Herr, gib uns im Diesseits das Gute und im Jenseits das Gute." },
-    en: { ayet: "For indeed, with hardship comes ease.", dua: "Our Lord, give us good in this world and good in the Hereafter." },
-    fr: { ayet: "Car certes, avec la difficulté vient la facilité.", dua: "Notre Seigneur, accorde-nous dans cette vie ce qui est bien et dans l'au-delà ce qui est bien." },
-    ru: { ayet: "Воистину, вместе с трудностью приходит облегчение.", dua: "Господь наш, дай нам благо в этом мире и благо в будущей жизни." },
-    id: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhan kami, berilah kami kebaikan di dunia dan kebaikan di akhirat." },
-    ur: { ayet: "بلاشبہ تکلیف کے ساتھ آسانی ہے۔", dua: "اے ہمارے رب! ہمیں دنیا میں بھی بھلائی دے اور آخرت میں بھی بھلائی دے۔" },
-    es: { ayet: "Ciertamente, junto con la dificultad hay facilidad.", dua: "Señor nuestro, concédenos el bien en esta vida y el bien en la otra vida." },
-    bn: { ayet: "নিশ্চয়ই কষ্টের সাথে স্বস্তি আছে।", dua: "হে আমাদের রব! আমাদের দুনিয়ায় কল্যাণ দাও এবং আখিরাতেও কল্যাণ দাও।" },
-    ar: { ayet: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", dua: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً" },
-    nl: { ayet: "Want voorwaar, met moeilijkheid komt gemak.", dua: "Onze Heer, geef ons het goede in deze wereld en het goede in het Hiernamaals." },
-    it: { ayet: "Invero, con la difficoltà c'è la facilità.", dua: "Signore nostro, donaci il bene in questo mondo e il bene nell'aldilà." },
-    fa: { ayet: "پس به یقین با سختی آسانی است.", dua: "پروردگارا! در دنیا به ما نیکی عطا کن و در آخرت هم نیکی عطا کن." },
-    ms: { ayet: "Sesungguhnya bersama kesulitan ada kemudahan.", dua: "Ya Tuhan kami, kurniakanlah kami kebaikan di dunia dan kebaikan di akhirat." },
-    sw: { ayet: "Hakika pamoja na ugumu kuna urahisi.", dua: "Mola wetu, tupe kheri duniani na kheri akhera." }
-  },
-  {
-    ayet_ar: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
-    ayet_ref: "Bakara 2:153",
-    dua_ar: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ",
-    dua_ref: "İbn Mâce, Duâ 2",
-    hadis_tr: "Hikmeti arayanlar için en güzel şey sabırdır.",
-    hadis_ref: "Tirmizî, Birr 76",
-    tr: { ayet: "Şüphesiz Allah sabredenlerle beraberdir.", dua: "Allah'ım! Senden af ve afiyet diliyorum." },
-    de: { ayet: "Wahrlich, Allah ist mit den Geduldigen.", dua: "O Allah, ich bitte Dich um Vergebung und Wohlbefinden." },
-    en: { ayet: "Indeed, Allah is with the patient.", dua: "O Allah, I ask You for forgiveness and well-being." },
-    fr: { ayet: "Certes, Allah est avec les endurants.", dua: "Ô Allah, je Te demande le pardon et la santé." },
-    ru: { ayet: "Поистине, Аллах с терпеливыми.", dua: "О Аллах, прошу Тебя о прощении и благополучии." },
-    id: { ayet: "Sesungguhnya Allah beserta orang-orang yang sabar.", dua: "Ya Allah, aku memohon kepada-Mu ampunan dan keselamatan." },
-    ur: { ayet: "بیشک اللہ صبر کرنے والوں کے ساتھ ہے۔", dua: "اے اللہ! میں تجھ سے معافی اور عافیت مانگتا ہوں۔" },
-    es: { ayet: "Ciertamente, Alá está con los pacientes.", dua: "¡Oh Alá, te pido perdón y bienestar!" },
-    bn: { ayet: "নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।", dua: "হে আল্লাহ! আমি তোমার কাছে ক্ষমা ও সুস্থতা চাই।" },
-    ar: { ayet: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", dua: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ" },
-    nl: { ayet: "Voorwaar, Allah is met de geduldigen.", dua: "O Allah, ik vraag U om vergiffenis en welzijn." },
-    it: { ayet: "Certo, Allah è con i pazienti.", dua: "O Allah, Ti chiedo perdono e benessere." },
-    fa: { ayet: "همانا خداوند با صابران است.", dua: "خدایا! از تو عفو و عافیت می‌خواهم." },
-    ms: { ayet: "Sesungguhnya Allah bersama orang-orang yang sabar.", dua: "Ya Allah, aku memohon keampunan dan kesejahteraan daripada-Mu." },
-    sw: { ayet: "Hakika Mwenyezi Mungu yuko pamoja na wanaovumilia.", dua: "Ee Mwenyezi Mungu, nakuomba msamaha na afya." }
-  },
-  {
-    ayet_ar: "وَتَوَكَّلْ عَلَى اللَّهِ وَكَفَىٰ بِاللَّهِ وَكِيلًا",
-    ayet_ref: "Ahzâb 33:3",
-    dua_ar: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ",
-    dua_ref: "Tirmizî, Daavat 97",
-    hadis_tr: "Allah'a güven, ancak deveni de bağla.",
-    hadis_ref: "Tirmizî, Kıyâme 60",
-    tr: { ayet: "Allah'a tevekkül et. Vekil olarak Allah yeter.", dua: "Ey Hay ve Kayyum olan Allah! Rahmetinle senden yardım istiyorum." },
-    de: { ayet: "Vertrau auf Allah, denn Allah genügt als Verwalter.", dua: "O Lebendiger, o Allerhaltender, durch Deine Barmherzigkeit flehe ich Dich um Hilfe an." },
-    en: { ayet: "Put your trust in Allah; Allah is sufficient as a Trustee.", dua: "O Ever-Living, O Sustainer, by Your mercy I call for help." },
-    fr: { ayet: "Fais confiance à Allah, car Allah suffit comme Protecteur.", dua: "Ô Vivant, ô Subsistant, par Ta miséricorde je T'implore." },
-    ru: { ayet: "Уповай на Аллаха, ведь Аллаха достаточно как Покровителя.", dua: "О Живой, о Вечносущий, Твоим милосердием взываю к Тебе." },
-    id: { ayet: "Bertawakallah kepada Allah, cukuplah Allah sebagai Pelindung.", dua: "Wahai Yang Maha Hidup, wahai Yang Maha Berdiri Sendiri, dengan rahmat-Mu aku memohon pertolongan." },
-    ur: { ayet: "اللہ پر توکل کرو اور اللہ کافی وکیل ہے۔", dua: "اے زندہ اور قائم! تیری رحمت سے مدد مانگتا ہوں۔" },
-    es: { ayet: "Confía en Alá; Alá es suficiente como Garante.", dua: "¡Oh Viviente, oh Sustentador, por Tu misericordia imploro Tu ayuda!" },
-    bn: { ayet: "আল্লাহর উপর তাওয়াক্কুল করো। অভিভাবক হিসেবে আল্লাহ যথেষ্ট।", dua: "হে চিরঞ্জীব, হে চিরস্থায়ী! তোমার রহমতের মাধ্যমে সাহায্য চাই।" },
-    ar: { ayet: "وَتَوَكَّلْ عَلَى اللَّهِ وَكَفَىٰ بِاللَّهِ وَكِيلًا", dua: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ" },
-    nl: { ayet: "Vertrouw op Allah; Allah is genoeg als Beschermer.", dua: "O Levende, o Eeuwig Bestaande, door Uw barmhartigheid roep ik U om hulp." },
-    it: { ayet: "Affidati ad Allah; Allah basta come Garante.", dua: "O Vivente, o Autosussistente, per la Tua misericordia imploro aiuto." },
-    fa: { ayet: "بر خداوند توکل کن و خداوند به عنوان وکیل کافی است.", dua: "ای زنده، ای پاینده! به رحمتت از تو یاری می‌خواهم." },
-    ms: { ayet: "Bertawakkallah kepada Allah; cukuplah Allah sebagai Pelindung.", dua: "Wahai Yang Maha Hidup, wahai Yang Maha Berdiri Sendiri, dengan rahmat-Mu aku memohon pertolongan." },
-    sw: { ayet: "Mtegemee Mwenyezi Mungu; Mwenyezi Mungu anatosha kama Mlezi.", dua: "Ewe Mwenye Uhai, ewe Mwenye Kudumu, kwa rehema Yako ninakuomba msaada." }
-  }
-];
-
-// Dil bazlı etiketler
-const GUNLUK_LABELS = {
-  tr: { label:"📅 Günün İçeriği", ayet:"📖 GÜNÜN AYETİ", dua:"🤲 GÜNÜN DUASI", hadis:"💡 GÜNÜN HADİSİ" },
-  de: { label:"📅 Heutiger Inhalt", ayet:"📖 VERS DES TAGES", dua:"🤲 DUA DES TAGES", hadis:"💡 HADITH DES TAGES" },
-  en: { label:"📅 Daily Content", ayet:"📖 VERSE OF THE DAY", dua:"🤲 DUA OF THE DAY", hadis:"💡 HADITH OF THE DAY" },
-  fr: { label:"📅 Contenu du jour", ayet:"📖 VERSET DU JOUR", dua:"🤲 DUA DU JOUR", hadis:"💡 HADITH DU JOUR" },
-  ru: { label:"📅 Контент дня", ayet:"📖 АЯТ ДНЯ", dua:"🤲 ДУА ДНЯ", hadis:"💡 ХАДИС ДНЯ" },
-  id: { label:"📅 Konten Hari Ini", ayet:"📖 AYAT HARI INI", dua:"🤲 DOA HARI INI", hadis:"💡 HADIS HARI INI" },
-  ur: { label:"📅 آج کا مواد", ayet:"📖 آج کی آیت", dua:"🤲 آج کی دعا", hadis:"💡 آج کی حدیث" },
-  es: { label:"📅 Contenido del día", ayet:"📖 VERSÍCULO DEL DÍA", dua:"🤲 DUA DEL DÍA", hadis:"💡 HADIZ DEL DÍA" },
-  bn: { label:"📅 আজকের বিষয়বস্তু", ayet:"📖 আজকের আয়াত", dua:"🤲 আজকের দোয়া", hadis:"💡 আজকের হাদিস" },
-  ar: { label:"📅 محتوى اليوم", ayet:"📖 آية اليوم", dua:"🤲 دعاء اليوم", hadis:"💡 حديث اليوم" },
-  nl: { label:"📅 Dagelijkse inhoud", ayet:"📖 VERS VAN DE DAG", dua:"🤲 DUA VAN DE DAG", hadis:"💡 HADITH VAN DE DAG" },
-  it: { label:"📅 Contenuto del giorno", ayet:"📖 VERSETTO DEL GIORNO", dua:"🤲 DUA DEL GIORNO", hadis:"💡 HADITH DEL GIORNO" },
-  fa: { label:"📅 محتوای روز", ayet:"📖 آیه روز", dua:"🤲 دعای روز", hadis:"💡 حدیث روز" },
-  ms: { label:"📅 Kandungan Hari Ini", ayet:"📖 AYAT HARI INI", dua:"🤲 DOA HARI INI", hadis:"💡 HADIS HARI INI" },
-  sw: { label:"📅 Maudhui ya Leo", ayet:"📖 AYA YA LEO", dua:"🤲 DUA YA LEO", hadis:"💡 HADITHI YA LEO" }
-};
-
-function renderGunlukKart() {
-  const today = new Date();
-  // Her gün farklı içerik: yıl başından gün sayısı mod kaç adet içerik
-  const start = new Date(today.getFullYear(), 0, 0);
-  const diff = today - start;
-  const dayOfYear = Math.floor(diff / 86400000);
-  const idx = dayOfYear % GUNLUK_DATA.length;
-  const d = GUNLUK_DATA[idx];
-  const l = lang || 'tr';
-  const lbl = GUNLUK_LABELS[l] || GUNLUK_LABELS['tr'];
-
-  // Tarih formatı
-  const tarihStr = today.toLocaleDateString(l === 'ar' || l === 'ur' || l === 'fa' ? 'en' : l, { day:'numeric', month:'long', year:'numeric' });
-
-  const set = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val || ''; };
-
-  set('gunlukTarih', tarihStr);
-  set('gunlukLabel', lbl.label);
-  set('gunlukAyetBaslik', lbl.ayet);
-  set('gunlukDuaBaslik', lbl.dua);
-  set('gunlukHadisBaslik', lbl.hadis);
-
-  // Ayet
-  set('gunlukAyetAr', d.ayet_ar);
-  const ayetLang = (d[l] || d['tr']);
-  set('gunlukAyetTr', ayetLang.ayet);
-  set('gunlukAyetRef', d.ayet_ref);
-
-  // Dua
-  set('gunlukDuaAr', d.dua_ar);
-  set('gunlukDuaTr', ayetLang.dua);
-  set('gunlukDuaRef', d.dua_ref);
-
-  // Hadis (şimdilik Türkçe + ref, dil desteği data'ya sonra eklenebilir)
-  set('gunlukHadisTr', '"' + d.hadis_tr + '"');
-  set('gunlukHadisRef', d.hadis_ref);
-}
-
-// Gece yarısı otomatik güncelle
-function scheduleGunlukUpdate() {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  const msUntilMidnight = midnight - now;
-  setTimeout(() => {
-    renderGunlukKart();
-    scheduleGunlukUpdate(); // Yarın için tekrar kur
-  }, msUntilMidnight);
-}
-
 // STATE
 let lang = (JSON.parse(localStorage.getItem('qSettings')||'{}').lang) || 'tr', surahData = null, ayahs = [], favs = JSON.parse(localStorage.getItem('qfavs')||'[]');
 let playing = false, curAyah = 0, reciter = (JSON.parse(localStorage.getItem('qSettings')||'{}').reciter) || 'ar.alafasy', showTrans = true, showTafsir = false, autoScroll = false, cache = {};
@@ -3077,8 +2860,33 @@ window.onload = () => {
   tesbiCounts = savedCounts.slice(0, fullList.length);
   localStorage.setItem('tesbiCounts', JSON.stringify(tesbiCounts));
 
-  renderGunlukKart(); scheduleGunlukUpdate();
   buildSurahGrid(buildSurahs()); buildEsma(); updateFavCount(); setupSearch(); renderTesbiSel(); updateTesbiUI(); renderDiniGunler(); setTimeout(initSurahFilters, 300);
+
+  // ── Hero Slider ──
+  (function(){
+    var slides = document.querySelectorAll('.hero-slide');
+    var dotsEl = document.getElementById('heroDots');
+    if(!slides.length) return;
+    var cur = 0, total = slides.length;
+    // Build dots
+    for(var i=0;i<total;i++){
+      var d = document.createElement('button');
+      d.className = 'hero-dot' + (i===0?' active':'');
+      d.setAttribute('aria-label','Slide '+(i+1));
+      d.dataset.idx = i;
+      d.onclick = function(){ goSlide(parseInt(this.dataset.idx)); };
+      dotsEl.appendChild(d);
+    }
+    var dots = dotsEl.querySelectorAll('.hero-dot');
+    function goSlide(n){
+      slides[cur].classList.remove('active');
+      dots[cur].classList.remove('active');
+      cur = n % total;
+      slides[cur].classList.add('active');
+      dots[cur].classList.add('active');
+    }
+    setInterval(function(){ goSlide(cur+1); }, 5500);
+  })();
 
   // Kayıtlı dil ve kıraat seçimini UI'ya yansıt
   const langSel = document.getElementById('langSel');
@@ -5744,7 +5552,6 @@ const UI_TEXT = {
 // ── applyUITranslations ──
 function applyUITranslations(l) {
   // Günlük kartı da yeni dille güncelle
-  setTimeout(renderGunlukKart, 50);
   const t = UI_TEXT[l] || UI_TEXT['tr'];
 
   // Header nav butonları
@@ -7659,46 +7466,6 @@ function shareAyah(i) {
 }
 
 // ── GÜNLÜK İÇERİK PAYLAŞ ──
-function shareGunluk(tip) {
-  var text = '';
-  var title = '';
-  if(tip === 'ayet') {
-    var ar = (document.getElementById('gunlukAyetAr')||{}).textContent || '';
-    var tr = (document.getElementById('gunlukAyetTr')||{}).textContent || '';
-    var ref = (document.getElementById('gunlukAyetRef')||{}).textContent || '';
-    title = '📖 Günün Ayeti';
-    text = title + '\n\n' + ar + '\n\n' + tr + '\n\n' + ref;
-  } else if(tip === 'dua') {
-    var ar = (document.getElementById('gunlukDuaAr')||{}).textContent || '';
-    var tr = (document.getElementById('gunlukDuaTr')||{}).textContent || '';
-    var ref = (document.getElementById('gunlukDuaRef')||{}).textContent || '';
-    title = '🤲 Günün Duası';
-    text = title + '\n\n' + ar + '\n\n' + tr + '\n\n' + ref;
-  } else if(tip === 'hadis') {
-    var tr = (document.getElementById('gunlukHadisTr')||{}).textContent || '';
-    var ref = (document.getElementById('gunlukHadisRef')||{}).textContent || '';
-    title = '💡 Günün Hadisi';
-    text = title + '\n\n' + tr + '\n\n' + ref;
-  }
-  text += '\n\nhttps://kuran-kerim.bakiciersen.workers.dev';
-  if(navigator.share) {
-    navigator.share({title: title, text: text}).catch(function(){});
-    return;
-  }
-  var waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
-  var tgUrl = 'https://t.me/share/url?url=https%3A%2F%2Fkuran-kerim.bakiciersen.workers.dev&text=' + encodeURIComponent(text);
-  showModal(
-    '<div style="text-align:center;padding:8px 0">' +
-    '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px">📤 Paylaş</div>' +
-    '<div style="display:flex;flex-direction:column;gap:10px">' +
-    '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">💬</span> WhatsApp</a>' +
-    '<a href="' + tgUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;background:#0088cc;color:#fff;border-radius:12px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:14px"><span style="font-size:20px">✈️</span> Telegram</a>' +
-    '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(decodeURIComponent(\'' + encodeURIComponent(text) + '\')).then(function(){toast(\'📋 Kopyalandı\')});closeModal()" style="display:flex;align-items:center;gap:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;font-weight:700;font-size:14px;cursor:pointer;width:100%;justify-content:center"><span style="font-size:20px">📋</span> Panoya Kopyala</button>' +
-    '<button onclick="closeModal()" style="background:transparent;color:var(--text3);border:none;padding:8px;cursor:pointer;font-size:13px">Kapat</button>' +
-    '</div></div>'
-  );
-}
-
 // ── OKUNUŞ ──
 async function loadOkunus(i) {
   var a = ayahs[i];
