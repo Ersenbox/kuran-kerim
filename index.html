@@ -412,7 +412,7 @@ body::before {
   z-index: 1;
   overflow: hidden;
   border-radius: 0 0 24px 24px;
-  min-height: 160px;
+  min-height: 240px;
 }
 /* ── Hero Slider ── */
 .hero-slide {
@@ -504,6 +504,26 @@ body::before {
 .page { display: none; animation: fadeIn 0.2s ease; }
 .page.active { display: block; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Page Background Images ── */
+.page[style*="background-image"] {
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+.page[style*="background-image"]::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.82);
+  z-index: 0;
+  pointer-events: none;
+}
+[data-theme="dark"] .page[style*="background-image"]::before {
+  background: rgba(18,18,30,0.85);
+}
+.page[style*="background-image"] > * { position: relative; z-index: 1; }
 
 .sec-head { display: flex; align-items: center; gap: 10px; margin: 24px 0 6px; }
 .sec-head h2 { font-size: 17px; font-weight: 600; color: var(--g1); }
@@ -2396,7 +2416,7 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 </header>
 
 <!-- HOME -->
-<div class="page active" id="page-home">
+<div class="page active" id="page-home" style="background-image:url('public/slider/s5.jpg')">
   <div class="hero">
     <div class="hero-slide active" style="background-image:url('public/slider/s1.jpg')"></div>
     <div class="hero-slide" style="background-image:url('public/slider/s2.jpg')"></div>
@@ -2461,7 +2481,7 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 </div>
 
 <!-- READER -->
-<div class="page" id="page-reader">
+<div class="page" id="page-reader" style="background-image:url('public/slider/s6.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="reader-top">
       <div>
@@ -2532,7 +2552,7 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 </div>
 
 <!-- ESMAUL HUSNA -->
-<div class="page" id="page-esma">
+<div class="page" id="page-esma" style="background-image:url('public/slider/s4.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Esmaül Hüsna — الأسماء الحسنى</h2><span class="sec-badge">99 İSİM</span></div>
     <p class="sec-desc">Allah'ın 99 güzel ismi — karta tıkla, manasını gör</p>
@@ -2598,7 +2618,7 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 </div>
 
 <!-- FAVORITES -->
-<div class="page" id="page-favs">
+<div class="page" id="page-favs" style="background-image:url('public/slider/s9.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Favorilerim</h2><span class="sec-badge" id="favCount">0</span></div>
     <p class="sec-desc">Kaydettiğin ayetler</p>
@@ -2607,7 +2627,7 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 </div>
 
 <!-- SEARCH -->
-<div class="page" id="page-search">
+<div class="page" id="page-search" style="background-image:url('public/slider/s1.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Ayet Ara</h2></div>
     <p class="sec-desc">Seçili dilde kelime veya ifade ara</p>
@@ -10759,7 +10779,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 <!-- AYARLAR -->
-<div class="page" id="page-ayarlar">
+<div class="page" id="page-ayarlar" style="background-image:url('public/slider/s8.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Ayarlar</h2><span class="sec-badge">⚙️</span></div>
     <p class="sec-desc">Uygulama tercihlerini ayarla</p>
@@ -11271,7 +11291,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 <!-- NAMAZ VAKİTLERİ -->
-<div class="page" id="page-namaz">
+<div class="page" id="page-namaz" style="background-image:url('public/slider/s3.jpg')">
   <div class="main" style="padding-top:16px">
     
         <div style="padding:16px;border-bottom:1px solid var(--border)">
@@ -11432,7 +11452,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 <!-- KIBLE -->
-<div class="page" id="page-kible">
+<div class="page" id="page-kible" style="background-image:url('public/slider/s2.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Kıble Pusulası</h2><span class="sec-badge" id="kibleBadge">🧭</span></div>
     <p class="sec-desc">Telefonunu düz tut — altın ok Kabe yönünü gösterir</p>
@@ -11490,7 +11510,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 <!-- TEBİHAT -->
-<div class="page" id="page-tesbi">
+<div class="page" id="page-tesbi" style="background-image:url('public/slider/s3.jpg')">
   <div class="main" style="padding-top:16px">
 
     <!-- BAŞLIK -->
@@ -11551,7 +11571,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
   </div>
 </div>
 <!-- DİNİ GÜNLER -->
-<div class="page" id="page-dini">
+<div class="page" id="page-dini" style="background-image:url('public/slider/s1.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Dini Günler 2026</h2><span class="sec-badge">📅</span></div>
     <p class="sec-desc">2026 yılı İslami özel gün ve geceler</p>
@@ -11560,7 +11580,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 <!-- KURAN OKUMADAN ÖNCE -->
-<div class="page" id="page-oncesi">
+<div class="page" id="page-oncesi" style="background-image:url('public/slider/s7.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Kuran Okumadan Önce</h2><span class="sec-badge">ÖNEMLİ</span></div>
     <p class="sec-desc">Kur'an-ı Kerim'i okumadan önce dikkat edilmesi gerekenler</p>
@@ -11600,7 +11620,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 <!-- DUA AYETLERİ -->
-<div class="page" id="page-dua">
+<div class="page" id="page-dua" style="background-image:url('public/slider/s4.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Dualar</h2><span class="sec-badge">KATEGORİLER</span></div>
     <p class="sec-desc">Kategori seç ve duaları oku</p>
@@ -11626,7 +11646,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 
-<div class="page" id="page-sifa">
+<div class="page" id="page-sifa" style="background-image:url('public/slider/s6.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>Şifa Ayetleri</h2><span class="sec-badge">7 AYET</span></div>
     <p class="sec-desc">Kuran-ı Kerim'de şifaya işaret eden mübarek ayetler</p>
@@ -11683,7 +11703,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 </div>
 
 <!-- HIZLI ERİŞİM -->
-<div class="page" id="page-hizli">
+<div class="page" id="page-hizli" style="background-image:url('public/slider/s8.jpg')">
   <div class="main" style="padding-top:16px">
     <div class="sec-head"><h2>⭐ Özel Sureler &amp; Tavsiyeler</h2><span class="sec-badge">ÖZEL</span></div>
     <p class="sec-desc">Çok bilinen sureler, namaz sureleri ve günlük tavsiyeler</p>
