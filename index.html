@@ -414,28 +414,35 @@ body::before {
   border-radius: 0 0 24px 24px;
   min-height: 160px;
 }
-/* ── Hero Slider ── */
+/* ── Hero Slider (Bismillah altı, ayrı bölüm) ── */
+.hero-slider-section {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+.hero-slider-track {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 16 / 7;
+  background: var(--card);
+}
 .hero-slide {
   position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center;
   opacity: 0;
   transition: opacity 1.8s ease-in-out;
-  z-index: 0;
 }
 .hero-slide.active { opacity: 1; }
-.hero-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.6) 100%);
-  z-index: 1;
-}
-[data-theme="dark"] .hero-overlay {
-  background: linear-gradient(180deg, rgba(20,20,20,0.6) 0%, rgba(20,20,20,0.78) 50%, rgba(20,20,20,0.55) 100%);
+.hero-slide img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
 }
 /* Slider dots */
 .hero-dots {
-  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 6px; z-index: 3;
+  display: flex; justify-content: center; gap: 6px;
+  margin-top: 10px;
 }
 .hero-dot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -444,6 +451,14 @@ body::before {
   transition: opacity 0.3s, transform 0.3s;
 }
 .hero-dot.active { opacity: 0.9; transform: scale(1.35); }
+/* Dark mode slider */
+[data-theme="dark"] .hero-slider-track {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+/* Light mode slider */
+[data-theme="light"] .hero-slider-track {
+  box-shadow: 0 2px 8px rgba(100,80,40,0.08);
+}
 .bismillah {
   font-family: 'Scheherazade New', serif;
   font-size: clamp(28px, 5vw, 58px);
@@ -457,6 +472,17 @@ body::before {
   font-size: 14px; color: var(--text3); letter-spacing: 0.1em;
   text-transform: uppercase; font-weight: 600;
   position: relative; z-index: 2;
+}
+/* Hero arka plan — slider kaldırıldı, temiz gradient */
+.hero-bg-pattern {
+  position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(135deg, rgba(180,148,60,0.08) 0%, rgba(42,74,78,0.06) 100%);
+}
+[data-theme="dark"] .hero-bg-pattern {
+  background: linear-gradient(135deg, rgba(180,148,60,0.06) 0%, rgba(20,20,20,0.3) 100%);
+}
+[data-theme="light"] .hero-bg-pattern {
+  background: linear-gradient(135deg, rgba(42,74,78,0.05) 0%, rgba(100,80,40,0.04) 100%);
 }
 
 /* ══════════════════════════════════════
@@ -2398,20 +2424,27 @@ mark { background: rgba(180,148,60,0.2); color: var(--g1); border-radius: 3px; p
 <!-- HOME -->
 <div class="page active" id="page-home">
   <div class="hero">
-    <div class="hero-slide active" style="background-image:url('public/slider/s1.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s2.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s3.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s4.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s5.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s6.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s7.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s8.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('public/slider/s9.jpg')"></div>
-    <div class="hero-overlay"></div>
+    <div class="hero-bg-pattern"></div>
     <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
     <div class="hero-sub">Rahman ve Rahim olan Allah'ın adıyla</div>
+  </div>
+
+  <!-- ══ SLIDER — Bismillah ile Sure Ara arasında ══ -->
+  <div class="hero-slider-section">
+    <div class="hero-slider-track">
+      <div class="hero-slide active"><img src="public/slider/s1.jpg" alt="Slider 1" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s2.jpg" alt="Slider 2" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s3.jpg" alt="Slider 3" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s4.jpg" alt="Slider 4" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s5.jpg" alt="Slider 5" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s6.jpg" alt="Slider 6" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s7.jpg" alt="Slider 7" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s8.jpg" alt="Slider 8" loading="lazy"></div>
+      <div class="hero-slide"><img src="public/slider/s9.jpg" alt="Slider 9" loading="lazy"></div>
+    </div>
     <div class="hero-dots" id="heroDots"></div>
   </div>
+
   <div class="search-wrap">
     <input class="search-inp" id="homeQ" placeholder="Sure ara..." oninput="filterSurahs(this.value)" onfocus="homeSearchFocus()" onblur="setTimeout(homeSearchBlur,200)">
     <button class="search-ico" onclick="filterSurahs(document.getElementById('homeQ').value)">🔍</button>
@@ -2864,7 +2897,7 @@ window.onload = () => {
 
   // ── Hero Slider ──
   (function(){
-    var slides = document.querySelectorAll('.hero-slide');
+    var slides = document.querySelectorAll('.hero-slider-track .hero-slide');
     var dotsEl = document.getElementById('heroDots');
     if(!slides.length) return;
     var cur = 0, total = slides.length;
