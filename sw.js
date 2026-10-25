@@ -3,8 +3,8 @@
 // Cache version güncellendi → eski cache temizlenir
 // ══════════════════════════════════════════
 
-const CACHE_NAME = 'kuran-v47';
-const CACHE_VERSION = '2026-07-20-v47';
+const CACHE_NAME = 'kuran-v48';
+const CACHE_VERSION = '2026-10-25-v48';
 
 // Cache'lenecek dosyalar
 const CACHE_FILES = [
