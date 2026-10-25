@@ -1,0 +1,30 @@
+{
+  "versionCode": 3,
+  "versionName": "1.2.0",
+  "publishedAt": "2026-10-25",
+  "apkDownloadUrl": "https://github.com/Ersenbox/kuran-kerim/releases/latest/download/kuranikerim26.apk",
+  "githubRepoUrl": "https://github.com/Ersenbox/kuran-kerim",
+  "changelog": {
+    "tr": [
+      "Kış saati ve namaz vakitleri resmi Diyanet algoritmasıyla (Method 13) güncellendi.",
+      "Kur'an okurken veya menülerde gezerken oluşan istenmeyen titreşim giderildi.",
+      "Pusula sensörü sadece Kıble ekranında çalışacak şekilde optimize edildi, pil tasarrufu sağlandı.",
+      "Sure ve Cüz arama motoru akıllandırıldı (Mülk Suresi, Yasin, Cüz aramaları eklendi).",
+      "GitHub üzerinden otomatik güncelleme denetleme sistemi entegre edildi."
+    ],
+    "de": [
+      "Winterzeit und Gebetszeiten mit dem offiziellen Diyanet-Algorithmus (Methode 13) aktualisiert.",
+      "Unerwünschte Vibrationen beim Lesen des Korans oder Navigieren behoben.",
+      "Kompasssensor optimiert (nur bei Qibla aktiv), spart Akkulaufzeit.",
+      "Intelligente Suche nach Suren und Dschuz hinzugefügt (z.B. Mulk Sure, Yasin, Dschuz).",
+      "Automatisches Update-System via GitHub integriert."
+    ],
+    "fr": [
+      "Heures de prière et heure d'hiver mises à jour avec l'algorithme officiel Diyanet (Méthode 13).",
+      "Vibrations indésirables lors de la lecture du Coran ou de la navigation résolues.",
+      "Capteur de boussole optimisé (actif uniquement sur l'écran Qibla), économise la batterie.",
+      "Recherche intelligente des sourates et juz améliorée (ex: Sourate Al-Mulk, Yasin, Juz).",
+      "Système de vérification des mises à jour automatiques via GitHub intégré."
+    ]
+  }
+}
